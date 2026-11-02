@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Princeton road accessibility</title>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="banner" role="note"></div>
+  <header>
+    <div>
+      <p class="kicker">Municipality of Princeton, New Jersey</p>
+      <h1>Road accessibility</h1>
+    </div>
+    <p id="product-line" class="product"></p>
+  </header>
+  <main>
+    <section id="map-wrap" aria-label="Centerline map">
+      <div id="map"></div>
+      <form id="search">
+        <label for="road-query">Find a road</label>
+        <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
+      </form>
+      <div id="legend"></div>
+    </section>
+    <aside>
+      <section>
+        <h2>Assumption</h2>
+        <div class="switch" role="group" aria-label="Scenario assumption">
+          <button type="button" id="stage-1" data-stage="1.00" aria-pressed="true">+1.0 m</button>
+          <button type="button" id="stage-2" data-stage="2.00" aria-pressed="false">+2.0 m</button>
+        </div>
+        <p class="hint">Two separate assumptions above the channel elevation. Not hours. There is no time slider.</p>
+        <dl id="stats"></dl>
+        <p id="hospital"></p>
+        <p id="aadt"></p>
+        <p id="component-note" class="hint"></p>
+      </section>
+      <section>
+        <h2>The two assumptions</h2>
+        <p class="hint">A comparison of the saved results. Not a hydrograph.</p>
+        <div id="chart"></div>
+      </section>
+      <section>
+        <h2>Selected road</h2>
+        <div id="road-detail"><p class="empty">Click a centerline on the map.</p></div>
+      </section>
+      <section>
+        <h2>ENSO context</h2>
+        <div id="enso"></div>
+      </section>
+      <section>
+        <h2>September 2021 records</h2>
+        <div id="ida"></div>
+      </section>
+    </aside>
+  </main>
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
