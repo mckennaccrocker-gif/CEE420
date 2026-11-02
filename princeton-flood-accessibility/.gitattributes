@@ -1,0 +1,2 @@
+# Keep the USGS table byte-for-byte. It is published with CRLF.
+data/raw/usgs_ida_nj_high_water_marks_2021.csv -text

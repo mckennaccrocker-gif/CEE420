@@ -1,0 +1,15 @@
+metric,value,unit,definition
+n_nodes,932.0,count,"Nodes in the directed drive graph, including dead ends"
+n_intersections,800.0,count,Nodes with at least 2 physical streets (OSMnx definition)
+n_junctions_min_streets_3,786.0,count,Nodes with at least 3 physical streets
+n_dead_ends,141.0,count,Nodes with exactly 1 physical street
+n_directed_edges,2442.0,count,"Directed edges, so a two-way street appears twice"
+n_centerlines,1298.0,count,"Physical street segments, two-way streets counted once"
+n_weakly_connected_components,1.0,count,Weakly connected components of the directed graph
+n_strongly_connected_components,1.0,count,Strongly connected components
+centerline_length_m,241711.54406032935,m,"Ellipsoidal centreline length of retained segments, including overhang outside the boundary"
+centerline_length_m_planar,241804.97934225152,m,"Same segments, EPSG:3424 length converted from US survey feet"
+centerline_length_inside_m,232984.83400317057,m,"EPSG:3424 length clipped to the municipal polygon, in metres"
+n_bridge_centerlines,20.0,count,Centerlines with an OSM bridge tag other than no
+bridge_centerline_length_inside_m,8866.77636426044,m,Clipped length of bridge centerlines. Not a deck elevation
+n_centerlines_with_explicit_maxspeed,463.0,count,Centerlines whose maxspeed tag states mph or km/h. Bare numbers were not converted
