@@ -21,7 +21,7 @@ def _load(name: str):
 
 @pytest.mark.parametrize(
     "script",
-    ["accessibility.py", "dashboard.py"],
+    ["dashboard.py"],
 )
 def test_later_stage_script_errors(script: str) -> None:
     module = _load(script)

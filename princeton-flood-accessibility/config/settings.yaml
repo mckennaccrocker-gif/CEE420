@@ -42,13 +42,26 @@ network:
 # closure standards, and they are not Hurricane Ida observations.
 # applied_in_stage_1 stays false so the baseline is not a flood run.
 # applied_as_labels lets stage 2 mark scenario maxima with these cuts.
-# That is a label, not a road closure and not a network-disruption analysis.
+# Stage 2 does not remove edges. The accessibility block below is the
+# stage-3 removal rule. It is still not an official closure standard.
 thresholds:
   depth_m: [0.10, 0.30]
   status: preliminary_assumption
   applied_in_stage_1: false
   applied_as_labels: true
   not_closure_standards: true
+
+# Stage 3 uses the same depth cuts as labels for routing status.
+# A centerline is removed only when closure_piece_fraction of its inside
+# length is at or above the upper cut. That rule is still not a closure
+# standard. The two scenario stages are analyzed separately.
+accessibility:
+  closure_piece_fraction: 0.50
+  aadt_max_snap_m: 30
+  aadt_ambiguity_gap_m: 10
+  destination_snap_max_m: 150
+  critical_path_min_fraction: 0.5
+  hurricane_ida_depth: false
 
 # Hypothetical water surface used only because no depth raster intersects
 # the municipal polygon. Not a Hurricane Ida simulation.
@@ -103,6 +116,17 @@ paths:
   exposure_summary_csv: outputs/tables/flood_exposure_summary.csv
   exposure_stats: data/processed/flood_exposure_stats.json
   exposure_map: outputs/maps/princeton_scenario_exposure.png
+  destinations: data/raw/osm_destinations_princeton.geojson
+  destinations_provenance: data/raw/osm_destinations_princeton.provenance.json
+  accessibility_gpkg: data/processed/princeton_accessibility.gpkg
+  accessibility_geojson: data/processed/princeton_accessibility.geojson
+  accessibility_csv: outputs/tables/accessibility_centerlines.csv
+  accessibility_components_csv: outputs/tables/accessibility_components.csv
+  accessibility_od_csv: outputs/tables/accessibility_od_pairs.csv
+  accessibility_critical_csv: outputs/tables/accessibility_critical_segments.csv
+  accessibility_aadt_csv: outputs/tables/accessibility_aadt_snap.csv
+  accessibility_stats: data/processed/accessibility_stats.json
+  accessibility_map: outputs/maps/princeton_accessibility_disruption.png
 
 sources:
   aadt:
