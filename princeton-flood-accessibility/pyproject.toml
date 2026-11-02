@@ -1,7 +1,7 @@
 [project]
 name = "princeton-flood-accessibility"
 version = "0.1.0"
-description = "Stage 1 baseline drivable road network for Princeton, NJ. Not a flood model."
+description = "Princeton, NJ drivable network and a labeled 3DEP flood scenario. Not an Ida reconstruction."
 requires-python = ">=3.11"
 dependencies = [
     "geopandas>=1.1,<2",

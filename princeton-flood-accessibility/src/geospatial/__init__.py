@@ -1,1 +1,1 @@
-"""Geospatial helpers for the Princeton baseline. No flood model lives here."""
+"""Geospatial helpers. The flood scenario is explicit and is not an Ida depth."""

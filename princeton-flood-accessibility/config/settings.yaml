@@ -1,5 +1,6 @@
-# Stage 1 settings for the Princeton baseline road network.
-# Depth thresholds below are NOT applied to any road in this stage.
+# Princeton road network and the stage-2 flood scenario.
+# 0.10 m and 0.30 m are preliminary labels, not closure standards.
+# Stage 1 does not apply them. Stage 2 may attach them to scenario depths only.
 
 place:
   name: Princeton, New Jersey
@@ -37,13 +38,45 @@ network:
   truncate_by_edge: true
   requests_timeout_s: 180
 
-# Preliminary assumptions for a later scenario. They are not official
-# NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida
-# observations. Stage 1 does not compare any road to these depths.
+# Preliminary assumptions. They are not official NJDOT, FEMA, or Princeton
+# closure standards, and they are not Hurricane Ida observations.
+# applied_in_stage_1 stays false so the baseline is not a flood run.
+# applied_as_labels lets stage 2 mark scenario maxima with these cuts.
+# That is a label, not a road closure and not a network-disruption analysis.
 thresholds:
   depth_m: [0.10, 0.30]
   status: preliminary_assumption
   applied_in_stage_1: false
+  applied_as_labels: true
+  not_closure_standards: true
+
+# Hypothetical water surface used only because no depth raster intersects
+# the municipal polygon. Not a Hurricane Ida simulation.
+scenario:
+  product: hypothetical_3dep_channel_relative_bathtub
+  not_a_hurricane_ida_simulation: true
+  # Metres added to the DEM elevation at the nearest mapped channel cell.
+  # The two values are separate assumptions. They are not a time series.
+  stage_above_channel_dem_m: [1.0, 2.0]
+  primary_stage_m: 2.0
+  max_channel_distance_m: 500
+  # A channel cell higher than the road by more than this is treated as
+  # uphill and is not that road's water surface. Stops a hillside tributary
+  # from being laid across a lower street. A road more than this far below
+  # every nearby channel cell is left unmatched rather than given the full
+  # vertical gap as a depth.
+  max_channel_above_road_m: 2.0
+  sample_spacing_m: 10
+  dem_pixel_m: 10
+  # Extra margin downloaded around the municipality so a road on the
+  # boundary can see a channel just outside it. This is not the depth cap.
+  channel_buffer_m: 600
+  hydrography:
+    # NHD FType 460 StreamRiver, 558 Artificial Path (the path through
+    # double-line rivers and lakes, including Carnegie Lake).
+    flowline_ftypes: [460, 558]
+    named_canals: ["Delaware and Raritan Canal"]
+    waterbodies: ["Carnegie Lake"]
 
 paths:
   boundary: data/raw/princeton_boundary.geojson
@@ -59,6 +92,17 @@ paths:
   coverage_json: data/processed/ida_raster_coverage_check.json
   stats_csv: outputs/tables/baseline_road_stats.csv
   map_png: outputs/maps/princeton_baseline_drive_network.png
+  dem: data/raw/usgs_3dep_princeton_10m.tif
+  dem_provenance: data/raw/usgs_3dep_princeton_10m.provenance.json
+  hydrography: data/raw/nhd_princeton_channels.geojson
+  hydrography_provenance: data/raw/nhd_princeton_channels.provenance.json
+  flood_search_json: data/processed/flood_raster_search.json
+  exposure_gpkg: data/processed/princeton_centerline_exposure.gpkg
+  exposure_geojson: data/processed/princeton_centerline_exposure.geojson
+  exposure_csv: outputs/tables/centerline_flood_exposure.csv
+  exposure_summary_csv: outputs/tables/flood_exposure_summary.csv
+  exposure_stats: data/processed/flood_exposure_stats.json
+  exposure_map: outputs/maps/princeton_scenario_exposure.png
 
 sources:
   aadt:

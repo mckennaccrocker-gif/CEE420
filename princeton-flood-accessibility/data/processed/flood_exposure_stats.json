@@ -1,0 +1,192 @@
+{
+  "product": "hypothetical_3dep_channel_relative_bathtub",
+  "hurricane_ida_simulation": false,
+  "observed_flood_depths_used": false,
+  "event_time": null,
+  "time_note": "The configured stages are separate assumptions about height above the channel DEM. They are not hours, they were not interpolated, and they are not the time of Hurricane Ida.",
+  "computed_at_utc": "2026-11-02T22:36:09Z",
+  "assumptions": {
+    "stage_above_channel_dem_m": [
+      1.0,
+      2.0
+    ],
+    "primary_stage_m": 2.0,
+    "max_channel_distance_m": 500,
+    "sample_spacing_m": 10,
+    "channel_buffer_m": 600,
+    "formula": "depth = max(0, elevation_at_controlling_channel_cell_m + stage_m - elevation_at_road_cell_m)",
+    "max_channel_above_road_m": 2.0,
+    "formula_limits": "The controlling channel cell is the nearest National Hydrography Dataset vertex within max_channel_distance_m whose DEM elevation is at most max_channel_above_road_m above the road cell. A higher vertex is uphill and is not used as a water surface. If every vertex in the cap is uphill, the sample is unmatched rather than given the vertical gap as a depth. A sample with no vertex in the cap is not coded as depth zero. Nodata samples are dropped, not coded as zero. The channel elevation is the DEM at a hydrography vertex, which is bare earth or a hydroflattened water surface depending on the 3DEP source, not a measured stage."
+  },
+  "thresholds": {
+    "depth_m": [
+      0.1,
+      0.3
+    ],
+    "status": "preliminary_assumption",
+    "applied_as_labels": true,
+    "not_closure_standards": true,
+    "network_disruption_analysis": false,
+    "label_uses": "maximum sampled depth on the centerline"
+  },
+  "n_centerlines": 1298,
+  "by_status": {
+    "bridge_deck_unmatched": {
+      "n_centerlines": 20,
+      "length_m_inside": 8866.77636426044
+    },
+    "outside_channel_buffer": {
+      "n_centerlines": 221,
+      "length_m_inside": 24231.317812033358
+    },
+    "outside_municipality": {
+      "n_centerlines": 6,
+      "length_m_inside": 0.0
+    },
+    "scenario_depth": {
+      "n_centerlines": 1051,
+      "length_m_inside": 199886.7398268768
+    }
+  },
+  "stages": {
+    "1.00": {
+      "stage_above_channel_dem_m": 1.0,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.049781666602911674,
+      "max_of_centerline_max_depth_m": 2.992351531982422,
+      "piece_length_m_below_lower_threshold": 179155.96163085164,
+      "piece_length_m_between_thresholds": 1794.4375805983068,
+      "piece_length_m_at_or_above_upper_threshold": 8306.969762939372,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 143,
+          "length_m_inside": 39628.74853762111
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 892,
+          "length_m_inside": 156413.7555511716
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 16,
+          "length_m_inside": 3844.235738084064
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "2.00": {
+      "stage_above_channel_dem_m": 2.0,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.13831628858014633,
+      "max_of_centerline_max_depth_m": 3.992351531982422,
+      "piece_length_m_below_lower_threshold": 167944.1203790843,
+      "piece_length_m_between_thresholds": 2153.464646403382,
+      "piece_length_m_at_or_above_upper_threshold": 19159.783948901604,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 234,
+          "length_m_inside": 60721.83045517618
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 804,
+          "length_m_inside": 136755.06983975213
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 13,
+          "length_m_inside": 2409.8395319484443
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    }
+  },
+  "bridges_not_sampled": {
+    "n_centerlines": 20,
+    "length_m_inside": 8866.77636426044
+  },
+  "dem": {
+    "path": "data/raw/usgs_3dep_princeton_10m.tif",
+    "crs": "EPSG:26918",
+    "width": 1013,
+    "height": 1081,
+    "pixel_size_x_m": 9.997892016793973,
+    "pixel_size_y_m": 9.997892016793923,
+    "nodata": null,
+    "dtype": "float32",
+    "bounds": [
+      522981.0142720154,
+      4461028.672865695,
+      533108.8788850277,
+      4471836.39413585
+    ],
+    "tags": {
+      "DataType": "Generic",
+      "AREA_OR_POINT": "Area"
+    },
+    "vertical_units_in_geotiff": null,
+    "vertical_datum_in_geotiff": null,
+    "elevation_min": 8.783527374267578,
+    "elevation_max": 127.14839935302734,
+    "elevation_median": 37.32101058959961,
+    "vertical_unit_interpretation": "metre",
+    "vertical_datum_interpretation": "NAVD88",
+    "vertical_interpretation_note": "The GeoTIFF tags do not state a vertical unit or datum. USGS 3DEP bare-earth elevations for the conterminous United States are metres relative to NAVD88. The numeric range of this clip matches metres, not feet. The interpretation is that program convention plus the range check, not a tag in the file."
+  },
+  "dem_provenance": {
+    "source": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+    "export_url_pattern": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage",
+    "request": {
+      "bbox": "-74.72920367773322,40.29947686921709,-74.61042007400923,40.396458766885225",
+      "bboxSR": "4326",
+      "imageSR": "26918",
+      "size": "1013,1081",
+      "format": "tiff",
+      "pixelType": "F32",
+      "interpolation": "RSP_NearestNeighbor",
+      "f": "image"
+    },
+    "retrieved_at_utc": "2026-11-02T22:31:51Z",
+    "sha256": "8f8e495d115f7772e7df96de5be55a759a42bb27cf3e383bd3df9ed096ae625d",
+    "bytes": 4720327,
+    "interpolation": "RSP_NearestNeighbor",
+    "requested_pixel_m": 10.0,
+    "note": "Resampled export from the USGS 3DEP ImageServer, which serves a multi-resolution bare-earth mosaic at about 1 m in Web Mercator. This file is the requested 10 m nearest-neighbor sample, not the native lidar cloud and not a flood-depth grid. Do not replace this file in place; write a new name if a later clip is needed.",
+    "not_a_flood_depth": true
+  },
+  "hydrography_provenance": {
+    "source_flowline": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/6/query",
+    "source_waterbody": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/12/query",
+    "retrieved_at_utc": "2026-11-02T22:32:30Z",
+    "bbox_epsg4326": [
+      -74.72920367773322,
+      40.29947686921709,
+      -74.61042007400923,
+      40.396458766885225
+    ],
+    "flowline_where": "ftype IN (460, 558) OR (ftype = 336 AND (gnis_name = 'Delaware and Raritan Canal'))",
+    "waterbody_where": "GNIS_NAME = 'Carnegie Lake'",
+    "n_features": 1005,
+    "sha256": "39b58c94623d4f380401eb96b4ef63f2d287832c6ee05701120289550c77880f",
+    "note": "National Hydrography Dataset flowlines (StreamRiver 460 and Artificial Path 558) plus named CanalDitch features and named waterbodies from config. Connectors, pipelines, and unnamed ditches are not included. This file is the channel reference for the scenario. It is not a flood extent."
+  },
+  "high_water_marks": {
+    "label": "USGS NJ Ida high-water marks",
+    "available": true,
+    "path": "data/raw/usgs_ida_nj_high_water_marks_2021.csv",
+    "joined_to_road_edges": false,
+    "n_rows": 139,
+    "n_with_coordinates": 139,
+    "n_unique_coordinates": 138,
+    "n_missing_coordinates": 0,
+    "n_inside_boundary": 0,
+    "n_within_25m_of_boundary": 0,
+    "distance_to_boundary_m_min": 2269.744265559256,
+    "coordinate_crs_assumed": "EPSG:4326",
+    "predicate_crs": "EPSG:3424",
+    "used_as_depth_surface": false,
+    "note": "Regional check only. Elevations were not interpolated onto roads and were not used as the scenario water surface."
+  },
+  "search": "data/processed/flood_raster_search.json"
+}

@@ -1,14 +1,14 @@
 # Princeton flood exposure and road accessibility
 
-Stage 1 of a Princeton, New Jersey flood-exposure and road-accessibility project. This stage builds and checks the **baseline drivable road network** only.
+Princeton, New Jersey flood-exposure and road-accessibility project. Stage 1 is the baseline drivable road network. Stage 2 is a labeled flood-depth scenario on those centerlines.
 
-It does **not** estimate flood depth, close roads, compute accessibility, or draw a flood map. The depth values 0.10 m and 0.30 m in `config/settings.yaml` are preliminary scenario assumptions for a later stage. They are not official NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida observations. Nothing in this stage compares a road to those depths.
+Stage 2 does **not** close roads, remove edges, or compute accessibility. The depth values 0.10 m and 0.30 m in `config/settings.yaml` are preliminary labels, not official NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida observations.
 
 ## What is already true about flood data
 
 No Hurricane Ida flood-depth raster is in this repository, and none was found whose extent intersects the Princeton municipal boundary. The only Ida depth grids inspected are five USGS Pennsylvania community grids (Chadds Ford, Downingtown, Modena, Norristown, Perkiomen). Their extents are tens of kilometres from Princeton. See `data/processed/ida_raster_coverage_check.json` for the header values actually read (CRS, resolution, bounds, nodata, file time). Those GeoTIFFs do not declare vertical units. They are not used by the road network.
 
-A DEM bathtub model is **not** implemented. If a later stage can only use a bare-earth DEM, that result must stay a labeled scenario. It would not be a validated Ida simulation.
+No agency depth raster was found whose extent meets the municipality. The substitute is a hypothetical USGS 3DEP channel-relative scenario (`scripts/flood_exposure.py`). It is not a Hurricane Ida simulation. Scenario depths are not observations. The search record is `data/processed/flood_raster_search.json`.
 
 ## Baseline definition
 
@@ -37,18 +37,20 @@ pip install -r requirements.txt
 python3 scripts/fetch_njdot_aadt.py
 python3 scripts/fetch_usgs_ida_hwm.py
 python3 scripts/download_roads.py
+python3 scripts/flood_exposure.py
 python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
 ```
 
-`download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds `data/processed/` and the map.
+`download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds the baseline files and the map.
+
+`flood_exposure.py` reads the saved centerlines. If `data/raw/usgs_3dep_princeton_10m.tif` or `data/raw/nhd_princeton_channels.geojson` is missing, it downloads that file once. It does not overwrite a raw file that is already there. It refuses to run unless the scenario is marked as not an Ida simulation. Bridge-tagged centerlines are left unmatched. The two stages in the config (1.0 m and 2.0 m above the channel DEM) are separate assumptions. They are not a time series.
 
 The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON is the inspection from the URLs listed in `config/settings.yaml`. Passing those local GeoTIFFs to `check_raster_coverage.py` repeats the check. The script does not download rasters and does not sample Princeton depths.
 
-These scripts exit with an error if you run them now. They are not partial flood or accessibility models:
+These scripts still exit with an error. They are not accessibility or dashboard models:
 
 ```bash
-python3 scripts/flood_exposure.py
 python3 scripts/accessibility.py
 python3 scripts/dashboard.py
 ```
@@ -61,7 +63,7 @@ python3 scripts/dashboard.py
 | `scripts/fetch_njdot_aadt.py` | Download the NJDOT 2024 AADT CSV and keep Mercer County rows whose community contains Princeton. |
 | `scripts/fetch_usgs_ida_hwm.py` | Download the USGS New Jersey Ida high-water-mark CSV unchanged. |
 | `scripts/check_raster_coverage.py` | Read local GeoTIFF headers and test whether each extent meets Princeton. |
-| `scripts/flood_exposure.py` | Placeholder. Exits with an error. |
+| `scripts/flood_exposure.py` | Labeled 3DEP scenario depths on centerlines. Not an Ida reconstruction and not a road closure. |
 | `scripts/accessibility.py` | Placeholder. Exits with an error. |
 | `scripts/dashboard.py` | Placeholder. Exits with an error. |
 
@@ -78,6 +80,15 @@ python3 scripts/dashboard.py
 | `outputs/tables/baseline_road_stats.csv` | The same headline metrics. |
 | `outputs/maps/princeton_baseline_drive_network.png` | Baseline map. Red means an OSM bridge tag, not flooding. |
 | `data/processed/ida_raster_coverage_check.json` | Header inspection of the Pennsylvania Ida grids and their distance to Princeton. |
+| `data/raw/usgs_3dep_princeton_10m.tif` | Resampled 3DEP bare-earth clip, about 10 m, EPSG:26918. Not a flood grid. |
+| `data/raw/nhd_princeton_channels.geojson` | NHD flowlines and Carnegie Lake used as the channel reference. |
+| `data/processed/flood_raster_search.json` | Agency products tested against the municipal polygon. None is used as a Princeton depth. |
+| `data/processed/princeton_centerline_exposure.gpkg` | Scenario max and mean depth per centerline. EPSG:3424. |
+| `data/processed/princeton_centerline_exposure.geojson` | The same table in EPSG:4326. |
+| `data/processed/flood_exposure_stats.json` | Scenario assumptions and summary lengths. |
+| `outputs/tables/centerline_flood_exposure.csv` | One row per centerline, no geometry. |
+| `outputs/tables/flood_exposure_summary.csv` | One row per assumed stage. |
+| `outputs/maps/princeton_scenario_exposure.png` | Static map of the +2.0 m assumption. Not a dashboard. |
 
 `outputs/figures/` is reserved for later charts. The map is under `outputs/maps/`.
 
@@ -88,12 +99,12 @@ python3 scripts/dashboard.py
 - NJGIN municipal boundary of Princeton (public record, course snapshot).
 - OSM drivable network built by `download_roads.py` (© OpenStreetMap contributors, ODbL 1.0).
 - NJDOT 2024 AADT station table, Princeton rows only, not joined to edges.
-- USGS high-water marks for Hurricane Ida in New Jersey (point elevations, NAVD88 feet in the source table). These are observations, not a depth grid. Many of the marks are outside the municipality; the inside count is in `baseline_stats.json`.
+- USGS high-water marks for Hurricane Ida in New Jersey (point elevations, NAVD88 feet in the source table). These are observations, not a depth grid. The exposure run counts 0 inside the municipality. The nearest is about 2.27 km outside. They are not the scenario water surface.
+- A 10 m USGS 3DEP bare-earth clip and the NHD channel lines used by the scenario. The GeoTIFF does not itself state a vertical datum. Values are interpreted as metres NAVD88 because that is the 3DEP convention and the numeric range matches metres.
 
 **Not in this project, and not invented**
 
-- A Hurricane Ida depth or inundation raster that covers Princeton. The Pennsylvania grids do not. An NJDEP note about an Ida depth grid for Manville Borough was not a file that could be inspected here, so it is not treated as Princeton inundation.
-- USGS 3DEP elevation for a later scenario. Not downloaded.
+- A Hurricane Ida depth or inundation raster that covers Princeton. The Pennsylvania grids do not. USGS and NOAA flood libraries near Princeton do not intersect the municipal polygon. An NJDEP note about an Ida depth grid for Manville Borough was not a file that could be inspected here, so it is not treated as Princeton inundation.
 - NJOGIS road centerlines (https://njogis-newjersey.opendata.arcgis.com/maps/fc3d0a95921b4026b386643eef5ff088 and https://njgin.nj.gov/njgin/edata/roads/). Statewide, EPSG:3424, with names, address ranges, and elevation level. Not downloaded. Useful later as a supplement. The baseline graph is OSM because it is routable and keeps bridge tags. NJOGIS should not be assumed to match OSM segment for segment.
 - NJDOT AADT on the rest of the state, and any join from a station point to an edge. The join is a later decision.
 - Bridge-deck elevations (National Bridge Inventory or a survey). OSM `bridge=yes` does not give the deck height, so terrain under the bridge is not the bridge.
@@ -103,12 +114,12 @@ python3 scripts/dashboard.py
 ## Repository layout
 
 ```
-config/settings.yaml          paths, CRS, network options, unused depth thresholds
-data/raw/                     boundary, AADT extract, USGS HWM table, OSMnx cache
-data/processed/               network files and stats
-src/geospatial/               CRS, point inventory, raster-extent test, flood placeholder
+config/settings.yaml          paths, CRS, network options, scenario stages, label thresholds
+data/raw/                     boundary, AADT extract, USGS HWM table, 3DEP clip, NHD channels
+data/processed/               network files, scenario exposure, search record
+src/geospatial/               CRS, extent test, scenario depth
 src/network/                  download, centerline length, baseline writer
-src/visualization/            baseline map
+src/visualization/            baseline map and scenario map
 scripts/                      command-line entry points
 outputs/maps/                 baseline map
 outputs/figures/              empty until a later stage
@@ -118,4 +129,4 @@ tests/                        length, CRS, placeholders, saved outputs
 
 ## Tests
 
-`python3 -m pytest` checks the US survey foot, the Princeton boundary identity, centerline de-duplication, the refusal of the flood placeholder, and the saved files against `baseline_stats.json`. The saved-file tests fail if `download_roads.py` has not been run.
+`python3 -m pytest` checks the US survey foot, the Princeton boundary identity, centerline de-duplication, the refusal of an unlabeled depth call, scenario nodata and bridge handling, and the saved baseline and exposure files. The saved-file tests fail if `download_roads.py` or `flood_exposure.py` has not been run.
