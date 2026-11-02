@@ -1,0 +1,180 @@
+"""Dashboard payload, ENSO parsing, and the Ida record comparison."""
+
+from __future__ import annotations
+
+import json
+from http.client import HTTPConnection
+from pathlib import Path
+from threading import Thread
+
+import pytest
+
+from dashboard.enso import assemble
+from dashboard.enso import parse_discussion
+from dashboard.enso import parse_oni
+from dashboard.enso import parse_weekly
+from dashboard.enso import refresh
+from dashboard.ida_check import compare_places
+from dashboard.roads import build_road_collection
+from dashboard.summary import build_summary
+
+WEEKLY = """
+                Nino1+2      Nino3        Nino34        Nino4
+ Week          SST SSTA     SST SSTA     SST SSTA     SST SSTA
+ 02SEP1981     20.6-0.1     24.8-0.1     26.5-0.2     28.3-0.3
+ 28OCT2026     26.7 5.4     29.5 4.4     30.2 3.4     30.1 1.4
+"""
+
+ONI = """
+ SEAS  YR   TOTAL   ANOM
+  JAS 2026  29.12   2.16
+"""
+
+DISCUSSION = (
+    "DIAGNOSTIC DISCUSSION issued by CLIMATE PREDICTION CENTER 8 October 2026 "
+    "ENSO Alert System Status: El Niño Advisory Synopsis: El Niño continues to strengthen."
+)
+
+
+def test_glued_negative_anomaly_and_latest_week() -> None:
+    row = parse_weekly(WEEKLY)
+    assert row["week_centered"] == "2026-10-28"
+    assert row["nino34_sst_c"] == 30.2
+    assert row["nino34_anomaly_c"] == 3.4
+
+
+def test_oni_row_has_no_phase() -> None:
+    row = parse_oni(ONI)
+    assert row["season"] == "JAS"
+    assert row["year"] == 2026
+    assert row["anomaly_c"] == 2.16
+    assert row["phase_stated_in_file"] is False
+
+
+def test_weekly_anomaly_does_not_set_the_phase() -> None:
+    assert parse_discussion("Niño-3.4 anomaly is +3.4 C and no alert line is present.") is None
+    record = assemble(WEEKLY, ONI, "no status here", fetched_at_utc="2026-11-02T00:00:00Z")
+    assert record["official_phase"] is None
+    assert record["weekly"]["nino34_anomaly_c"] == 3.4
+    assert record["enso_scales_depths"] is False
+    stated = assemble(WEEKLY, ONI, DISCUSSION, fetched_at_utc="2026-11-02T00:00:00Z")
+    assert stated["official_phase"]["status"] == "El Niño Advisory"
+    assert stated["official_phase"]["classified_from_weekly_anomaly"] is False
+    assert stated["official_phase"]["issued"] == "8 October 2026"
+
+
+def test_failed_fetch_keeps_the_saved_observation(tmp_path: Path) -> None:
+    cache = tmp_path / "enso_latest.json"
+    cache.write_text(
+        json.dumps({"fetched_at_utc": "2026-01-15T00:00:00Z", "ok": True, "weekly": {"nino34_anomaly_c": 0.2}}),
+        encoding="utf-8",
+    )
+
+    def boom(_url: str) -> str:
+        raise OSError("NOAA unreachable")
+
+    saved = refresh(cache, fetch=boom)
+    assert saved["using_saved_observation"] is True
+    assert saved["fetched_at_utc"] == "2026-01-15T00:00:00Z"
+    assert saved["weekly"]["nino34_anomaly_c"] == 0.2
+    assert saved["hurricane_ida_depth"] is False
+
+
+def test_summary_keeps_the_two_stages_separate(project_root: Path) -> None:
+    stats = json.loads((project_root / "data" / "processed" / "accessibility_stats.json").read_text())
+    summary = build_summary(stats)
+    assert summary["hurricane_ida_depth"] is False
+    assert summary["interpolated"] is False
+    assert summary["enso_scales_depths"] is False
+    assert summary["event_time"] is None
+    by_id = {stage["id"]: stage for stage in summary["stages"]}
+    assert by_id["1.00"]["n_assumed_closed"] == 33
+    assert by_id["1.00"]["n_weak_components"] == 13
+    assert by_id["1.00"]["hospital_disconnected"] is False
+    assert by_id["2.00"]["n_assumed_closed"] == 90
+    assert by_id["2.00"]["n_weak_components"] == 42
+    assert by_id["2.00"]["hospital_disconnected"] is True
+    assert summary["hospital"]["disconnects_only_at_2_00"] is True
+    assert by_id["1.00"]["aadt_nearest_edge_assumed_closed"] == 0
+    assert by_id["2.00"]["aadt_records"] == 39
+    with pytest.raises(ValueError):
+        build_summary({"hurricane_ida_depth": True})
+
+
+def test_roads_are_not_marked_as_ida(project_root: Path) -> None:
+    collection = build_road_collection(project_root / "data" / "processed" / "princeton_accessibility.geojson")
+    assert len(collection["features"]) == 1298
+    assert all(feature["properties"]["hurricane_ida_depth"] is False for feature in collection["features"])
+
+
+def test_unverified_place_is_not_scored() -> None:
+    places = [
+        {
+            "place_id": "missing",
+            "title": "Nowhere Road",
+            "names": ["Nowhere Road"],
+            "verification": "unverified",
+            "claims": [],
+        }
+    ]
+    roads = [
+        {
+            "name": "Quaker Road",
+            "routing_status_stage_1_00": "assumed_closed",
+            "routing_status_stage_2_00": "assumed_closed",
+            "length_m_at_or_above_0_30_stage_1_00": 10,
+            "length_m_at_or_above_0_30_stage_2_00": 10,
+        }
+    ]
+    result = compare_places(places, roads)
+    assert result["validated"] is False
+    assert result["hurricane_ida_depth"] is False
+    assert "precision" not in result
+    assert "recall" not in result
+    assert result["places"][0]["verification"] == "unverified"
+    assert result["places"][0]["qualitative"].startswith("Unverified.")
+
+
+def test_saved_ida_comparison_is_not_a_validation(project_root: Path) -> None:
+    path = project_root / "data" / "processed" / "ida_record_comparison.json"
+    if not path.is_file():
+        pytest.skip("validate_ida.py has not been run")
+    result = json.loads(path.read_text())
+    assert result["validated"] is False
+    assert result["hurricane_ida_depth"] is False
+    assert "precision" not in result
+    assert "recall" not in result
+    titles = [place["title"] for place in result["places"]]
+    assert "Quaker Road" in titles
+    assert "Stony Brook crossings" in titles
+
+
+def test_server_serves_the_scenario_summary(settings: dict) -> None:
+    from test_placeholders import _load
+
+    dashboard = _load("dashboard.py")
+    context = dashboard.build_context(settings)
+    handler = dashboard.make_handler(context)
+    from http.server import ThreadingHTTPServer
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        connection = HTTPConnection("127.0.0.1", server.server_address[1], timeout=10)
+        connection.request("GET", "/api/summary")
+        response = connection.getresponse()
+        body = json.loads(response.read().decode("utf-8"))
+        assert response.status == 200
+        assert body["hurricane_ida_depth"] is False
+        assert body["interpolated"] is False
+        connection.request("GET", "/")
+        page = connection.getresponse()
+        html = page.read().decode("utf-8")
+        assert page.status == 200
+        assert "Road accessibility" in html
+        assert 'id="stage-1"' in html
+        assert 'type="range"' not in html
+    finally:
+        server.shutdown()
+        server.server_close()

@@ -1,6 +1,6 @@
 # Princeton flood exposure and road accessibility
 
-Princeton, New Jersey flood-exposure and road-accessibility project. Stage 1 is the baseline drivable road network. Stage 2 is a labeled flood-depth scenario on those centerlines. Stage 3 removes some of those centerlines under a preliminary fraction rule and recounts connectivity. It is not a dashboard.
+Princeton, New Jersey flood-exposure and road-accessibility project. Stage 1 is the baseline drivable road network. Stage 2 is a labeled flood-depth scenario on those centerlines. Stage 3 removes some of those centerlines under a preliminary fraction rule and recounts connectivity. Stage 4 is a local map of those two assumptions, plus a Pacific ENSO context panel and a qualitative September 2021 record check.
 
 The depth values 0.10 m and 0.30 m in `config/settings.yaml` are preliminary assumptions, not official NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida observations. Stage 2 only labels them. Stage 3 uses the same cuts to decide which centerlines leave the routable graph. That decision is still an assumption.
 
@@ -39,15 +39,20 @@ python3 scripts/fetch_usgs_ida_hwm.py
 python3 scripts/download_roads.py
 python3 scripts/flood_exposure.py
 python3 scripts/accessibility.py
+python3 scripts/update_enso.py
+python3 scripts/validate_ida.py
+python3 scripts/dashboard.py
 python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
 ```
+
+`dashboard.py` serves http://127.0.0.1:8765/ and does not interpolate the two stages. `update_enso.py` refreshes the NOAA cache in `data/processed/enso_latest.json`. If NOAA is unreachable and a previous file exists, that observation and its date stay in place. `validate_ida.py` writes a qualitative comparison. It does not score the scenario.
 
 `download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds the baseline files and the map.
 
 `flood_exposure.py` reads the saved centerlines. If `data/raw/usgs_3dep_princeton_10m.tif` or `data/raw/nhd_princeton_channels.geojson` is missing, it downloads that file once. It does not overwrite a raw file that is already there. It refuses to run unless the scenario is marked as not an Ida simulation. Bridge-tagged centerlines are left unmatched. The two stages in the config (1.0 m and 2.0 m above the channel DEM) are separate assumptions. They are not a time series.
 
-`accessibility.py` reads the saved exposure and the saved graph. It does not recompute depths and it does not interpolate between the two stages. A centerline is removed only when at least half of its inside length is pieces at or above 0.30 m (`accessibility.closure_piece_fraction`). Bridge decks and centerlines with no channel match stay in the graph. If `data/raw/osm_destinations_princeton.geojson` is missing, the script downloads OSM amenities once and does not overwrite that file later. `dashboard.py` still exits with an error.
+`accessibility.py` reads the saved exposure and the saved graph. It does not recompute depths and it does not interpolate between the two stages. A centerline is removed only when at least half of its inside length is pieces at or above 0.30 m (`accessibility.closure_piece_fraction`). Bridge decks and centerlines with no channel match stay in the graph. If `data/raw/osm_destinations_princeton.geojson` is missing, the script downloads OSM amenities once and does not overwrite that file later.
 
 The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON is the inspection from the URLs listed in `config/settings.yaml`. Passing those local GeoTIFFs to `check_raster_coverage.py` repeats the check. The script does not download rasters and does not sample Princeton depths.
 
@@ -61,7 +66,9 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `scripts/check_raster_coverage.py` | Read local GeoTIFF headers and test whether each extent meets Princeton. |
 | `scripts/flood_exposure.py` | Labeled 3DEP scenario depths on centerlines. Not an Ida reconstruction and not a road closure. |
 | `scripts/accessibility.py` | Remove fraction-rule centerlines from the two scenario graphs and write connectivity, routes, and the disruption map. |
-| `scripts/dashboard.py` | Placeholder. Exits with an error. |
+| `scripts/update_enso.py` | Refresh the NOAA weekly Niño-3.4 anomaly, the ONI row, and the official alert status. |
+| `scripts/validate_ida.py` | Qualitative comparison with September 2021 road reports. Not a validation score. |
+| `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. |
 
 ## Outputs
 
@@ -95,6 +102,9 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `outputs/tables/accessibility_critical_segments.csv` | Graph-theory bridges and centerlines on many of those paths. |
 | `outputs/tables/accessibility_aadt_snap.csv` | Nearest-edge status of each AADT station-record. AADT is not summed. |
 | `outputs/maps/princeton_accessibility_disruption.png` | Baseline and both stages. Red is the fraction rule, not a closure standard. |
+| `data/processed/enso_latest.json` | Last successful NOAA weekly Niño-3.4 row, ONI row, and alert status. |
+| `data/processed/ida_record_comparison.json` | Qualitative September 2021 comparison. Not a validation score. |
+| `web/` | Map page served by `scripts/dashboard.py`. |
 
 `outputs/figures/` is reserved for later charts. Maps are under `outputs/maps/`.
 
@@ -125,7 +135,9 @@ data/raw/                     boundary, AADT extract, USGS HWM table, 3DEP clip,
 data/processed/               network files, scenario exposure, search record
 src/geospatial/               CRS, extent test, scenario depth
 src/network/                  download, centerline length, baseline writer, scenario disruption
+src/dashboard/              scenario summary, ENSO cache, Ida comparison, map payload
 src/visualization/            baseline map, scenario map, disruption map
+web/                          Leaflet page served locally
 scripts/                      command-line entry points
 outputs/maps/                 baseline, exposure, and disruption maps
 outputs/figures/              empty until a later stage
@@ -135,4 +147,4 @@ tests/                        length, CRS, closure rule, placeholders, saved out
 
 ## Tests
 
-`python3 -m pytest` checks the US survey foot, the Princeton boundary identity, centerline de-duplication, the refusal of an unlabeled depth call, scenario nodata and bridge handling, the closure fraction, component length on a tiny graph, and the saved baseline, exposure, and accessibility files. The saved-file tests fail if `download_roads.py`, `flood_exposure.py`, or `accessibility.py` has not been run. `dashboard.py` is still required to exit.
+`python3 -m pytest` checks the US survey foot, the Princeton boundary identity, centerline de-duplication, the refusal of an unlabeled depth call, scenario nodata and bridge handling, the closure fraction, component length on a tiny graph, the saved baseline, exposure, and accessibility files, ENSO parsing, and the dashboard summary. The saved-file tests fail if `download_roads.py`, `flood_exposure.py`, or `accessibility.py` has not been run.

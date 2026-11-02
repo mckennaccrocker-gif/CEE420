@@ -1,11 +1,9 @@
-"""Placeholders must fail clearly instead of pretending to model floods."""
+"""The dashboard is no longer a placeholder. Importing it must not exit."""
 
 from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -19,11 +17,7 @@ def _load(name: str):
     return module
 
 
-@pytest.mark.parametrize(
-    "script",
-    ["dashboard.py"],
-)
-def test_later_stage_script_errors(script: str) -> None:
-    module = _load(script)
-    with pytest.raises(SystemExit, match="not implemented"):
-        module.main()
+def test_dashboard_imports_without_serving() -> None:
+    module = _load("dashboard.py")
+    assert callable(module.main)
+    assert callable(module.build_context)

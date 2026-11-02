@@ -127,6 +127,12 @@ paths:
   accessibility_aadt_csv: outputs/tables/accessibility_aadt_snap.csv
   accessibility_stats: data/processed/accessibility_stats.json
   accessibility_map: outputs/maps/princeton_accessibility_disruption.png
+  enso_cache: data/processed/enso_latest.json
+  ida_comparison: data/processed/ida_record_comparison.json
+
+dashboard:
+  host: 127.0.0.1
+  port: 8765
 
 sources:
   aadt:
@@ -142,6 +148,11 @@ sources:
     url: https://njogis-newjersey.opendata.arcgis.com/maps/fc3d0a95921b4026b386643eef5ff088
     title: Road Centerlines of NJ, Hosted, 3424
     note: Not downloaded in stage 1. Cited as a later supplement, not as the baseline graph.
+  enso:
+    weekly_url: https://www.cpc.ncep.noaa.gov/data/indices/wksst9120.for
+    oni_url: https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt
+    discussion_url: https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml
+    note: Pacific context only. Not a Princeton road depth and not a scaling factor.
   ida_pa_depth_grids:
     note: >
       USGS depth grids for five Pennsylvania communities after Ida.
