@@ -61,8 +61,34 @@ def build_context(settings: dict) -> dict:
         "centerlines": [],
         "note": "No bridge-deck join yet. Run scripts/bridge_decks.py.",
     }
-    roads = build_road_collection(resolve(settings, "accessibility_geojson"), decks)
-    return {"summary": summary, "roads": roads, "boundary": boundary, "enso": enso, "ida": ida, "decks": decks}
+    fema_path = resolve(settings, "fema_overlay")
+    fema = json.loads(fema_path.read_text(encoding="utf-8")) if fema_path.is_file() else {
+        "hurricane_ida_depth": False,
+        "zone_depth_assigned": False,
+        "regulatory": True,
+        "effective_date_label": None,
+        "zones": [],
+        "centerlines": [],
+        "note": "No FEMA overlay yet. Run scripts/fema_overlay.py.",
+    }
+    zones_path = resolve(settings, "fema_zones_geojson")
+    fema_zones = json.loads(zones_path.read_text(encoding="utf-8")) if zones_path.is_file() else {
+        "type": "FeatureCollection",
+        "features": [],
+    }
+    roads = build_road_collection(resolve(settings, "accessibility_geojson"), decks, fema)
+    fema_public = dict(fema)
+    fema_public.pop("centerlines", None)
+    return {
+        "summary": summary,
+        "roads": roads,
+        "boundary": boundary,
+        "enso": enso,
+        "ida": ida,
+        "decks": decks,
+        "fema": fema_public,
+        "fema_zones": fema_zones,
+    }
 
 
 def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
@@ -86,6 +112,12 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
                 return
             if path == "/api/bridge-decks":
                 self._json(context["decks"])
+                return
+            if path == "/api/fema":
+                self._json(context["fema"])
+                return
+            if path == "/api/fema-zones.geojson":
+                self._json(context["fema_zones"])
                 return
             if path == "/":
                 self._file(WEB / "index.html")

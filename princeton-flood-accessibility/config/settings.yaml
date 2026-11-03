@@ -132,6 +132,10 @@ paths:
   enso_cache: data/processed/enso_latest.json
   ida_comparison: data/processed/ida_record_comparison.json
   bridge_deck_join: data/processed/bridge_deck_join.json
+  fema_zones_gpkg: data/processed/fema_flood_zones.gpkg
+  fema_zones_geojson: data/processed/fema_flood_zones.geojson
+  fema_overlay: data/processed/fema_zone_intersection.json
+  fema_provenance: data/raw/fema_nfhl_princeton.provenance.json
 
 dashboard:
   host: 127.0.0.1

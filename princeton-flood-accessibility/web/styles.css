@@ -114,11 +114,47 @@ main {
   left: 12px;
   bottom: 18px;
   max-width: 22rem;
+  max-height: 46%;
+  overflow: auto;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0.65rem 0.75rem;
   box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+}
+
+#fema-control {
+  position: absolute;
+  z-index: 500;
+  top: 12px;
+  right: 12px;
+  max-width: 16rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+}
+
+#fema-control label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-weight: 650;
+}
+
+#fema-date {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.legend-heading {
+  margin: 0.45rem 0 0.15rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .legend-row {
@@ -135,6 +171,12 @@ main {
   height: 0.38rem;
   margin-top: 0.35rem;
   border-radius: 2px;
+}
+
+.swatch.area {
+  height: 0.75rem;
+  margin-top: 0.15rem;
+  border: 1px solid rgba(22, 50, 79, 0.35);
 }
 
 aside {

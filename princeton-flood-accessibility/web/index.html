@@ -24,6 +24,13 @@
         <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
       </form>
       <div id="legend"></div>
+      <div id="fema-control">
+        <label for="fema-toggle">
+          <input id="fema-toggle" type="checkbox" checked>
+          Regulatory flood zones
+        </label>
+        <p id="fema-date"></p>
+      </div>
     </section>
     <aside>
       <section>
@@ -46,6 +53,10 @@
       <section>
         <h2>Bridge decks</h2>
         <div id="decks"></div>
+      </section>
+      <section>
+        <h2>Regulatory flood zones</h2>
+        <div id="fema"></div>
       </section>
       <section>
         <h2>Selected road</h2>

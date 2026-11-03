@@ -33,16 +33,40 @@ const STATUS_LABEL = {
 
 let summary = null;
 let roads = null;
+let fema = null;
+let femaZones = null;
 let stage = "1.00";
 let selected = null;
 let roadLayer = null;
+let femaLayer = null;
 let map = null;
+
+const FEMA_STYLE = {
+  floodway: { color: "#0b1f33", fillColor: "#16324f", fillOpacity: 0.5, weight: 0.6 },
+  ae: { color: "#1d4e89", fillColor: "#8fb8d6", fillOpacity: 0.42, weight: 0.4 },
+  a: { color: "#1d4e89", fillColor: "#d5e4f0", fillOpacity: 0.55, weight: 0.5, dashArray: "3 2" },
+  moderate: { color: "#6b5b3e", fillColor: "#f4efe2", fillOpacity: 0.55, weight: 0.7, dashArray: "2 2" },
+  minimal: { color: "#c5d0d6", fillColor: "#e7eef2", fillOpacity: 0.18, weight: 0 },
+  other: { color: "#243040", fillColor: "#d9e2ea", fillOpacity: 0.35, weight: 0.4 },
+};
+
+const FEMA_LEGEND = [
+  ["floodway", "Floodway. Special flood hazard area."],
+  ["ae", "Zone AE. Special flood hazard area, base flood elevation from the study."],
+  ["a", "Zone A. Special flood hazard area, no published base flood elevation on the polygon."],
+  ["moderate", "Zone X, 0.2% annual chance. Not the special flood hazard area."],
+  ["minimal", "Zone X, minimal hazard. Not a scenario depth."],
+];
 
 document.getElementById("stage-1").addEventListener("click", () => setStage("1.00"));
 document.getElementById("stage-2").addEventListener("click", () => setStage("2.00"));
 document.getElementById("search").addEventListener("submit", (event) => {
   event.preventDefault();
   findRoad(document.getElementById("road-query").value);
+});
+
+document.getElementById("fema-toggle").addEventListener("change", (event) => {
+  setFemaVisible(event.target.checked);
 });
 
 Promise.all([
@@ -52,9 +76,13 @@ Promise.all([
   fetch("/api/enso").then((response) => response.json()),
   fetch("/api/ida").then((response) => response.json()),
   fetch("/api/bridge-decks").then((response) => response.json()),
-]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload]) => {
+  fetch("/api/fema").then((response) => response.json()),
+  fetch("/api/fema-zones.geojson").then((response) => response.json()),
+]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload]) => {
   summary = summaryPayload;
   roads = roadPayload;
+  fema = femaPayload;
+  femaZones = zonePayload;
   document.getElementById("banner").textContent = summary.banner;
   const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
   document.getElementById("product-line").textContent =
@@ -66,6 +94,7 @@ Promise.all([
   renderEnso(ensoPayload);
   renderIda(idaPayload);
   renderDecks(deckPayload);
+  renderFema(femaPayload);
   setStage("1.00");
 }).catch((error) => {
   document.getElementById("banner").textContent = "The dashboard data did not load. " + error;
@@ -85,6 +114,29 @@ function drawLegend() {
     row.append(swatch, label);
     root.append(row);
   });
+  if (!fema) return;
+  const heading = document.createElement("p");
+  heading.className = "legend-heading";
+  heading.textContent = "Regulatory. Effective " + (fema.effective_date_label || "date not loaded") + ".";
+  root.append(heading);
+  FEMA_LEGEND.forEach(([key, text]) => {
+    const row = document.createElement("div");
+    row.className = "legend-row";
+    const swatch = document.createElement("span");
+    swatch.className = "swatch area";
+    swatch.style.background = FEMA_STYLE[key].fillColor;
+    const label = document.createElement("span");
+    label.textContent = text;
+    row.append(swatch, label);
+    root.append(row);
+  });
+  const surface = document.createElement("p");
+  surface.className = "hint";
+  const water = fema.regulatory_water_surface;
+  surface.textContent = water
+    ? "Stony Brook cross section M: " + water.value + " " + water.units + " " + water.datum + " regulatory water surface. Not a deck elevation."
+    : "No regulatory water-surface attribute is loaded.";
+  root.append(surface);
 }
 
 function drawMap(boundary) {
@@ -96,6 +148,29 @@ function drawMap(boundary) {
   L.geoJSON(boundary, {
     style: { color: "#16324f", weight: 1.5, fill: false, dashArray: "4 4" },
   }).addTo(map);
+  map.createPane("fema");
+  map.getPane("fema").style.zIndex = 350;
+  femaLayer = L.featureGroup();
+  if (femaZones) {
+    L.geoJSON(femaZones, {
+      pane: "fema",
+      style: (feature) => femaStyle(feature.properties.fill_class),
+    }).addTo(femaLayer);
+  }
+  const section = fema && fema.regulatory_water_surface_geometry;
+  if (section) {
+    L.geoJSON(
+      { type: "Feature", geometry: section, properties: {} },
+      {
+        pane: "fema",
+        style: { color: "#102033", weight: 3, opacity: 0.9, dashArray: "6 4" },
+      }
+    ).bindTooltip(
+      "Regulatory base-flood water surface, Stony Brook cross section M: 65.5 ft NAVD 88. Not a deck elevation and not a scenario depth.",
+      { sticky: true }
+    ).addTo(femaLayer);
+  }
+  femaLayer.addTo(map);
   roadLayer = L.geoJSON(roads, {
     style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
@@ -217,6 +292,9 @@ function showDetail(props) {
   addLine(root, "Wet piece length", wet === null || wet === undefined ? "not sampled" : wet.toFixed(1) + " m at or above 0.30 m");
   addLine(root, "Inside length", props.length_m_inside === null ? "none" : props.length_m_inside.toFixed(1) + " m");
   addLine(root, "Bridge flag", props.is_bridge ? "yes" : "no");
+  const zones = props.fema_zones || [];
+  addLine(root, "Regulatory zone", zones.length ? zones.map((zone) => zone.zone + " (" + zone.length_m + " m)").join("; ") : "none");
+  addLine(root, "Zone depth", "not assigned");
   if (props.deck_status === "bridge_deck_sampled") {
     const note = document.createElement("p");
     note.className = "hint";
@@ -258,6 +336,55 @@ function findRoad(query) {
   const group = L.featureGroup(hits);
   map.fitBounds(group.getBounds(), { padding: [30, 30], maxZoom: 16 });
   selectLayer(hits[0]);
+}
+
+function renderFema(record) {
+  const root = document.getElementById("fema");
+  const date = document.getElementById("fema-date");
+  root.replaceChildren();
+  date.textContent = record.effective_date_label
+    ? "Regulatory. Effective " + record.effective_date_label + ". Not Hurricane Ida. Not a scenario depth."
+    : "Regulatory layer is not loaded.";
+  (record.zones || []).forEach((zone) => {
+    addLine(root, zone.zone, zone.length_m + " m, " + zone.n_centerlines + " centerlines");
+  });
+  const water = record.regulatory_water_surface;
+  if (water) {
+    const note = document.createElement("p");
+    note.className = "hint";
+    note.textContent = water.stream + " cross section " + water.cross_section
+      + " regulatory water surface: " + water.value + " " + water.units + " " + water.datum
+      + ". Not a deck elevation. It is not subtracted from the +1.0 m or +2.0 m scenario.";
+    root.append(note);
+  }
+  if (record.neighbor_firm_note) {
+    const extra = document.createElement("p");
+    extra.className = "hint";
+    extra.textContent = record.neighbor_firm_note;
+    root.append(extra);
+  }
+}
+
+function femaStyle(fillClass) {
+  const style = FEMA_STYLE[fillClass] || FEMA_STYLE.other;
+  return {
+    color: style.color,
+    fillColor: style.fillColor,
+    fillOpacity: style.fillOpacity,
+    weight: style.weight,
+    dashArray: style.dashArray || null,
+    opacity: 0.9,
+  };
+}
+
+function setFemaVisible(visible) {
+  if (!map || !femaLayer) return;
+  if (visible) {
+    femaLayer.addTo(map);
+    if (roadLayer) roadLayer.bringToFront();
+  } else if (map.hasLayer(femaLayer)) {
+    map.removeLayer(femaLayer);
+  }
 }
 
 function renderDecks(record) {

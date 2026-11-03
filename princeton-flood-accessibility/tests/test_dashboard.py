@@ -174,7 +174,21 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         assert page.status == 200
         assert "Road accessibility" in html
         assert 'id="stage-1"' in html
+        assert 'id="fema-toggle"' in html
+        assert "Regulatory flood zones" in html
         assert 'type="range"' not in html
+        connection.request("GET", "/api/fema")
+        fema_response = connection.getresponse()
+        fema = json.loads(fema_response.read().decode("utf-8"))
+        assert fema_response.status == 200
+        assert fema["hurricane_ida_depth"] is False
+        assert fema["zone_depth_assigned"] is False
+        assert fema["effective_date"] == "2016-07-20"
+        assert fema["regulatory_water_surface"]["value"] == 65.5
+        assert fema["regulatory_water_surface"]["not_a_deck_elevation"] is True
+        connection.request("GET", "/api/roads.geojson")
+        roads = json.loads(connection.getresponse().read().decode("utf-8"))
+        assert all(feature["properties"]["fema_zone_depth_m"] is None for feature in roads["features"])
     finally:
         server.shutdown()
         server.server_close()

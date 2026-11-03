@@ -42,6 +42,7 @@ python3 scripts/accessibility.py
 python3 scripts/update_enso.py
 python3 scripts/validate_ida.py
 python3 scripts/bridge_decks.py
+python3 scripts/fema_overlay.py
 python3 scripts/dashboard.py
 python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
@@ -54,6 +55,8 @@ python3 -m pytest
 `flood_exposure.py` reads the saved centerlines. If `data/raw/usgs_3dep_princeton_10m.tif` or `data/raw/nhd_princeton_channels.geojson` is missing, it downloads that file once. It does not overwrite a raw file that is already there. It refuses to run unless the scenario is marked as not an Ida simulation. Bridge-tagged centerlines are left unmatched. The two stages in the config (1.0 m and 2.0 m above the channel DEM) are separate assumptions. They are not a time series.
 
 `bridge_decks.py` reads the saved FHWA 2025 New Jersey National Bridge Inventory file. It joins a structure to an OSM bridge centerline only when the carried facility matches the name or route ref and the point is within 40 m. It does not sample the terrain under a bridge. A missing deck elevation stays unmatched, and accessibility is not rerun unless a joined elevation can change a status.
+
+`fema_overlay.py` downloads the effective FEMA National Flood Hazard Layer polygons that meet Princeton and intersects them with the saved centerlines. The layer is regulatory. It is not Hurricane Ida and it does not rewrite the +1.0 m or +2.0 m scenario depths. A zone code is not turned into a depth. Bridge decks stay unmatched. The 65.5 ft NAVD 88 figure is the Stony Brook cross section M base-flood water surface, kept as an attribute of the overlay.
 
 `accessibility.py` reads the saved exposure and the saved graph. It does not recompute depths and it does not interpolate between the two stages. A centerline is removed only when at least half of its inside length is pieces at or above 0.30 m (`accessibility.closure_piece_fraction`). Bridge decks and centerlines with no channel match stay in the graph. If `data/raw/osm_destinations_princeton.geojson` is missing, the script downloads OSM amenities once and does not overwrite that file later.
 
@@ -72,7 +75,8 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `scripts/update_enso.py` | Refresh the NOAA weekly Niño-3.4 anomaly, the ONI row, and the official alert status. |
 | `scripts/validate_ida.py` | Qualitative comparison with September 2021 road reports. Not a validation score. |
 | `scripts/bridge_decks.py` | Join NBI structures to the 20 bridge centerlines. Does not invent a deck elevation. |
-| `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. |
+| `scripts/fema_overlay.py` | Regulatory FEMA flood zones. Does not rewrite scenario depths. |
+| `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. The flood-zone checkbox is on by default. |
 
 ## Outputs
 
@@ -110,7 +114,11 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `data/processed/ida_record_comparison.json` | Qualitative September 2021 comparison. Not a validation score. |
 | `data/raw/nbi_nj_2025_delimited.txt` | FHWA 2025 New Jersey National Bridge Inventory. No deck-elevation column. |
 | `data/processed/bridge_deck_join.json` | Which of the 20 bridge centerlines received a published deck elevation. |
-| `web/` | Map page served by `scripts/dashboard.py`. Purple is an unknown deck. Teal would be a sampled deck. |
+| `data/processed/fema_flood_zones.gpkg` | Effective NFHL polygons clipped to Princeton. EPSG:3424. |
+| `data/processed/fema_flood_zones.geojson` | The same polygons in EPSG:4326, for the map. |
+| `data/processed/fema_zone_intersection.json` | Centerline length and count inside each zone. No zone depth. |
+| `data/raw/fema_nfhl_princeton.provenance.json` | NFHL source, NAD83, Mercer panel date, and the 65.5 ft water-surface attribute. |
+| `web/` | Map page served by `scripts/dashboard.py`. Purple is an unknown deck. Teal would be a sampled deck. The flood-zone toggle is a separate regulatory layer. |
 
 `outputs/figures/` is reserved for later charts. Maps are under `outputs/maps/`.
 
@@ -129,8 +137,7 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 - A Hurricane Ida depth or inundation raster that covers Princeton. The Pennsylvania grids do not. USGS and NOAA flood libraries near Princeton do not intersect the municipal polygon. An NJDEP note about an Ida depth grid for Manville Borough was not a file that could be inspected here, so it is not treated as Princeton inundation.
 - NJOGIS road centerlines (https://njogis-newjersey.opendata.arcgis.com/maps/fc3d0a95921b4026b386643eef5ff088 and https://njgin.nj.gov/njgin/edata/roads/). Statewide, EPSG:3424, with names, address ranges, and elevation level. Not downloaded. Useful later as a supplement. The baseline graph is OSM because it is routable and keeps bridge tags. NJOGIS should not be assumed to match OSM segment for segment.
 - NJDOT AADT on the rest of the state. The Princeton join is a nearest-edge snap with a 30 m limit and a 10 m ambiguity gap. It is not a traffic assignment.
-- Bridge-deck elevations (National Bridge Inventory or a survey). OSM `bridge=yes` does not give the deck height, so terrain under the bridge is not the bridge.
-- FEMA National Flood Hazard Layer polygons. A regulatory zone, not an Ida observation.
+- Bridge-deck elevations (National Bridge Inventory or a survey). OSM `bridge=yes` does not give the deck height, so terrain under the bridge is not the bridge. The effective FEMA flood zones are a regulatory overlay in this project. They are not deck elevations and they are not the scenario depths.
 - A pinned historical Overpass date. The network is the OSM extract at the `retrieved_at_utc` timestamp in the stats file. Re-running the script can change the network.
 
 ## Repository layout
