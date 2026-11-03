@@ -1,2 +1,4 @@
 # Keep the USGS table byte-for-byte. It is published with CRLF.
 data/raw/usgs_ida_nj_high_water_marks_2021.csv -text
+# The FHWA delimited file is published with CRLF. The provenance hash is of those bytes.
+data/raw/nbi_nj_2025_delimited.txt -text
