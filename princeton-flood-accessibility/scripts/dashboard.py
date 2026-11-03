@@ -42,7 +42,6 @@ _TYPES = {
 def build_context(settings: dict) -> dict:
     stats = json.loads(resolve(settings, "accessibility_stats").read_text(encoding="utf-8"))
     summary = build_summary(stats)
-    roads = build_road_collection(resolve(settings, "accessibility_geojson"))
     boundary = json.loads(resolve(settings, "boundary").read_text(encoding="utf-8"))
     enso_path = resolve(settings, "enso_cache")
     ida_path = resolve(settings, "ida_comparison")
@@ -53,7 +52,17 @@ def build_context(settings: dict) -> dict:
         "note": "No comparison file yet. Run scripts/validate_ida.py.",
         "places": [],
     }
-    return {"summary": summary, "roads": roads, "boundary": boundary, "enso": enso, "ida": ida}
+    deck_path = resolve(settings, "bridge_deck_join")
+    decks = json.loads(deck_path.read_text(encoding="utf-8")) if deck_path.is_file() else {
+        "hurricane_ida_depth": False,
+        "n_bridge_centerlines": None,
+        "n_with_deck_elevation": None,
+        "n_sampled": None,
+        "centerlines": [],
+        "note": "No bridge-deck join yet. Run scripts/bridge_decks.py.",
+    }
+    roads = build_road_collection(resolve(settings, "accessibility_geojson"), decks)
+    return {"summary": summary, "roads": roads, "boundary": boundary, "enso": enso, "ida": ida, "decks": decks}
 
 
 def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
@@ -74,6 +83,9 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
                 return
             if path == "/api/ida":
                 self._json(context["ida"])
+                return
+            if path == "/api/bridge-decks":
+                self._json(context["decks"])
                 return
             if path == "/":
                 self._file(WEB / "index.html")

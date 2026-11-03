@@ -11,6 +11,7 @@ import pytest
 
 from network.disruption import STATUS_BRIDGE
 from network.disruption import STATUS_CLOSED
+from network.disruption import STATUS_DECK_SAMPLED
 from network.disruption import STATUS_NO_CHANNEL
 from network.disruption import STATUS_PARTIAL
 from network.disruption import bridge_centerline_keys
@@ -67,6 +68,18 @@ def test_bridge_deck_is_not_closed_from_terrain() -> None:
     assert decision["assumed_closed"] is False
     assert decision["routing_status"] == STATUS_BRIDGE
     assert decision["max_based_at_or_above_closure_depth"] is False
+
+
+def test_sampled_deck_is_not_the_unknown_deck() -> None:
+    decision = _decision(
+        exposure_status="bridge_deck_sampled",
+        is_bridge=True,
+        wet_piece_length_m=100.0,
+        depth_max_m=1.5,
+    )
+    assert decision["assumed_closed"] is False
+    assert decision["routing_status"] == STATUS_DECK_SAMPLED
+    assert decision["hurricane_ida_depth"] is False
 
 
 def test_missing_channel_is_not_called_dry_or_closed() -> None:

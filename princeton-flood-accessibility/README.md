@@ -41,6 +41,7 @@ python3 scripts/flood_exposure.py
 python3 scripts/accessibility.py
 python3 scripts/update_enso.py
 python3 scripts/validate_ida.py
+python3 scripts/bridge_decks.py
 python3 scripts/dashboard.py
 python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
@@ -51,6 +52,8 @@ python3 -m pytest
 `download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds the baseline files and the map.
 
 `flood_exposure.py` reads the saved centerlines. If `data/raw/usgs_3dep_princeton_10m.tif` or `data/raw/nhd_princeton_channels.geojson` is missing, it downloads that file once. It does not overwrite a raw file that is already there. It refuses to run unless the scenario is marked as not an Ida simulation. Bridge-tagged centerlines are left unmatched. The two stages in the config (1.0 m and 2.0 m above the channel DEM) are separate assumptions. They are not a time series.
+
+`bridge_decks.py` reads the saved FHWA 2025 New Jersey National Bridge Inventory file. It joins a structure to an OSM bridge centerline only when the carried facility matches the name or route ref and the point is within 40 m. It does not sample the terrain under a bridge. A missing deck elevation stays unmatched, and accessibility is not rerun unless a joined elevation can change a status.
 
 `accessibility.py` reads the saved exposure and the saved graph. It does not recompute depths and it does not interpolate between the two stages. A centerline is removed only when at least half of its inside length is pieces at or above 0.30 m (`accessibility.closure_piece_fraction`). Bridge decks and centerlines with no channel match stay in the graph. If `data/raw/osm_destinations_princeton.geojson` is missing, the script downloads OSM amenities once and does not overwrite that file later.
 
@@ -68,6 +71,7 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `scripts/accessibility.py` | Remove fraction-rule centerlines from the two scenario graphs and write connectivity, routes, and the disruption map. |
 | `scripts/update_enso.py` | Refresh the NOAA weekly Niño-3.4 anomaly, the ONI row, and the official alert status. |
 | `scripts/validate_ida.py` | Qualitative comparison with September 2021 road reports. Not a validation score. |
+| `scripts/bridge_decks.py` | Join NBI structures to the 20 bridge centerlines. Does not invent a deck elevation. |
 | `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. |
 
 ## Outputs
@@ -104,7 +108,9 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `outputs/maps/princeton_accessibility_disruption.png` | Baseline and both stages. Red is the fraction rule, not a closure standard. |
 | `data/processed/enso_latest.json` | Last successful NOAA weekly Niño-3.4 row, ONI row, and alert status. |
 | `data/processed/ida_record_comparison.json` | Qualitative September 2021 comparison. Not a validation score. |
-| `web/` | Map page served by `scripts/dashboard.py`. |
+| `data/raw/nbi_nj_2025_delimited.txt` | FHWA 2025 New Jersey National Bridge Inventory. No deck-elevation column. |
+| `data/processed/bridge_deck_join.json` | Which of the 20 bridge centerlines received a published deck elevation. |
+| `web/` | Map page served by `scripts/dashboard.py`. Purple is an unknown deck. Teal would be a sampled deck. |
 
 `outputs/figures/` is reserved for later charts. Maps are under `outputs/maps/`.
 

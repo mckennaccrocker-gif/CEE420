@@ -22,6 +22,7 @@ STATUS_ACCESSIBLE = "accessible_routable"
 STATUS_AT_RISK = "at_risk_routable"
 STATUS_PARTIAL = "partial_above_0_30_not_closed"
 STATUS_BRIDGE = "bridge_deck_unmatched"
+STATUS_DECK_SAMPLED = "bridge_deck_sampled"
 STATUS_NO_CHANNEL = "unmatched_no_channel"
 STATUS_OUTSIDE = "outside_municipality"
 STATUS_NODATA = "dem_nodata"
@@ -116,7 +117,12 @@ def closure_decision(
         and max_depth >= closed_at_m
     )
     fraction = None
-    if is_bridge or exposure_status == "bridge_deck_unmatched":
+    if exposure_status == STATUS_DECK_SAMPLED:
+        # A published deck elevation produced this depth. It is not the
+        # unknown-deck status, and the ground under the span was not used.
+        status = STATUS_DECK_SAMPLED
+        closed = False
+    elif is_bridge or exposure_status == "bridge_deck_unmatched":
         status = STATUS_BRIDGE
         closed = False
     elif exposure_status in _UNMATCHED_ROUTABLE:

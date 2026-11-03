@@ -96,6 +96,8 @@ paths:
   osmnx_cache: data/raw/osmnx_cache
   aadt_csv: data/raw/njdot_aadt_princeton_2024.csv
   hwm_csv: data/raw/usgs_ida_nj_high_water_marks_2021.csv
+  nbi_delimited: data/raw/nbi_nj_2025_delimited.txt
+  nbi_provenance: data/raw/nbi_nj_2025_delimited.provenance.json
   gpkg: data/processed/princeton_drive_network.gpkg
   graphml: data/processed/princeton_drive_network.graphml
   centerlines_geojson: data/processed/princeton_drive_centerlines.geojson
@@ -129,6 +131,7 @@ paths:
   accessibility_map: outputs/maps/princeton_accessibility_disruption.png
   enso_cache: data/processed/enso_latest.json
   ida_comparison: data/processed/ida_record_comparison.json
+  bridge_deck_join: data/processed/bridge_deck_join.json
 
 dashboard:
   host: 127.0.0.1

@@ -4,6 +4,7 @@ const COLORS = {
   assumed_closed: "#c0392b",
   partial_above_0_30_not_closed: "#e07a2f",
   bridge_deck_unmatched: "#6d4ea8",
+  bridge_deck_sampled: "#0e7c86",
   unmatched_no_channel: "#8a8a8a",
   outside_municipality: "#b7b1a6",
 };
@@ -13,7 +14,8 @@ const LEGEND = [
   ["at_risk_routable", "At risk. Some length is 0.10–0.30 m. Still routable."],
   ["partial_above_0_30_not_closed", "Partly at or above 0.30 m, but under half the inside length. Still routable."],
   ["assumed_closed", "Assumed closed. At least half the inside length is at or above 0.30 m. A preliminary rule, not a closure standard."],
-  ["bridge_deck_unmatched", "Purple is an unknown bridge deck, not a flood depth. The edge stays routable."],
+  ["bridge_deck_unmatched", "Purple is an unknown bridge deck. No published elevation was joined. Not a flood depth."],
+  ["bridge_deck_sampled", "Teal is a sampled deck. Depth is max(0, scenario water surface − a published deck elevation)."],
   ["unmatched_no_channel", "Gray is unmatched, not dry. No channel was found within 500 m. Not called closed."],
   ["outside_municipality", "Outside the municipality. Not a depth."],
 ];
@@ -24,6 +26,7 @@ const STATUS_LABEL = {
   partial_above_0_30_not_closed: "Partly at or above 0.30 m, not closed",
   assumed_closed: "Assumed closed",
   bridge_deck_unmatched: "Bridge deck unmatched",
+  bridge_deck_sampled: "Bridge deck sampled",
   unmatched_no_channel: "Unmatched, no channel",
   outside_municipality: "Outside the municipality",
 };
@@ -48,7 +51,8 @@ Promise.all([
   fetch("/api/boundary.geojson").then((response) => response.json()),
   fetch("/api/enso").then((response) => response.json()),
   fetch("/api/ida").then((response) => response.json()),
-]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload]) => {
+  fetch("/api/bridge-decks").then((response) => response.json()),
+]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload]) => {
   summary = summaryPayload;
   roads = roadPayload;
   document.getElementById("banner").textContent = summary.banner;
@@ -61,6 +65,7 @@ Promise.all([
   drawChart();
   renderEnso(ensoPayload);
   renderIda(idaPayload);
+  renderDecks(deckPayload);
   setStage("1.00");
 }).catch((error) => {
   document.getElementById("banner").textContent = "The dashboard data did not load. " + error;
@@ -92,7 +97,7 @@ function drawMap(boundary) {
     style: { color: "#16324f", weight: 1.5, fill: false, dashArray: "4 4" },
   }).addTo(map);
   roadLayer = L.geoJSON(roads, {
-    style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)]),
+    style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
       layer.on("click", () => selectLayer(layer));
     },
@@ -100,11 +105,12 @@ function drawMap(boundary) {
   map.fitBounds(roadLayer.getBounds(), { padding: [20, 20] });
 }
 
-function styleFor(status) {
+function styleFor(status, deckStatus) {
   const closed = status === "assumed_closed";
+  const color = deckStatus === "bridge_deck_sampled" ? COLORS.bridge_deck_sampled : (COLORS[status] || "#444");
   return {
-    color: COLORS[status] || "#444",
-    weight: closed ? 4 : status === "partial_above_0_30_not_closed" ? 3 : 2.2,
+    color: color,
+    weight: closed || deckStatus === "bridge_deck_sampled" ? 4 : status === "partial_above_0_30_not_closed" ? 3 : 2.2,
     opacity: 0.92,
   };
 }
@@ -116,8 +122,8 @@ function setStage(next) {
   if (roadLayer) {
     roadLayer.eachLayer((layer) => {
       const status = layer.feature.properties["status_" + stageKey(stage)];
-      layer.setStyle(styleFor(status));
-      if (status === "assumed_closed" || status === "partial_above_0_30_not_closed" || status === "bridge_deck_unmatched") {
+      layer.setStyle(styleFor(status, layer.feature.properties.deck_status));
+      if (status === "assumed_closed" || status === "partial_above_0_30_not_closed" || status === "bridge_deck_unmatched" || layer.feature.properties.deck_status === "bridge_deck_sampled") {
         layer.bringToFront();
       }
     });
@@ -188,7 +194,9 @@ function metric(title, stages, value, max, label) {
 }
 
 function selectLayer(layer) {
-  if (selected) selected.setStyle(styleFor(selected.feature.properties["status_" + stageKey(stage)]));
+  if (selected) {
+    selected.setStyle(styleFor(selected.feature.properties["status_" + stageKey(stage)], selected.feature.properties.deck_status));
+  }
   selected = layer;
   layer.setStyle({ weight: 7, color: "#111" });
   layer.bringToFront();
@@ -209,12 +217,18 @@ function showDetail(props) {
   addLine(root, "Wet piece length", wet === null || wet === undefined ? "not sampled" : wet.toFixed(1) + " m at or above 0.30 m");
   addLine(root, "Inside length", props.length_m_inside === null ? "none" : props.length_m_inside.toFixed(1) + " m");
   addLine(root, "Bridge flag", props.is_bridge ? "yes" : "no");
-  if (status === "bridge_deck_unmatched") {
+  if (props.deck_status === "bridge_deck_sampled") {
     const note = document.createElement("p");
     note.className = "hint";
-    note.textContent = "Purple means the deck elevation is unknown. It is not a flood depth.";
+    note.textContent = "Teal means this depth is the scenario water surface minus a published deck elevation.";
+    root.append(note);
+  } else if (status === "bridge_deck_unmatched" || props.deck_status === "bridge_deck_unmatched") {
+    const note = document.createElement("p");
+    note.className = "hint";
+    note.textContent = props.deck_note || "Purple means the deck elevation is unknown. It is not a flood depth.";
     root.append(note);
   }
+  (props.deck_structures || []).forEach((label) => addLine(root, "Inventory", label));
   if (status === "unmatched_no_channel") {
     const note = document.createElement("p");
     note.className = "hint";
@@ -244,6 +258,33 @@ function findRoad(query) {
   const group = L.featureGroup(hits);
   map.fitBounds(group.getBounds(), { padding: [30, 30], maxZoom: 16 });
   selectLayer(hits[0]);
+}
+
+function renderDecks(record) {
+  const root = document.getElementById("decks");
+  root.replaceChildren();
+  const count = document.createElement("p");
+  const sampled = record.n_sampled;
+  const total = record.n_bridge_centerlines;
+  const withElevation = record.n_with_deck_elevation;
+  count.textContent = sampled === null || sampled === undefined
+    ? "Bridge-deck join has not been run."
+    : "Published deck elevations joined: " + withElevation + " of " + total + ". Sampled decks: " + sampled + ".";
+  root.append(count);
+  const unknown = document.createElement("p");
+  unknown.className = "hint";
+  unknown.textContent = "Purple is an unknown deck. Teal would be a sampled deck, and it is a different color. A 3DEP elevation under the span is not a deck.";
+  root.append(unknown);
+  const quakers = (record.centerlines || []).filter((item) => item.name === "Quaker Road");
+  quakers.forEach((item) => {
+    const line = document.createElement("p");
+    line.className = "hint";
+    const structures = (item.accepted_structures || []).map((structure) => structure.structure_number).join(", ");
+    line.textContent = "Quaker Road, " + item.length_m_inside + " m inside: " + item.exposure_status
+      + (structures ? ". Structures " + structures + "." : ". No accepted structure.")
+      + (item.deck_elevation_m == null ? " Deck elevation: not published." : " Deck elevation: " + item.deck_elevation_m + " m.");
+    root.append(line);
+  });
 }
 
 function renderEnso(record) {
