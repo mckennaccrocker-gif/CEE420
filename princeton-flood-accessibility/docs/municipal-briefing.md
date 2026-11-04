@@ -66,6 +66,22 @@ A search of the Flood Insurance Study, the NJDOT Route 533 straight-line diagram
 
 Of the other named closures in the same news check: Mercer Road has 0 streets removed at +1.0 m and 2 at +2.0 m, with 117.5 m and 510.7 m of deep pieces. Stockton Street / Route 206 has 0 streets removed at either stage. South Harrison Street has 0 streets removed and 0 m of deep pieces. That comparison was not scored. It is not a validation of the model.
 
+## Name check, not a validation
+
+The side panel compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed.
+
+Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.
+
+| Road | +1.0 m | +2.0 m |
+| --- | --- | --- |
+| Quaker Road | Missed | Missed |
+| Mercer Road | Missed | Captured, 2 of 14 |
+| Stockton Street / Route 206 | Missed | Missed |
+| South Harrison Street | Missed | Missed |
+| Rosedale Road | Missed | Missed |
+
+Quaker Road is 10 centerlines, none assumed closed at either assumption. Mercer Road is 14 centerlines, not closed at +1.0 m, and 2 assumed closed at +2.0 m. Stockton Street is 11 centerlines, none assumed closed. South Harrison Street is 4 centerlines, none assumed closed, and the wording gap is left as written. Rosedale Road is 12 centerlines, none assumed closed. Its 2 September sentence is a reopening time, not a closure log.
+
 ## The FEMA layer is a regulation map
 
 The flood-zone polygons are the effective FEMA National Flood Hazard Layer for Mercer County DFIRM 34021C, retrieved 3 November 2026. Twenty panels over the municipal envelope are effective **20 July 2016**. The layer is regulatory. It is not Hurricane Ida, it is not a deck elevation, and it does not change the +1.0 m or +2.0 m depths. A zone letter was not turned into a depth of water.
