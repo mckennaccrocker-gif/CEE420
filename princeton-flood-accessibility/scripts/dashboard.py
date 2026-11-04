@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from dashboard.enso import load_cached  # noqa: E402
+from dashboard.observed_reports import build_observed_reports  # noqa: E402
 from dashboard.roads import build_road_collection  # noqa: E402
 from dashboard.summary import build_summary  # noqa: E402
 from network.roads import load_settings  # noqa: E402
@@ -88,6 +89,7 @@ def build_context(settings: dict) -> dict:
         "decks": decks,
         "fema": fema_public,
         "fema_zones": fema_zones,
+        "observed_reports": build_observed_reports(roads),
     }
 
 
@@ -119,6 +121,9 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
             if path == "/api/fema-zones.geojson":
                 self._json(context["fema_zones"])
                 return
+            if path == "/api/observed-reports.geojson":
+                self._json(context["observed_reports"])
+                return
             if path == "/":
                 self._file(WEB / "index.html")
                 return
@@ -145,6 +150,7 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
             self.send_response(200)
             self.send_header("Content-Type", _TYPES.get(resolved.suffix, "application/octet-stream"))
             self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
 

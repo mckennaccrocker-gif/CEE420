@@ -51,7 +51,7 @@ python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
 ```
 
-`dashboard.py` serves http://127.0.0.1:8765/ and does not interpolate the two stages. `update_enso.py` refreshes the NOAA cache in `data/processed/enso_latest.json`. If NOAA is unreachable and a previous file exists, that observation and its date stay in place. `validate_ida.py` writes a qualitative comparison. It does not score the scenario.
+`dashboard.py` serves http://127.0.0.1:8765/ and does not interpolate the two stages. A separate checkbox, off until checked, draws black dashes for the September 2021 news reports. Those dashes are not scenario depths. `update_enso.py` refreshes the NOAA cache in `data/processed/enso_latest.json`. If NOAA is unreachable and a previous file exists, that observation and its date stay in place. `validate_ida.py` writes a qualitative comparison. It does not score the scenario.
 
 `download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds the baseline files and the map.
 
@@ -82,7 +82,7 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `scripts/bridge_decks.py` | Join NBI structures to the 20 bridge centerlines. Does not invent a deck elevation. |
 | `scripts/fema_overlay.py` | Regulatory FEMA flood zones. Does not rewrite scenario depths. |
 | `scripts/njogis_roads.py` | Compare NJOGIS centerlines with the OSM drive centerlines. Does not replace the graph. |
-| `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. The flood-zone checkbox is on by default. |
+| `scripts/dashboard.py` | Serve the map at http://127.0.0.1:8765/. The flood-zone checkbox is on by default. The September 2021 news-report checkbox is off by default. |
 
 ## Outputs
 
@@ -128,7 +128,7 @@ The Pennsylvania GeoTIFFs are not in the repository. The committed coverage JSON
 | `data/raw/njogis_princeton_centerlines.provenance.json` | Source, 23 September 2026 service date, NAD83 / New Jersey (ftUS). |
 | `data/processed/njogis_princeton_centerlines.gpkg` | Those centerlines clipped to the municipality. |
 | `data/processed/njogis_osm_comparison.json` | Lengths, the 20 m name comparison, and hashes of the files this step must not change. |
-| `web/` | Map page served by `scripts/dashboard.py`. Purple is an unknown deck. Teal would be a sampled deck. The flood-zone toggle is a separate regulatory layer. |
+| `web/` | Map page served by `scripts/dashboard.py`. Purple is an unknown deck. Teal would be a sampled deck. The flood-zone toggle is a separate regulatory layer. Black dashes, off until checked, are the September 2021 news reports and are not a depth. |
 
 `outputs/figures/` is reserved for later charts. Maps are under `outputs/maps/`.
 

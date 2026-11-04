@@ -149,6 +149,34 @@ main {
   font-size: 0.78rem;
 }
 
+#reports-control {
+  position: absolute;
+  z-index: 500;
+  top: 7.4rem;
+  right: 12px;
+  max-width: 16rem;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px dashed #111;
+  border-radius: 6px;
+  padding: 0.45rem 0.6rem;
+  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+}
+
+#reports-control label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-weight: 650;
+}
+
+#reports-note {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.report-popup p { margin: 0.35rem 0; }
+
 .legend-heading {
   margin: 0.45rem 0 0.15rem;
   font-size: 0.72rem;

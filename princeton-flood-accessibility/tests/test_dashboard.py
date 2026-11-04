@@ -176,6 +176,8 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         assert 'id="stage-1"' in html
         assert 'id="fema-toggle"' in html
         assert "Regulatory flood zones" in html
+        assert 'id="reports-toggle"' in html
+        assert 'id="reports-toggle" type="checkbox" checked' not in html
         assert 'type="range"' not in html
         connection.request("GET", "/api/fema")
         fema_response = connection.getresponse()
@@ -189,6 +191,14 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         connection.request("GET", "/api/roads.geojson")
         roads = json.loads(connection.getresponse().read().decode("utf-8"))
         assert all(feature["properties"]["fema_zone_depth_m"] is None for feature in roads["features"])
+        connection.request("GET", "/api/observed-reports.geojson")
+        reports_response = connection.getresponse()
+        reports = json.loads(reports_response.read().decode("utf-8"))
+        assert reports_response.status == 200
+        assert reports["default_visible"] is False
+        assert reports["is_model_depth"] is False
+        assert reports["scenario_depth_assigned"] is False
+        assert all(feature["properties"]["scenario_depth_m"] is None for feature in reports["features"])
     finally:
         server.shutdown()
         server.server_close()

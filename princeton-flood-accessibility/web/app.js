@@ -39,7 +39,17 @@ let stage = "1.00";
 let selected = null;
 let roadLayer = null;
 let femaLayer = null;
+let reportsLayer = null;
+let observedReports = null;
 let map = null;
+
+const REPORT_STYLE = {
+  color: "#111111",
+  weight: 4,
+  opacity: 0.95,
+  dashArray: "2 8",
+  lineCap: "butt",
+};
 
 const FEMA_STYLE = {
   floodway: { color: "#0b1f33", fillColor: "#16324f", fillOpacity: 0.5, weight: 0.6 },
@@ -68,6 +78,9 @@ document.getElementById("search").addEventListener("submit", (event) => {
 document.getElementById("fema-toggle").addEventListener("change", (event) => {
   setFemaVisible(event.target.checked);
 });
+document.getElementById("reports-toggle").addEventListener("change", (event) => {
+  setReportsVisible(event.target.checked);
+});
 
 Promise.all([
   fetch("/api/summary").then((response) => response.json()),
@@ -78,11 +91,13 @@ Promise.all([
   fetch("/api/bridge-decks").then((response) => response.json()),
   fetch("/api/fema").then((response) => response.json()),
   fetch("/api/fema-zones.geojson").then((response) => response.json()),
-]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload]) => {
+  fetch("/api/observed-reports.geojson").then((response) => response.json()),
+]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload, reportPayload]) => {
   summary = summaryPayload;
   roads = roadPayload;
   fema = femaPayload;
   femaZones = zonePayload;
+  observedReports = reportPayload;
   document.getElementById("banner").textContent = summary.banner;
   const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
   document.getElementById("product-line").textContent =
@@ -171,6 +186,29 @@ function drawMap(boundary) {
     ).addTo(femaLayer);
   }
   femaLayer.addTo(map);
+  map.createPane("reports");
+  map.getPane("reports").style.zIndex = 640;
+  const reportData = observedReports || { type: "FeatureCollection", features: [] };
+  const reportHits = L.geoJSON(reportData, {
+    pane: "reports",
+    style: () => ({ color: "#111111", weight: 18, opacity: 0 }),
+    onEachFeature: (feature, layer) => {
+      layer.bindPopup(reportPopup(feature.properties));
+      layer.on("add", () => {
+        if (layer._path) layer._path.setAttribute("pointer-events", "stroke");
+      });
+      layer.on("click", (event) => {
+        L.DomEvent.stop(event);
+        layer.openPopup(event.latlng);
+      });
+    },
+  });
+  const reportInk = L.geoJSON(reportData, {
+    pane: "reports",
+    interactive: false,
+    style: () => REPORT_STYLE,
+  });
+  reportsLayer = L.featureGroup([reportHits, reportInk]);
   roadLayer = L.geoJSON(roads, {
     style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
@@ -202,6 +240,9 @@ function setStage(next) {
         layer.bringToFront();
       }
     });
+  }
+  if (reportsLayer && map && map.hasLayer(reportsLayer)) {
+    reportsLayer.bringToFront();
   }
   renderStats();
   drawChart();
@@ -377,11 +418,37 @@ function femaStyle(fillClass) {
   };
 }
 
+function setReportsVisible(visible) {
+  if (!map || !reportsLayer) return;
+  if (visible) {
+    reportsLayer.addTo(map);
+    reportsLayer.bringToFront();
+  } else if (map.hasLayer(reportsLayer)) {
+    map.removeLayer(reportsLayer);
+  }
+}
+
+function reportPopup(props) {
+  const root = document.createElement("div");
+  root.className = "report-popup";
+  const title = document.createElement("strong");
+  title.textContent = props.title || props.name || "News report";
+  const news = document.createElement("p");
+  news.textContent = "News date: " + (props.news_date || "not recorded") + ". " + (props.news_note || "");
+  const scenario = document.createElement("p");
+  scenario.textContent = props.scenario_note || "The scenario result for this road is not loaded.";
+  const mark = document.createElement("p");
+  mark.textContent = "This mark is a news report. It is not a model depth.";
+  root.append(title, news, scenario, mark);
+  return root;
+}
+
 function setFemaVisible(visible) {
   if (!map || !femaLayer) return;
   if (visible) {
     femaLayer.addTo(map);
     if (roadLayer) roadLayer.bringToFront();
+    if (reportsLayer && map.hasLayer(reportsLayer)) reportsLayer.bringToFront();
   } else if (map.hasLayer(femaLayer)) {
     map.removeLayer(femaLayer);
   }
