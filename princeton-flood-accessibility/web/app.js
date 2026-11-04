@@ -40,6 +40,7 @@ let femaLayer = null;
 let reportsLayer = null;
 let reportFocus = null;
 let observedReports = null;
+let nameCheck = null;
 let map = null;
 
 const REPORT_STYLE = {
@@ -243,7 +244,7 @@ function setStage(next) {
   const captionNode = document.getElementById("stage-caption");
   if (captionNode) captionNode.textContent = caption;
   if (slider) slider.setAttribute("aria-valuetext", riseText(row.stage_above_channel_dem_m) + ". " + caption);
-  highlightNameCheck();
+  showNameCheck(stage);
   if (roadLayer) {
     roadLayer.eachLayer((layer) => {
       const status = layer.feature.properties["status_" + stageKey(stage)];
@@ -543,6 +544,7 @@ function renderEnso(record) {
 }
 
 function renderNameCheck(record) {
+  nameCheck = record;
   const root = document.getElementById("name-check");
   if (!root) return;
   root.replaceChildren();
@@ -565,37 +567,48 @@ function renderNameCheck(record) {
     detail.textContent = row.detail || "";
     const marks = document.createElement("div");
     marks.className = "name-check-marks";
-    (row.steps || []).forEach((step) => {
-      marks.append(resultMark(step.result, riseText(step.stage_m), step.captured_of, step.id));
-    });
+    const mark = document.createElement("span");
+    mark.dataset.road = row.road;
+    marks.append(mark);
     item.append(button, marks, detail);
     list.append(item);
   });
   root.append(list);
   const note = document.createElement("p");
   note.className = "hint";
-  note.textContent = "Click a name to turn on the news dashes and zoom to those centerlines. Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.";
+  note.textContent = "The five rows follow the selected rise. Captured means at least one centerline of that name is assumed closed at that mark. Missed means none are. Click a name to turn on the news dashes and zoom to those centerlines.";
   root.append(note);
+  showNameCheck(stage);
 }
 
-function resultMark(result, label, capturedOf, stageId) {
-  const mark = document.createElement("span");
-  mark.className = result === "captured" ? "result" : "missed";
-  mark.dataset.stage = stageId;
-  if (result === "captured" && capturedOf) {
-    mark.textContent = label + " Captured, " + capturedOf;
-  } else if (result === "captured") {
-    mark.textContent = label + " Captured";
-  } else {
-    mark.textContent = label + " Missed";
+function nameCheckLine(step) {
+  const label = riseText(step.stage_m);
+  if (step.result === "captured" && step.captured_of) {
+    return label + " Captured, " + step.captured_of;
   }
-  return mark;
+  if (step.result === "captured") return label + " Captured";
+  return label + " Missed";
 }
 
-function highlightNameCheck() {
-  document.querySelectorAll(".name-check-marks span").forEach((mark) => {
-    mark.classList.toggle("on", mark.dataset.stage === stage);
+function showNameCheck(stageId) {
+  if (!nameCheck) return;
+  const byRoad = {};
+  (nameCheck.rows || []).forEach((row) => {
+    byRoad[row.road] = row;
   });
+  document.querySelectorAll(".name-check-marks span").forEach((mark) => {
+    const row = byRoad[mark.dataset.road];
+    const step = row && (row.steps || []).find((item) => item.id === stageId);
+    if (!step) return;
+    mark.className = step.result === "captured" ? "result" : "missed";
+    mark.textContent = nameCheckLine(step);
+  });
+  const summaryNode = document.getElementById("name-check-summary");
+  const sample = (nameCheck.rows || [])[0];
+  const sampleStep = sample && (sample.steps || []).find((item) => item.id === stageId);
+  if (summaryNode && sampleStep) {
+    summaryNode.textContent = "Name check, " + riseText(sampleStep.stage_m);
+  }
 }
 
 function focusReportedRoad(row) {

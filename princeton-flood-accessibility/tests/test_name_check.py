@@ -53,6 +53,16 @@ def test_five_rows_match_the_stage_note(project_root: Path) -> None:
     assert by_road["South Harrison Street"]["n_centerlines"] == 4
     assert by_road["Rosedale Road"]["n_centerlines"] == 12
     assert "not a closure log" in by_road["Rosedale Road"]["detail"]
+    for road in roads:
+        half = next(step for step in by_road[road]["steps"] if step["id"] == "0.50")
+        assert half["result"] == "missed"
+        assert "captured_of" not in half
+    mercer_one_half = next(step for step in mercer["steps"] if step["id"] == "1.50")
+    assert mercer_one_half["result"] == "captured"
+    assert mercer_one_half["captured_of"] == "1 of 14"
+    for road in ("Quaker Road", "Stockton Street / Route 206", "South Harrison Street", "Rosedale Road"):
+        one_half = next(step for step in by_road[road]["steps"] if step["id"] == "1.50")
+        assert one_half["result"] == "missed"
     for path, content in before.items():
         assert (project_root / path).read_bytes() == content
 
@@ -76,6 +86,7 @@ def test_name_check_panel_is_in_the_page(project_root: Path) -> None:
     assert "not a validation" in html
     script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
     assert "renderNameCheck" in script
+    assert "showNameCheck(stage)" in script
     assert "/api/name-check" in script
     assert "function focusReportedRoad" in script
     assert "feature.properties.title === row.road" in script
