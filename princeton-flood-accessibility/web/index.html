@@ -24,23 +24,26 @@
         <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
       </form>
       <div id="legend"></div>
-      <div id="fema-control">
-        <label for="fema-toggle">
-          <input id="fema-toggle" type="checkbox" checked>
-          Regulatory flood zones
-        </label>
-        <p id="fema-date"></p>
-      </div>
-      <div id="reports-control">
-        <label for="reports-toggle">
-          <input id="reports-toggle" type="checkbox">
-          September 2021 news reports
-        </label>
-        <p id="reports-note">Off until checked. Black dashes are a news report, not a model depth.</p>
-      </div>
-      <div id="enso-panel">
-        <h2>ENSO</h2>
-        <div id="enso"></div>
+      <div id="map-rail">
+        <div id="fema-control">
+          <label for="fema-toggle">
+            <input id="fema-toggle" type="checkbox" checked>
+            Regulatory flood zones
+          </label>
+          <p id="fema-date"></p>
+        </div>
+        <div id="reports-control">
+          <label for="reports-toggle">
+            <input id="reports-toggle" type="checkbox">
+            September 2021 news reports
+          </label>
+          <p id="reports-note">Off until checked. Black dashes are a news report, not a model depth.</p>
+        </div>
+        <div id="enso-panel">
+          <h2>ENSO context</h2>
+          <p class="enso-role">Does not change road depth.</p>
+          <div id="enso"></div>
+        </div>
       </div>
     </section>
     <aside>

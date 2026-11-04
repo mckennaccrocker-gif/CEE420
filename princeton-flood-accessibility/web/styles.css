@@ -22,7 +22,7 @@ html, body {
   height: 100%;
   color: var(--ink);
   background: var(--paper);
-  font: 15px/1.45 "Segoe UI", "Helvetica Neue", sans-serif;
+  font: 16px/1.5 "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
 body {
@@ -34,19 +34,20 @@ body {
 #banner {
   background: var(--banner);
   color: var(--banner-ink);
-  border-bottom: 3px solid #a15c07;
-  padding: 0.7rem 1.2rem;
-  font-weight: 650;
+  border-bottom: 1px solid #e2d2ae;
+  padding: 0.75rem 1.4rem;
+  font-weight: 600;
+  line-height: 1.45;
 }
 
 header {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
   align-items: end;
   background: var(--navy);
   color: #f7f4ee;
-  padding: 0.85rem 1.2rem 0.95rem;
+  padding: 0.9rem 1.4rem 1rem;
 }
 
 h1, h2, p { margin: 0; }
@@ -75,7 +76,7 @@ main {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
+  grid-template-columns: minmax(0, 1fr) 24rem;
 }
 
 #map-wrap { position: relative; min-height: 420px; }
@@ -85,16 +86,15 @@ main {
 #search {
   position: absolute;
   z-index: 500;
-  top: 12px;
-  left: 52px;
+  top: 16px;
+  left: 56px;
   display: flex;
-  gap: 0.4rem;
+  gap: 0.45rem;
   align-items: center;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.35rem 0.5rem;
-  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+  border-radius: 8px;
+  padding: 0.4rem 0.65rem;
 }
 
 #search label { font-size: 0.75rem; color: var(--muted); }
@@ -111,29 +111,32 @@ main {
 #legend {
   position: absolute;
   z-index: 500;
-  left: 12px;
-  bottom: 18px;
-  max-width: 22rem;
-  max-height: 46%;
+  left: 16px;
+  bottom: 22px;
+  max-width: 20rem;
+  max-height: 38%;
   overflow: auto;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.65rem 0.75rem;
-  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem;
+}
+
+#map-rail {
+  position: absolute;
+  z-index: 500;
+  top: 16px;
+  right: 16px;
+  width: 16.5rem;
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 
 #fema-control {
-  position: absolute;
-  z-index: 500;
-  top: 12px;
-  right: 12px;
-  max-width: 16rem;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+  padding: 0.75rem 0.85rem 0.65rem;
 }
 
 #fema-control label {
@@ -144,22 +147,15 @@ main {
 }
 
 #fema-date {
-  margin: 0.25rem 0 0;
+  margin: 0.3rem 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 #reports-control {
-  position: absolute;
-  z-index: 500;
-  top: 7.4rem;
-  right: 12px;
-  max-width: 16rem;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px dashed #111;
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+  padding: 0.7rem 0.85rem;
+  border-top: 1px dashed #c8c2b6;
 }
 
 #reports-control label {
@@ -170,35 +166,32 @@ main {
 }
 
 #reports-note {
-  margin: 0.25rem 0 0;
+  margin: 0.3rem 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 #enso-panel {
-  position: absolute;
-  z-index: 500;
-  top: 14.6rem;
-  right: 12px;
-  width: 16.5rem;
-  max-height: 42%;
-  overflow: auto;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--navy);
-  border-radius: 6px;
-  padding: 0.5rem 0.65rem 0.6rem;
-  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+  padding: 0.65rem 0.85rem 0.75rem;
+  border-top: 1px solid var(--line);
 }
 
-#enso-panel h2 { margin-bottom: 0.35rem; }
+#enso-panel h2 { margin-bottom: 0.15rem; }
 
-#enso-panel p { margin: 0.28rem 0; font-size: 0.78rem; }
+.enso-role {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin: 0 0 0.35rem;
+}
+
+#enso-panel p { margin: 0.18rem 0; font-size: 0.88rem; line-height: 1.4; }
 
 .report-popup p { margin: 0.35rem 0; }
 
 .legend-heading {
-  margin: 0.45rem 0 0.15rem;
-  font-size: 0.72rem;
+  margin: 0.55rem 0 0.2rem;
+  font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
@@ -210,7 +203,7 @@ main {
   gap: 0.45rem;
   align-items: start;
   margin: 0.28rem 0;
-  font-size: 0.82rem;
+  font-size: 0.92rem;
 }
 
 .swatch {
@@ -230,25 +223,26 @@ aside {
   overflow: auto;
   background: var(--panel);
   border-left: 1px solid var(--line);
-  padding: 1rem 1rem 2rem;
+  padding: 1.35rem 1.25rem 2.5rem;
 }
 
 aside section + section {
-  margin-top: 1.15rem;
-  padding-top: 1rem;
+  margin-top: 1.6rem;
+  padding-top: 1.35rem;
   border-top: 1px solid var(--line);
 }
 
-.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
 
 .switch button {
   font: inherit;
+  font-size: 1.05rem;
   font-weight: 650;
   border: 1px solid var(--navy);
   background: white;
   color: var(--navy);
-  border-radius: 6px;
-  padding: 0.55rem 0.4rem;
+  border-radius: 8px;
+  padding: 0.7rem 0.5rem;
   cursor: pointer;
 }
 
@@ -257,7 +251,7 @@ aside section + section {
   color: white;
 }
 
-.hint { color: var(--muted); font-size: 0.82rem; margin-top: 0.45rem; }
+.hint { color: var(--muted); font-size: 0.9rem; margin-top: 0.55rem; }
 
 dl { margin: 0.8rem 0 0; }
 
@@ -288,11 +282,11 @@ dl { margin: 0.8rem 0 0; }
 
 .metric { margin-top: 0.35rem; font-size: 0.78rem; color: var(--muted); }
 
-#road-detail p, #enso p, #ida p, #name-check p { margin: 0.35rem 0; }
+#road-detail p, #ida p, #name-check p { margin: 0.4rem 0; }
 
 .name-check-heading {
-  margin-top: 1rem;
-  padding-top: 0.85rem;
+  margin-top: 1.35rem;
+  padding-top: 1.15rem;
   border-top: 1px solid var(--line);
 }
 
@@ -305,9 +299,9 @@ dl { margin: 0.8rem 0 0; }
 .name-check li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.15rem 0.6rem;
+  gap: 0.2rem 0.7rem;
   align-items: start;
-  padding: 0.4rem 0.25rem;
+  padding: 0.55rem 0.15rem;
   border-bottom: 1px solid #eee8dc;
 }
 
@@ -337,7 +331,7 @@ dl { margin: 0.8rem 0 0; }
 
 .name-check .result,
 .name-check .missed {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 650;
   white-space: nowrap;
 }
