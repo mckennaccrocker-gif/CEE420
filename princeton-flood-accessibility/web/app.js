@@ -10,14 +10,12 @@ const COLORS = {
 };
 
 const LEGEND = [
-  ["accessible_routable", "Accessible. Scenario depth stays below 0.10 m."],
-  ["at_risk_routable", "At risk. Some length is 0.10–0.30 m. Still routable."],
-  ["partial_above_0_30_not_closed", "Partly at or above 0.30 m, but under half the inside length. Still routable."],
-  ["assumed_closed", "Assumed closed. At least half the inside length is at or above 0.30 m. A preliminary rule, not a closure standard."],
-  ["bridge_deck_unmatched", "Purple is an unknown bridge deck. No published elevation was joined. Not a flood depth."],
-  ["bridge_deck_sampled", "Teal is a sampled deck. Depth is max(0, scenario water surface − a published deck elevation)."],
-  ["unmatched_no_channel", "Gray is unmatched, not dry. No channel was found within 500 m. Not called closed."],
-  ["outside_municipality", "Outside the municipality. Not a depth."],
+  ["accessible_routable", "Accessible"],
+  ["at_risk_routable", "At risk"],
+  ["partial_above_0_30_not_closed", "Partly deep but still routed"],
+  ["assumed_closed", "Assumed closed"],
+  ["bridge_deck_unmatched", "Unknown bridge deck"],
+  ["unmatched_no_channel", "Unmatched (not dry)"],
 ];
 
 const STATUS_LABEL = {
@@ -60,14 +58,6 @@ const FEMA_STYLE = {
   minimal: { color: "#c5d0d6", fillColor: "#e7eef2", fillOpacity: 0.18, weight: 0 },
   other: { color: "#243040", fillColor: "#d9e2ea", fillOpacity: 0.35, weight: 0.4 },
 };
-
-const FEMA_LEGEND = [
-  ["floodway", "Floodway. Special flood hazard area."],
-  ["ae", "Zone AE. Special flood hazard area, base flood elevation from the study."],
-  ["a", "Zone A. Special flood hazard area, no published base flood elevation on the polygon."],
-  ["moderate", "Zone X, 0.2% annual chance. Not the special flood hazard area."],
-  ["minimal", "Zone X, minimal hazard. Not a scenario depth."],
-];
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -135,29 +125,6 @@ function drawLegend() {
     row.append(swatch, label);
     root.append(row);
   });
-  if (!fema) return;
-  const heading = document.createElement("p");
-  heading.className = "legend-heading";
-  heading.textContent = "Regulatory. Effective " + (fema.effective_date_label || "date not loaded") + ".";
-  root.append(heading);
-  FEMA_LEGEND.forEach(([key, text]) => {
-    const row = document.createElement("div");
-    row.className = "legend-row";
-    const swatch = document.createElement("span");
-    swatch.className = "swatch area";
-    swatch.style.background = FEMA_STYLE[key].fillColor;
-    const label = document.createElement("span");
-    label.textContent = text;
-    row.append(swatch, label);
-    root.append(row);
-  });
-  const surface = document.createElement("p");
-  surface.className = "hint";
-  const water = fema.regulatory_water_surface;
-  surface.textContent = water
-    ? "Stony Brook cross section M: " + water.value + " " + water.units + " " + water.datum + " regulatory water surface. Not a deck elevation."
-    : "No regulatory water-surface attribute is loaded.";
-  root.append(surface);
 }
 
 function drawMap(boundary) {

@@ -113,13 +113,11 @@ main {
   z-index: 500;
   left: 16px;
   bottom: 22px;
-  max-width: 18.5rem;
-  max-height: 42%;
-  overflow: auto;
-  background: rgba(255, 255, 255, 0.94);
+  width: max-content;
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.75rem 0.85rem;
+  padding: 0.45rem 0.7rem 0.5rem;
 }
 
 #fema-control {
@@ -167,34 +165,21 @@ main {
 
 .report-popup p { margin: 0.35rem 0; }
 
-.legend-heading {
-  margin: 0.55rem 0 0.2rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .legend-row {
   display: grid;
-  grid-template-columns: 1.1rem 1fr;
-  gap: 0.45rem;
-  align-items: start;
-  margin: 0.28rem 0;
+  grid-template-columns: 1.15rem auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.18rem 0;
   font-size: 0.92rem;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .swatch {
-  width: 1.1rem;
-  height: 0.38rem;
-  margin-top: 0.35rem;
+  width: 1.15rem;
+  height: 0.42rem;
   border-radius: 2px;
-}
-
-.swatch.area {
-  height: 0.75rem;
-  margin-top: 0.15rem;
-  border: 1px solid rgba(22, 50, 79, 0.35);
 }
 
 aside {
