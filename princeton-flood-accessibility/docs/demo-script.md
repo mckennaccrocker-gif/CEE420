@@ -12,7 +12,7 @@ One page for a Princeton official. Say only what is below. The figures are the o
 
 **September 2021 news reports.** The checkbox under the flood-zone control is off until you check it. Black dashes then mark Quaker Road, Mercer Road, Stockton Street, South Harrison Street, and Rosedale Road. The dashes are the news reports. They are not a model depth, and they do not replace the green, yellow, orange, or red road color. Click a dash and read the news date. Quaker Road, Stockton Street, South Harrison Street, and Rosedale Road: the scenario did not close the road. Mercer Road: the scenario did not close it at +1.0 m, and it assumed 2 of 14 centerlines closed at +2.0 m. Rosedale Road was reported open again at about 4 p.m. on 2 September 2021. That sentence is not a closure log. South Harrison Street has a wording gap: Patch named South Harrison Street, and Planet Princeton named Harrison Street without the word South.
 
-**Name check.** Point at the side panel. It compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed.
+**Name check.** Point at the side panel. It compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed. Click a name in that list to turn on the news-report dashes, zoom to those centerlines, and read the captured or missed result beside the name.
 
 Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.
 

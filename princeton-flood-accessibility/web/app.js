@@ -40,6 +40,7 @@ let selected = null;
 let roadLayer = null;
 let femaLayer = null;
 let reportsLayer = null;
+let reportFocus = null;
 let observedReports = null;
 let map = null;
 
@@ -523,41 +524,93 @@ function renderNameCheck(record) {
   root.replaceChildren();
   const hint = root.previousElementSibling;
   if (hint && record.label) hint.textContent = record.label;
-  const table = document.createElement("table");
-  table.className = "name-check";
-  const head = document.createElement("tr");
-  ["Road", "+1.0 m", "+2.0 m"].forEach((text) => {
-    const cell = document.createElement("th");
-    cell.textContent = text;
-    head.append(cell);
-  });
-  table.append(head);
+  const list = document.createElement("ul");
+  list.className = "name-check";
+  list.setAttribute("aria-label", "Name check, not a validation");
   (record.rows || []).forEach((row) => {
-    const line = document.createElement("tr");
-    const name = document.createElement("td");
-    name.textContent = row.road;
-    line.append(name, resultCell(row, "plus_1_00"), resultCell(row, "plus_2_00"));
-    table.append(line);
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "name-check-road";
+    button.textContent = row.road;
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => focusReportedRoad(row));
+    const detail = document.createElement("p");
+    detail.className = "hint name-check-detail";
+    detail.hidden = true;
+    detail.textContent = row.detail || "";
+    const marks = document.createElement("div");
+    marks.className = "name-check-marks";
+    marks.append(resultMark(row, "plus_1_00", "+1.0 m"), resultMark(row, "plus_2_00", "+2.0 m"));
+    item.append(button, marks, detail);
+    list.append(item);
   });
-  root.append(table);
+  root.append(list);
   const note = document.createElement("p");
   note.className = "hint";
-  note.textContent = "Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.";
+  note.textContent = "Click a name to turn on the news dashes and zoom to those centerlines. Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.";
   root.append(note);
 }
 
-function resultCell(row, stage) {
-  const cell = document.createElement("td");
+function resultMark(row, stage, label) {
+  const mark = document.createElement("span");
   const result = row[stage];
-  cell.className = result === "captured" ? "result" : "missed";
+  mark.className = result === "captured" ? "result" : "missed";
   if (result === "captured" && row.captured_of) {
-    cell.textContent = "Captured, " + row.captured_of;
+    mark.textContent = label + " Captured, " + row.captured_of;
   } else if (result === "captured") {
-    cell.textContent = "Captured";
+    mark.textContent = label + " Captured";
   } else {
-    cell.textContent = "Missed";
+    mark.textContent = label + " Missed";
   }
-  return cell;
+  return mark;
+}
+
+function focusReportedRoad(row) {
+  const root = document.getElementById("name-check");
+  if (root) {
+    root.querySelectorAll(".name-check-road").forEach((button) => {
+      const on = button.textContent === row.road;
+      button.setAttribute("aria-pressed", on ? "true" : "false");
+      const item = button.parentElement;
+      if (!item) return;
+      item.classList.toggle("selected", on);
+      const detail = item.querySelector(".name-check-detail");
+      if (detail) detail.hidden = !on;
+    });
+  }
+  const toggle = document.getElementById("reports-toggle");
+  if (toggle) toggle.checked = true;
+  setReportsVisible(true);
+  if (!map || !reportsLayer || !observedReports) return;
+  if (reportFocus) {
+    reportsLayer.removeLayer(reportFocus);
+    reportFocus = null;
+  }
+  const features = (observedReports.features || []).filter(
+    (feature) => feature.properties && feature.properties.title === row.road
+  );
+  if (!features.length) return;
+  reportFocus = L.geoJSON(
+    { type: "FeatureCollection", features: features },
+    {
+      pane: "reports",
+      interactive: false,
+      style: () => ({
+        color: "#111111",
+        weight: 7,
+        opacity: 0.95,
+        dashArray: "8 5",
+        lineCap: "butt",
+      }),
+    }
+  );
+  reportsLayer.addLayer(reportFocus);
+  reportsLayer.bringToFront();
+  const bounds = reportFocus.getBounds();
+  if (bounds.isValid()) {
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 16 });
+  }
 }
 
 function renderIda(record) {

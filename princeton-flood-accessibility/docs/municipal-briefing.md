@@ -68,7 +68,7 @@ Of the other named closures in the same news check: Mercer Road has 0 streets re
 
 ## Name check, not a validation
 
-The side panel compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed.
+The side panel compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed. Click a name in that list to turn on the news-report dashes, zoom to those centerlines, and read the captured or missed result beside the name.
 
 Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.
 
