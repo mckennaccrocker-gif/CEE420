@@ -216,6 +216,12 @@ function nearestStageId(raw) {
   return best.id;
 }
 
+function wetCaption(row) {
+  const length = Math.round(row.wet_piece_length_m);
+  const text = String(length).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return "chosen rise, not a forecast. " + text + " m at or above 0.30 m";
+}
+
 function riseText(metres) {
   const quarters = Math.round(Number(metres) * 4) / 4;
   const text = quarters.toFixed(2).replace(/0$/, "").replace(/\.0$/, ".0");
@@ -230,10 +236,13 @@ function setStage(next) {
   if (slider) {
     slider.value = String(row.stage_above_channel_dem_m);
     slider.setAttribute("aria-valuenow", String(row.stage_above_channel_dem_m));
-    slider.setAttribute("aria-valuetext", riseText(row.stage_above_channel_dem_m));
   }
   const readout = document.getElementById("stage-readout");
   if (readout) readout.textContent = riseText(row.stage_above_channel_dem_m);
+  const caption = wetCaption(row);
+  const captionNode = document.getElementById("stage-caption");
+  if (captionNode) captionNode.textContent = caption;
+  if (slider) slider.setAttribute("aria-valuetext", riseText(row.stage_above_channel_dem_m) + ". " + caption);
   highlightNameCheck();
   if (roadLayer) {
     roadLayer.eachLayer((layer) => {
