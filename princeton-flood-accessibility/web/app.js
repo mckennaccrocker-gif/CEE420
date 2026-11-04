@@ -189,7 +189,8 @@ function drawMap(boundary) {
       layer.on("click", () => selectLayer(layer));
     },
   }).addTo(map);
-  map.fitBounds(roadLayer.getBounds(), { padding: [20, 20] });
+  map.fitBounds(roadLayer.getBounds(), { padding: [28, 28] });
+  requestAnimationFrame(() => map.invalidateSize());
 }
 
 function styleFor(status, deckStatus) {
@@ -227,40 +228,52 @@ function wetCaption(row) {
 
 function scenarioSummaryLines(row) {
   const facts = [
-    riseText(row.stage_above_channel_dem_m) + " chosen rise",
-    groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m",
-    row.n_assumed_closed + " assumed-closed centerlines",
+    { label: "Chosen rise", value: riseText(row.stage_above_channel_dem_m) },
+    { label: "Wet centerline at or above 0.30 m", value: groupedMetres(row.wet_piece_length_m) + " m" },
+    { label: "Assumed closed", value: row.n_assumed_closed + " centerlines", alert: true },
   ];
   const roads = (nameCheck && nameCheck.rows || []).map((road) => {
     const step = (road.steps || []).find((item) => item.id === row.id);
     const captured = Boolean(step && step.result === "captured");
     let result = "missed";
     if (captured) result = step.captured_of ? "captured, " + step.captured_of : "captured";
-    return { text: road.road + " " + result, captured: captured };
+    return { road: road.road, result: result, captured: captured };
   });
   return { facts: facts, roads: roads };
 }
 
 function showScenarioSummary(row) {
   const node = document.getElementById("scenario-summary");
+  const roadNode = document.getElementById("summary-roads");
   if (!node || !nameCheck) return;
   const lines = scenarioSummaryLines(row);
-  const facts = document.createElement("div");
-  facts.className = "summary-facts";
-  lines.facts.forEach((text) => {
+  node.replaceChildren();
+  lines.facts.forEach((item) => {
     const line = document.createElement("p");
-    line.textContent = text;
-    facts.append(line);
+    line.className = item.alert ? "summary-fact alert" : "summary-fact";
+    const label = document.createElement("span");
+    label.className = "fact-label";
+    label.textContent = item.label;
+    const value = document.createElement("span");
+    value.className = "fact-value";
+    value.textContent = item.value;
+    line.append(label, value);
+    node.append(line);
   });
-  const roads = document.createElement("ul");
-  roads.className = "summary-roads";
+  if (!roadNode) return;
+  roadNode.replaceChildren();
   lines.roads.forEach((item) => {
     const line = document.createElement("li");
     line.className = item.captured ? "captured" : "missed";
-    line.textContent = item.text;
-    roads.append(line);
+    const name = document.createElement("span");
+    name.className = "road-name";
+    name.textContent = item.road;
+    const result = document.createElement("span");
+    result.className = "road-result";
+    result.textContent = item.result;
+    line.append(name, result);
+    roadNode.append(line);
   });
-  node.replaceChildren(facts, roads);
 }
 
 function riseText(metres) {
