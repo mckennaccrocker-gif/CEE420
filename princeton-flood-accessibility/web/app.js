@@ -69,8 +69,9 @@ const FEMA_LEGEND = [
   ["minimal", "Zone X, minimal hazard. Not a scenario depth."],
 ];
 
-document.getElementById("stage-1").addEventListener("click", () => setStage("1.00"));
-document.getElementById("stage-2").addEventListener("click", () => setStage("2.00"));
+document.getElementById("stage-slider").addEventListener("input", (event) => {
+  setStage(nearestStageId(event.target.value));
+});
 document.getElementById("search").addEventListener("submit", (event) => {
   event.preventDefault();
   findRoad(document.getElementById("road-query").value);
@@ -100,7 +101,7 @@ Promise.all([
   fema = femaPayload;
   femaZones = zonePayload;
   observedReports = reportPayload;
-  document.getElementById("banner").textContent = "Not Hurricane Ida. Two assumptions, not hours.";
+  document.getElementById("banner").textContent = "Not Hurricane Ida. Each mark is a chosen rise, not a forecast.";
   const scenarioNote = document.getElementById("scenario-note");
   if (scenarioNote) scenarioNote.textContent = summary.banner;
   const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
@@ -233,10 +234,40 @@ function styleFor(status, deckStatus) {
   };
 }
 
+function nearestStageId(raw) {
+  if (!summary || !summary.stages || !summary.stages.length) return stage;
+  const value = Number(raw);
+  let best = summary.stages[0];
+  let gap = Infinity;
+  summary.stages.forEach((item) => {
+    const next = Math.abs(item.stage_above_channel_dem_m - value);
+    if (next < gap) {
+      gap = next;
+      best = item;
+    }
+  });
+  return best.id;
+}
+
+function riseText(metres) {
+  const quarters = Math.round(Number(metres) * 4) / 4;
+  const text = quarters.toFixed(2).replace(/0$/, "").replace(/\.0$/, ".0");
+  return "+" + text + " m";
+}
+
 function setStage(next) {
-  stage = next;
-  document.getElementById("stage-1").setAttribute("aria-pressed", next === "1.00" ? "true" : "false");
-  document.getElementById("stage-2").setAttribute("aria-pressed", next === "2.00" ? "true" : "false");
+  const row = summary && summary.stages.find((item) => item.id === next);
+  if (!row) return;
+  stage = row.id;
+  const slider = document.getElementById("stage-slider");
+  if (slider) {
+    slider.value = String(row.stage_above_channel_dem_m);
+    slider.setAttribute("aria-valuenow", String(row.stage_above_channel_dem_m));
+    slider.setAttribute("aria-valuetext", riseText(row.stage_above_channel_dem_m));
+  }
+  const readout = document.getElementById("stage-readout");
+  if (readout) readout.textContent = riseText(row.stage_above_channel_dem_m);
+  highlightNameCheck();
   if (roadLayer) {
     roadLayer.eachLayer((layer) => {
       const status = layer.feature.properties["status_" + stageKey(stage)];
@@ -268,9 +299,12 @@ function renderStats() {
   addStat(stats, "Largest component", metres(row.largest_component_length_m) + " (" + row.largest_component_n_nodes + " nodes)");
   const hospital = document.getElementById("hospital");
   const showing = row.hospital_disconnected ? "disconnected from the high school, fire station, police, and municipal building" : "still connected to those destinations";
-  const only = summary.hospital.disconnects_only_at_2_00
-    ? "The hospital routes disconnect only at the +2.0 m assumption. "
-    : "";
+  let only = "";
+  if (summary.hospital.disconnects_only_at_2_00) {
+    only = "The hospital routes disconnect only at the +2.0 m rise. ";
+  } else if (summary.hospital.disconnected_rises_m && summary.hospital.disconnected_rises_m.length) {
+    only = "The hospital routes are disconnected at " + summary.hospital.disconnected_rises_m.map(riseText).join(", ") + ". ";
+  }
   hospital.textContent = only + "Showing " + row.label + ": Princeton House Behavioral Health is " + showing + ".";
   const aadt = document.getElementById("aadt");
   aadt.textContent = "AADT: " + row.aadt_nearest_edge_assumed_closed + " of " + row.aadt_records + " station-records have a nearest edge assumed closed. " + summary.aadt_note;
@@ -297,7 +331,7 @@ function metric(title, stages, value, max, label) {
     const row = document.createElement("div");
     row.className = "bar-row";
     const name = document.createElement("span");
-    name.textContent = "+" + item.stage_above_channel_dem_m.toFixed(1) + " m";
+    name.textContent = riseText(item.stage_above_channel_dem_m);
     const track = document.createElement("div");
     track.className = "track";
     const fill = document.createElement("div");
@@ -555,7 +589,9 @@ function renderNameCheck(record) {
     detail.textContent = row.detail || "";
     const marks = document.createElement("div");
     marks.className = "name-check-marks";
-    marks.append(resultMark(row, "plus_1_00", "+1.0 m"), resultMark(row, "plus_2_00", "+2.0 m"));
+    (row.steps || []).forEach((step) => {
+      marks.append(resultMark(step.result, riseText(step.stage_m), step.captured_of, step.id));
+    });
     item.append(button, marks, detail);
     list.append(item);
   });
@@ -566,18 +602,24 @@ function renderNameCheck(record) {
   root.append(note);
 }
 
-function resultMark(row, stage, label) {
+function resultMark(result, label, capturedOf, stageId) {
   const mark = document.createElement("span");
-  const result = row[stage];
   mark.className = result === "captured" ? "result" : "missed";
-  if (result === "captured" && row.captured_of) {
-    mark.textContent = label + " Captured, " + row.captured_of;
+  mark.dataset.stage = stageId;
+  if (result === "captured" && capturedOf) {
+    mark.textContent = label + " Captured, " + capturedOf;
   } else if (result === "captured") {
     mark.textContent = label + " Captured";
   } else {
     mark.textContent = label + " Missed";
   }
   return mark;
+}
+
+function highlightNameCheck() {
+  document.querySelectorAll(".name-check-marks span").forEach((mark) => {
+    mark.classList.toggle("on", mark.dataset.stage === stage);
+  });
 }
 
 function focusReportedRoad(row) {

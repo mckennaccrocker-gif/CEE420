@@ -525,7 +525,12 @@ def _stats(
         "hurricane_ida_depth": False,
         "hurricane_ida_simulation": False,
         "event_time": None,
-        "time_note": "The two stages are separate assumptions. They were not interpolated and they are not hours.",
+        "interpolated": False,
+        "enso_scales_depths": False,
+        "time_note": (
+            "Each configured rise is a separate channel-relative computation. "
+            "The rises were not interpolated, they are not hours, and they are not a forecast."
+        ),
         "computed_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "not_a_closure_standard": True,
         "thresholds_m": {

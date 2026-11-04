@@ -1,6 +1,6 @@
 """Princeton road-accessibility dashboard.
 
-Serves the two saved scenario assumptions. It does not interpolate them and
+Serves the saved channel-relative rises. It does not interpolate them and
 it does not scale depths by ENSO.
 
 Run from princeton-flood-accessibility:
@@ -85,7 +85,9 @@ def build_context(settings: dict) -> dict:
         "type": "FeatureCollection",
         "features": [],
     }
-    roads = build_road_collection(resolve(settings, "accessibility_geojson"), decks, fema)
+    accessibility_path = resolve(settings, "accessibility_geojson")
+    roads = build_road_collection(accessibility_path, decks, fema)
+    accessibility = json.loads(accessibility_path.read_text(encoding="utf-8"))
     fema_public = dict(fema)
     fema_public.pop("centerlines", None)
     return {
@@ -98,7 +100,7 @@ def build_context(settings: dict) -> dict:
         "fema": fema_public,
         "fema_zones": fema_zones,
         "observed_reports": build_observed_reports(roads),
-        "name_check": build_name_check(),
+        "name_check": build_name_check(accessibility["features"]),
     }
 
 
@@ -175,7 +177,7 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
 def serve(host: str, port: int, context: dict) -> None:
     server = ThreadingHTTPServer((host, port), make_handler(context))
     print(f"Princeton scenario dashboard at http://{host}:{port}/")
-    print("Not Hurricane Ida. The two stages are assumptions, not hours.")
+    print("Not Hurricane Ida. Each rise is computed on its own, not a forecast.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

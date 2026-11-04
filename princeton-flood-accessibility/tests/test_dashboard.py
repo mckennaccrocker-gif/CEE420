@@ -168,19 +168,30 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert response.status == 200
         assert body["hurricane_ida_depth"] is False
         assert body["interpolated"] is False
+        assert [stage["id"] for stage in body["stages"]] == [
+            "0.00", "0.25", "0.50", "0.75", "1.00", "1.25", "1.50", "1.75", "2.00",
+        ]
+        wet = {stage["id"]: stage["wet_piece_length_m"] for stage in body["stages"]}
+        assert wet["0.50"] == pytest.approx(4775.748, abs=0.05)
+        assert wet["1.00"] == pytest.approx(8306.970, abs=0.05)
+        assert wet["1.50"] == pytest.approx(13202.237, abs=0.05)
+        assert wet["2.00"] == pytest.approx(19159.784, abs=0.05)
         connection.request("GET", "/")
         page = connection.getresponse()
         html = page.read().decode("utf-8")
         assert page.status == 200
         assert "Road accessibility" in html
-        assert 'id="stage-1"' in html
+        assert 'id="stage-slider"' in html
+        assert 'step="0.25"' in html
+        assert "chosen rise above the channel, not a forecast." in html
         assert 'id="fema-toggle"' in html
         assert "Regulatory flood zones" in html
         assert 'id="reports-toggle"' in html
         assert 'id="reports-toggle" type="checkbox" checked' not in html
         assert 'id="enso-panel"' in html
-        assert 'type="range"' not in html
+        assert html.count('type="range"') == 1
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
+        assert "nearestStageId" in script
         assert "not a threshold on the weekly anomaly" in script
         assert "does not set Princeton road depths" in script
         assert "last saved observation" in script

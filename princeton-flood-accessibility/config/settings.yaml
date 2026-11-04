@@ -54,7 +54,7 @@ thresholds:
 # Stage 3 uses the same depth cuts as labels for routing status.
 # A centerline is removed only when closure_piece_fraction of its inside
 # length is at or above the upper cut. That rule is still not a closure
-# standard. The two scenario stages are analyzed separately.
+# standard. Each configured rise is analyzed separately. Rises are not interpolated.
 accessibility:
   closure_piece_fraction: 0.50
   aadt_max_snap_m: 30
@@ -68,9 +68,10 @@ accessibility:
 scenario:
   product: hypothetical_3dep_channel_relative_bathtub
   not_a_hurricane_ida_simulation: true
-  # Metres added to the DEM elevation at the nearest mapped channel cell.
-  # The two values are separate assumptions. They are not a time series.
-  stage_above_channel_dem_m: [1.0, 2.0]
+  # Metres added to the DEM elevation at the controlling channel cell.
+  # Each value is its own computation. The values are not interpolated,
+  # they are not a time series, and they are not a forecast.
+  stage_above_channel_dem_m: [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
   primary_stage_m: 2.0
   max_channel_distance_m: 500
   # A channel cell higher than the road by more than this is treated as

@@ -3,11 +3,20 @@
   "hurricane_ida_simulation": false,
   "observed_flood_depths_used": false,
   "event_time": null,
-  "time_note": "The configured stages are separate assumptions about height above the channel DEM. They are not hours, they were not interpolated, and they are not the time of Hurricane Ida.",
-  "computed_at_utc": "2026-11-02T22:36:09Z",
+  "interpolated": false,
+  "enso_scales_depths": false,
+  "time_note": "Each configured rise is a separate channel-relative computation. The rises were not interpolated, they are not hours, they are not a forecast, and they are not the time of Hurricane Ida.",
+  "computed_at_utc": "2026-11-04T19:25:43Z",
   "assumptions": {
     "stage_above_channel_dem_m": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
       1.0,
+      1.25,
+      1.5,
+      1.75,
       2.0
     ],
     "primary_stage_m": 2.0,
@@ -49,6 +58,110 @@
     }
   },
   "stages": {
+    "0.00": {
+      "stage_above_channel_dem_m": 0.0,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.01285219842135641,
+      "max_of_centerline_max_depth_m": 1.9923515319824219,
+      "piece_length_m_below_lower_threshold": 186303.02247159838,
+      "piece_length_m_between_thresholds": 698.6953625490814,
+      "piece_length_m_at_or_above_upper_threshold": 2255.6511402418528,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 53,
+          "length_m_inside": 16372.425593227466
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 975,
+          "length_m_inside": 177315.19364789827
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 23,
+          "length_m_inside": 6199.120585751043
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "0.25": {
+      "stage_above_channel_dem_m": 0.25,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.01863229051420827,
+      "max_of_centerline_max_depth_m": 2.242351531982422,
+      "piece_length_m_below_lower_threshold": 184714.13223496167,
+      "piece_length_m_between_thresholds": 1432.6209047024008,
+      "piece_length_m_at_or_above_upper_threshold": 3110.6158347252576,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 81,
+          "length_m_inside": 24148.969184826146
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 946,
+          "length_m_inside": 168002.34250534352
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 24,
+          "length_m_inside": 7735.428136707109
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "0.50": {
+      "stage_above_channel_dem_m": 0.5,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.026439218869031278,
+      "max_of_centerline_max_depth_m": 2.492351531982422,
+      "piece_length_m_below_lower_threshold": 183166.9950049405,
+      "piece_length_m_between_thresholds": 1314.6259179418598,
+      "piece_length_m_at_or_above_upper_threshold": 4775.748051506947,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 107,
+          "length_m_inside": 32295.376683988026
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 926,
+          "length_m_inside": 163032.55575130816
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 18,
+          "length_m_inside": 4558.807391580593
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "0.75": {
+      "stage_above_channel_dem_m": 0.75,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.03672072947678344,
+      "max_of_centerline_max_depth_m": 2.742351531982422,
+      "piece_length_m_below_lower_threshold": 181255.69981174418,
+      "piece_length_m_between_thresholds": 1493.712720356797,
+      "piece_length_m_at_or_above_upper_threshold": 6507.95644228833,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 128,
+          "length_m_inside": 37263.00215085179
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 910,
+          "length_m_inside": 160709.42457330402
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 13,
+          "length_m_inside": 1914.3131027209465
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
     "1.00": {
       "stage_above_channel_dem_m": 1.0,
       "n_centerlines_with_depth": 1051,
@@ -70,6 +183,84 @@
         "between_0_10m_and_0_30m_preliminary": {
           "n_centerlines": 16,
           "length_m_inside": 3844.235738084064
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "1.25": {
+      "stage_above_channel_dem_m": 1.25,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.06608559126110919,
+      "max_of_centerline_max_depth_m": 3.242351531982422,
+      "piece_length_m_below_lower_threshold": 176739.51699372538,
+      "piece_length_m_between_thresholds": 1982.9120435691827,
+      "piece_length_m_at_or_above_upper_threshold": 10534.939937094758,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 162,
+          "length_m_inside": 44028.46664381047
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 874,
+          "length_m_inside": 152664.53174898925
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 15,
+          "length_m_inside": 3193.7414340770474
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "1.50": {
+      "stage_above_channel_dem_m": 1.5,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.08633837871798002,
+      "max_of_centerline_max_depth_m": 3.492351531982422,
+      "piece_length_m_below_lower_threshold": 173599.6212074505,
+      "piece_length_m_between_thresholds": 2455.5105576096494,
+      "piece_length_m_at_or_above_upper_threshold": 13202.237209329178,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 189,
+          "length_m_inside": 50182.675917551045
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 837,
+          "length_m_inside": 143293.46258015005
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 25,
+          "length_m_inside": 6410.601329175716
+        }
+      },
+      "label_uses": "maximum sampled depth on the centerline",
+      "not_a_clock_time": true
+    },
+    "1.75": {
+      "stage_above_channel_dem_m": 1.75,
+      "n_centerlines_with_depth": 1051,
+      "sampled_length_m": 189257.36897438933,
+      "length_weighted_mean_depth_m": 0.1104987097183587,
+      "max_of_centerline_max_depth_m": 3.742351531982422,
+      "piece_length_m_below_lower_threshold": 170712.44638689855,
+      "piece_length_m_between_thresholds": 2226.282658578183,
+      "piece_length_m_at_or_above_upper_threshold": 16318.639928912584,
+      "centerlines_by_max_label": {
+        "at_or_above_0_30m_preliminary": {
+          "n_centerlines": 220,
+          "length_m_inside": 57706.11920011445
+        },
+        "below_0_10m_preliminary": {
+          "n_centerlines": 824,
+          "length_m_inside": 140877.99956511662
+        },
+        "between_0_10m_and_0_30m_preliminary": {
+          "n_centerlines": 7,
+          "length_m_inside": 1302.6210616457045
         }
       },
       "label_uses": "maximum sampled depth on the centerline",

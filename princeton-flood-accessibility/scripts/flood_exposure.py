@@ -447,10 +447,12 @@ def _stats(
         "hurricane_ida_simulation": False,
         "observed_flood_depths_used": False,
         "event_time": None,
+        "interpolated": False,
+        "enso_scales_depths": False,
         "time_note": (
-            "The configured stages are separate assumptions about height above the "
-            "channel DEM. They are not hours, they were not interpolated, and they "
-            "are not the time of Hurricane Ida."
+            "Each configured rise is a separate channel-relative computation. "
+            "The rises were not interpolated, they are not hours, they are not a forecast, "
+            "and they are not the time of Hurricane Ida."
         ),
         "computed_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "assumptions": {

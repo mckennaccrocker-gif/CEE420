@@ -152,11 +152,14 @@ def test_saved_run_keeps_bridges_routable_and_is_not_ida() -> None:
     table = gpd.read_file(root / "data" / "processed" / "princeton_accessibility.gpkg", layer="centerline_accessibility")
     bridges = table["exposure_status"] == "bridge_deck_unmatched"
     assert int(bridges.sum()) == 20
-    assert not bool(table.loc[bridges, "assumed_closed_stage_1_00"].any())
-    assert not bool(table.loc[bridges, "assumed_closed_stage_2_00"].any())
+    closed_columns = [column for column in table.columns if column.startswith("assumed_closed_stage_")]
+    assert len(closed_columns) == 9
+    for column in closed_columns:
+        assert not bool(table.loc[bridges, column].fillna(False).any())
     unmatched = table["exposure_status"] == "outside_channel_buffer"
-    assert set(table.loc[unmatched, "routing_status_stage_1_00"]) == {"unmatched_no_channel"}
-    assert set(table.loc[unmatched, "routing_status_stage_2_00"]) == {"unmatched_no_channel"}
+    status_columns = [column for column in table.columns if column.startswith("routing_status_stage_")]
+    for column in status_columns:
+        assert set(table.loc[unmatched, column]) == {"unmatched_no_channel"}
 
 
 def test_travel_time_needs_an_explicit_speed_and_a_gap_is_not_infinite() -> None:

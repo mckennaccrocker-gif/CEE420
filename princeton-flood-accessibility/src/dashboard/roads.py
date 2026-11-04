@@ -29,11 +29,7 @@ def build_road_collection(
         deck = decks.get(props.get("centerline_id"))
         fema_row = fema_rows.get(props.get("centerline_id"))
         is_bridge = bool(props.get("is_bridge"))
-        features.append(
-            {
-                "type": "Feature",
-                "geometry": _round_geometry(feature["geometry"]),
-                "properties": {
+        slim = {
                     "centerline_id": props.get("centerline_id"),
                     "name": props.get("name") or None,
                     "road_class": props.get("road_class"),
@@ -42,13 +38,18 @@ def build_road_collection(
                     "length_m_inside": _round(props.get("length_m_inside"), 1),
                     "hurricane_ida_depth": False,
                     "event_time": None,
-                    "status_1_00": props.get("routing_status_stage_1_00"),
-                    "status_2_00": props.get("routing_status_stage_2_00"),
-                    "depth_max_m_1_00": _round(props.get("depth_max_m_stage_1_00"), 3),
-                    "depth_max_m_2_00": _round(props.get("depth_max_m_stage_2_00"), 3),
-                    "wet_m_1_00": _round(props.get("length_m_at_or_above_0_30_stage_1_00"), 1),
-                    "wet_m_2_00": _round(props.get("length_m_at_or_above_0_30_stage_2_00"), 1),
                     "deck_status": _deck_status(is_bridge, deck),
+        }
+        for slug in _stage_slugs(props):
+            slim[f"status_{slug}"] = props.get(f"routing_status_stage_{slug}")
+            slim[f"depth_max_m_{slug}"] = _round(props.get(f"depth_max_m_stage_{slug}"), 3)
+            slim[f"wet_m_{slug}"] = _round(props.get(f"length_m_at_or_above_0_30_stage_{slug}"), 1)
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": _round_geometry(feature["geometry"]),
+                "properties": {
+                    **slim,
                     "deck_elevation_m": None if deck is None else deck.get("deck_elevation_m"),
                     "deck_note": None if deck is None else deck.get("note"),
                     "deck_structures": _structure_labels(deck),
@@ -58,6 +59,22 @@ def build_road_collection(
             }
         )
     return {"type": "FeatureCollection", "features": features}
+
+
+def _stage_slugs(props: dict[str, Any]) -> list[str]:
+    """Column suffixes already computed for this centerline, low rise first."""
+    slugs = [
+        key.removeprefix("routing_status_stage_")
+        for key in props
+        if key.startswith("routing_status_stage_")
+    ]
+    if not slugs:
+        slugs = [
+            key.removeprefix("depth_max_m_stage_")
+            for key in props
+            if key.startswith("depth_max_m_stage_")
+        ]
+    return sorted(slugs, key=lambda slug: float(slug.replace("_", ".")))
 
 
 def _deck_status(is_bridge: bool, deck: dict[str, Any] | None) -> str | None:

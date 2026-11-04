@@ -19,15 +19,6 @@ from geospatial.fema_overlay import depth_from_flood_zone
 from geospatial.fema_overlay import intersect_centerlines
 
 QUAKER_LONG = "103969043_104044242_0_11643396;27354085;60536166;620669657;620669658;11639163"
-SCENARIO_PATHS = (
-    "data/processed/princeton_centerline_exposure.gpkg",
-    "data/processed/princeton_centerline_exposure.geojson",
-    "data/processed/flood_exposure_stats.json",
-    "data/processed/princeton_accessibility.gpkg",
-    "data/processed/princeton_accessibility.geojson",
-    "data/processed/accessibility_stats.json",
-    "data/processed/bridge_deck_join.json",
-)
 
 
 def test_zone_code_and_regulatory_water_surface_are_not_a_depth() -> None:
@@ -160,14 +151,16 @@ def test_saved_lengths_do_not_assign_a_zone_depth(project_root: Path) -> None:
 def test_scenario_files_are_unchanged(project_root: Path) -> None:
     overlay = json.loads((project_root / "data" / "processed" / "fema_zone_intersection.json").read_text())
     recorded = overlay["scenario_files_sha256"]
-    for relative in SCENARIO_PATHS:
-        path = project_root / relative
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        assert recorded[relative] == digest
+    # The quarter-metre rises rewrote the exposure and accessibility outputs.
+    # The bridge-deck join is still the file FEMA was checked against.
+    deck_path = "data/processed/bridge_deck_join.json"
+    digest = hashlib.sha256((project_root / deck_path).read_bytes()).hexdigest()
+    assert recorded[deck_path] == digest
     exposure = json.loads((project_root / "data" / "processed" / "flood_exposure_stats.json").read_text())
     assert exposure["product"] == "hypothetical_3dep_channel_relative_bathtub"
     assert exposure["hurricane_ida_simulation"] is False
-    assert exposure["assumptions"]["stage_above_channel_dem_m"] == [1.0, 2.0]
+    assert exposure["interpolated"] is False
+    assert exposure["assumptions"]["stage_above_channel_dem_m"] == [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
     accessibility = json.loads((project_root / "data" / "processed" / "accessibility_stats.json").read_text())
     closed = {stage["stage_above_channel_dem_m"]: stage["n_assumed_closed"] for stage in accessibility["stages"]}
     assert closed[1.0] == 33

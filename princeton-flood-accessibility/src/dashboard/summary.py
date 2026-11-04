@@ -1,6 +1,7 @@
 """Side-panel numbers from the saved accessibility stats.
 
-The two stages stay separate. Nothing here interpolates them.
+Each rise is a saved channel-relative computation. Nothing here interpolates
+a depth between rises or scales a depth by ENSO.
 """
 
 from __future__ import annotations
@@ -41,8 +42,11 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
                 "aadt_nearest_edge_assumed_closed": aadt["n_station_records_nearest_edge_assumed_closed"],
             }
         )
-    low = hospital_by_stage.get("1.00", {})
-    high = hospital_by_stage.get("2.00", {})
+    disconnected = [
+        item["stage_above_channel_dem_m"]
+        for item in stages
+        if item["hospital_disconnected"]
+    ]
     return {
         "product": "scenario_accessibility_dashboard",
         "depth_product": stats.get("depth_product"),
@@ -51,7 +55,10 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
         "interpolated": False,
         "enso_scales_depths": False,
         "not_a_closure_standard": True,
-        "time_note": "The two stages are separate assumptions. They were not interpolated and they are not hours.",
+        "time_note": (
+            "Each slider mark is a saved channel-relative rise. "
+            "The marks were not interpolated, they are not hours, and they are not a forecast."
+        ),
         "thresholds_m": stats["thresholds_m"],
         "closure_piece_fraction": stats["closure_piece_fraction"],
         "network_length_m_inside": stats["stages"][0]["length_m_inside"],
@@ -60,12 +67,14 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
         "banner": (
             "Not Hurricane Ida. Depths are a hypothetical 3DEP channel-relative scenario. "
             "0.10 m, 0.30 m, and the 0.50 length fraction are preliminary assumptions, not closure standards. "
-            "The +1.0 m and +2.0 m cases are two assumptions, not hours."
+            "Each slider mark is its own rise above the channel. The marks were not interpolated, "
+            "they are not a forecast, and ENSO does not scale them."
         ),
         "stages": stages,
         "hospital": {
             "name": "Princeton House Behavioral Health",
-            "disconnects_only_at_2_00": bool(high.get("disconnected")) and not bool(low.get("disconnected")),
+            "disconnects_only_at_2_00": disconnected == [2.0],
+            "disconnected_rises_m": disconnected,
             "by_stage": hospital_by_stage,
         },
         "aadt_note": (

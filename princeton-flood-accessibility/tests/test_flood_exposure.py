@@ -106,6 +106,41 @@ def test_uphill_channel_is_not_used_as_a_water_surface() -> None:
     assert depth_from_elevations(20.0, elevation, 2.0) == pytest.approx(3.0)
 
 
+def test_quarter_metre_rise_is_not_interpolated() -> None:
+    # The zero floor makes +0.50 m unequal to the average of +0.25 m and +0.75 m.
+    result = summarize_pieces(
+        is_bridge=False,
+        is_tunnel=False,
+        piece_length_m=[10.0],
+        road_elevation_m=[10.4],
+        channel_elevation_m=[10.0],
+        channel_distance_m=[12.0],
+        max_channel_distance_m=500.0,
+        stages_m=[0.25, 0.5, 0.75],
+        thresholds_m=THRESHOLDS,
+    )
+    assert result["depth_max_m_stage_0_25"] == pytest.approx(0.0)
+    assert result["depth_max_m_stage_0_50"] == pytest.approx(0.1)
+    assert result["depth_max_m_stage_0_75"] == pytest.approx(0.35)
+    blended = (result["depth_max_m_stage_0_25"] + result["depth_max_m_stage_0_75"]) / 2
+    assert result["depth_max_m_stage_0_50"] != pytest.approx(blended)
+    bridge = summarize_pieces(
+        is_bridge=True,
+        is_tunnel=False,
+        piece_length_m=[10.0],
+        road_elevation_m=[1.0],
+        channel_elevation_m=[1.0],
+        channel_distance_m=[1.0],
+        max_channel_distance_m=500.0,
+        stages_m=[0.0, 0.25, 1.0, 2.0],
+        thresholds_m=THRESHOLDS,
+    )
+    assert bridge["exposure_status"] == "bridge_deck_unmatched"
+    assert bridge["hurricane_ida_depth"] is False
+    for slug in ("0_00", "0_25", "1_00", "2_00"):
+        assert bridge[f"depth_max_m_stage_{slug}"] is None
+
+
 def test_valid_pieces_are_length_weighted_and_nodata_is_dropped() -> None:
     # 10 m of road at elevation 10 (depth 0 at stage 1, depth 1 at stage 2)
     # and 30 m at elevation 8 (depth 2 at stage 1). One nodata piece of 100 m
@@ -153,6 +188,13 @@ def test_saved_scenario_outputs(project_root, boundary) -> None:
     assert stats["observed_flood_depths_used"] is False
     assert stats["event_time"] is None
     assert stats["product"] == SCENARIO_PRODUCT
+    assert stats["interpolated"] is False
+    assert stats["enso_scales_depths"] is False
+    assert stats["assumptions"]["stage_above_channel_dem_m"] == [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+    assert stats["stages"]["0.50"]["piece_length_m_at_or_above_upper_threshold"] > 0
+    assert stats["stages"]["1.00"]["piece_length_m_at_or_above_upper_threshold"] == pytest.approx(8306.969762939372, abs=0.05)
+    assert stats["stages"]["1.50"]["piece_length_m_at_or_above_upper_threshold"] > stats["stages"]["1.00"]["piece_length_m_at_or_above_upper_threshold"]
+    assert stats["stages"]["2.00"]["piece_length_m_at_or_above_upper_threshold"] == pytest.approx(19159.783948901604, abs=0.05)
     assert stats["thresholds"]["network_disruption_analysis"] is False
     assert stats["thresholds"]["not_closure_standards"] is True
     assert stats["high_water_marks"]["n_inside_boundary"] == 0
@@ -188,7 +230,10 @@ def test_saved_scenario_outputs(project_root, boundary) -> None:
     bridges = exposure[exposure["is_bridge"] == True]  # noqa: E712
     assert len(bridges) == stats["bridges_not_sampled"]["n_centerlines"]
     assert (bridges["exposure_status"] == "bridge_deck_unmatched").all()
-    assert bridges["depth_max_m_stage_2_00"].isna().all()
+    depth_columns = [column for column in bridges.columns if column.startswith("depth_max_m_stage_")]
+    assert len(depth_columns) == 9
+    for column in depth_columns:
+        assert bridges[column].isna().all()
     assert bridges["depth_mean_m_stage_1_00"].isna().all()
     # Unmatched decks are not filed under the "below 0.10 m" label.
     assert bridges["illustrative_label_stage_2_00"].isna().all()

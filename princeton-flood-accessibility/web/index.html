@@ -26,11 +26,11 @@
       <div id="legend"></div>
     </section>
     <aside>
-      <div class="switch" role="group" aria-label="Scenario assumption">
-        <button type="button" id="stage-1" data-stage="1.00" aria-pressed="true">+1.0 m</button>
-        <button type="button" id="stage-2" data-stage="2.00" aria-pressed="false">+2.0 m</button>
+      <div class="rise">
+        <label for="stage-slider">chosen rise above the channel, not a forecast.</label>
+        <input id="stage-slider" type="range" min="0" max="2" step="0.25" value="1" aria-valuemin="0" aria-valuemax="2" aria-valuenow="1" aria-valuetext="+1.0 m">
+        <p id="stage-readout" class="rise-value">+1.0 m</p>
       </div>
-      <p class="hint">Two assumptions. Not hours.</p>
       <details class="fold">
         <summary>Name check</summary>
         <div class="fold-body">

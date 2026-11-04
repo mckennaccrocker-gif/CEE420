@@ -38,12 +38,6 @@ GRAPH_AND_SCENARIO = (
     "data/processed/princeton_drive_nodes.geojson",
     "data/processed/princeton_drive_edges.geojson",
     "data/processed/baseline_stats.json",
-    "data/processed/princeton_centerline_exposure.gpkg",
-    "data/processed/princeton_centerline_exposure.geojson",
-    "data/processed/flood_exposure_stats.json",
-    "data/processed/princeton_accessibility.gpkg",
-    "data/processed/princeton_accessibility.geojson",
-    "data/processed/accessibility_stats.json",
     "data/processed/bridge_deck_join.json",
     "data/processed/fema_flood_zones.gpkg",
     "data/processed/fema_flood_zones.geojson",
@@ -179,7 +173,9 @@ def test_graph_scenario_and_fema_files_are_unchanged(project_root: Path) -> None
     assert comparison["comparison"]["osm"]["length_m_beyond_proximity"] == pytest.approx(3023.1, abs=0.1)
     exposure = json.loads((project_root / "data" / "processed" / "flood_exposure_stats.json").read_text())
     assert exposure["product"] == "hypothetical_3dep_channel_relative_bathtub"
-    assert exposure["assumptions"]["stage_above_channel_dem_m"] == [1.0, 2.0]
+    assert exposure["assumptions"]["stage_above_channel_dem_m"] == [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+    assert exposure["interpolated"] is False
+    assert exposure["enso_scales_depths"] is False
     accessibility = json.loads((project_root / "data" / "processed" / "accessibility_stats.json").read_text())
     closed = {stage["stage_above_channel_dem_m"]: stage["n_assumed_closed"] for stage in accessibility["stages"]}
     assert closed[1.0] == 33
