@@ -35,9 +35,9 @@ body {
   background: var(--banner);
   color: var(--banner-ink);
   border-bottom: 1px solid #e2d2ae;
-  padding: 0.75rem 1.4rem;
+  padding: 0.55rem 1.5rem;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 header {
@@ -76,7 +76,7 @@ main {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 24rem;
+  grid-template-columns: minmax(0, 1fr) 22rem;
 }
 
 #map-wrap { position: relative; min-height: 420px; }
@@ -113,30 +113,17 @@ main {
   z-index: 500;
   left: 16px;
   bottom: 22px;
-  max-width: 20rem;
-  max-height: 38%;
+  max-width: 18.5rem;
+  max-height: 42%;
   overflow: auto;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.7rem 0.8rem;
-}
-
-#map-rail {
-  position: absolute;
-  z-index: 500;
-  top: 16px;
-  right: 16px;
-  width: 16.5rem;
-  max-height: calc(100% - 32px);
-  overflow: auto;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
 }
 
 #fema-control {
-  padding: 0.75rem 0.85rem 0.65rem;
+  padding: 0.15rem 0 0.7rem;
 }
 
 #fema-control label {
@@ -154,7 +141,7 @@ main {
 }
 
 #reports-control {
-  padding: 0.7rem 0.85rem;
+  padding: 0.75rem 0;
   border-top: 1px dashed #c8c2b6;
 }
 
@@ -172,20 +159,11 @@ main {
   line-height: 1.4;
 }
 
-#enso-panel {
-  padding: 0.65rem 0.85rem 0.75rem;
-  border-top: 1px solid var(--line);
-}
+#enso-panel h2 { margin: 0.2rem 0 0.45rem; }
 
-#enso-panel h2 { margin-bottom: 0.15rem; }
+.enso-role { color: var(--ink); }
 
-.enso-role {
-  color: var(--muted);
-  font-size: 0.88rem;
-  margin: 0 0 0.35rem;
-}
-
-#enso-panel p { margin: 0.18rem 0; font-size: 0.88rem; line-height: 1.4; }
+#enso-panel p { margin: 0.2rem 0; font-size: 0.95rem; line-height: 1.45; }
 
 .report-popup p { margin: 0.35rem 0; }
 
@@ -223,16 +201,31 @@ aside {
   overflow: auto;
   background: var(--panel);
   border-left: 1px solid var(--line);
-  padding: 1.35rem 1.25rem 2.5rem;
+  padding: 1.5rem 1.35rem 2.75rem;
 }
 
-aside section + section {
-  margin-top: 1.6rem;
-  padding-top: 1.35rem;
+.fold {
   border-top: 1px solid var(--line);
+  margin-top: 0.35rem;
 }
 
-.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+.fold summary {
+  cursor: pointer;
+  font-weight: 650;
+  padding: 0.85rem 0.1rem;
+  line-height: 1.35;
+}
+
+.fold summary:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.fold-body { padding: 0.15rem 0.1rem 1.15rem; }
+
+.fold-body h2 { margin-top: 1rem; }
+
+.switch { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.35rem; }
 
 .switch button {
   font: inherit;
@@ -283,12 +276,6 @@ dl { margin: 0.8rem 0 0; }
 .metric { margin-top: 0.35rem; font-size: 0.78rem; color: var(--muted); }
 
 #road-detail p, #ida p, #name-check p { margin: 0.4rem 0; }
-
-.name-check-heading {
-  margin-top: 1.35rem;
-  padding-top: 1.15rem;
-  border-top: 1px solid var(--line);
-}
 
 .name-check {
   list-style: none;

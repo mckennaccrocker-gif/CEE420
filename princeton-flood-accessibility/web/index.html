@@ -24,65 +24,73 @@
         <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
       </form>
       <div id="legend"></div>
-      <div id="map-rail">
-        <div id="fema-control">
-          <label for="fema-toggle">
-            <input id="fema-toggle" type="checkbox" checked>
-            Regulatory flood zones
-          </label>
-          <p id="fema-date"></p>
-        </div>
-        <div id="reports-control">
-          <label for="reports-toggle">
-            <input id="reports-toggle" type="checkbox">
-            September 2021 news reports
-          </label>
-          <p id="reports-note">Off until checked. Black dashes are a news report, not a model depth.</p>
-        </div>
-        <div id="enso-panel">
-          <h2>ENSO context</h2>
-          <p class="enso-role">Does not change road depth.</p>
-          <div id="enso"></div>
-        </div>
-      </div>
     </section>
     <aside>
-      <section>
-        <h2>Assumption</h2>
-        <div class="switch" role="group" aria-label="Scenario assumption">
-          <button type="button" id="stage-1" data-stage="1.00" aria-pressed="true">+1.0 m</button>
-          <button type="button" id="stage-2" data-stage="2.00" aria-pressed="false">+2.0 m</button>
+      <div class="switch" role="group" aria-label="Scenario assumption">
+        <button type="button" id="stage-1" data-stage="1.00" aria-pressed="true">+1.0 m</button>
+        <button type="button" id="stage-2" data-stage="2.00" aria-pressed="false">+2.0 m</button>
+      </div>
+      <p class="hint">Two assumptions. Not hours.</p>
+      <details class="fold">
+        <summary>Name check</summary>
+        <div class="fold-body">
+          <p class="hint">A name check, not a validation. It was not scored.</p>
+          <div id="name-check"></div>
         </div>
-        <p class="hint">Two separate assumptions above the channel elevation. Not hours. There is no time slider.</p>
-        <h2 class="name-check-heading">Name check</h2>
-        <p class="hint">A name check, not a validation. It was not scored.</p>
-        <div id="name-check"></div>
-        <dl id="stats"></dl>
-        <p id="hospital"></p>
-        <p id="aadt"></p>
-        <p id="component-note" class="hint"></p>
-      </section>
-      <section>
-        <h2>The two assumptions</h2>
-        <p class="hint">A comparison of the saved results. Not a hydrograph.</p>
-        <div id="chart"></div>
-      </section>
-      <section>
-        <h2>Bridge decks</h2>
-        <div id="decks"></div>
-      </section>
-      <section>
-        <h2>Regulatory flood zones</h2>
-        <div id="fema"></div>
-      </section>
-      <section>
-        <h2>Selected road</h2>
-        <div id="road-detail"><p class="empty">Click a centerline on the map.</p></div>
-      </section>
-      <section>
-        <h2>September 2021 records</h2>
-        <div id="ida"></div>
-      </section>
+      </details>
+      <details class="fold">
+        <summary>Flood statistics</summary>
+        <div class="fold-body">
+          <p id="scenario-note" class="hint"></p>
+          <dl id="stats"></dl>
+          <p id="hospital"></p>
+          <p id="aadt"></p>
+          <p id="component-note" class="hint"></p>
+          <h2>The two assumptions</h2>
+          <p class="hint">A comparison of the saved results. Not a hydrograph.</p>
+          <div id="chart"></div>
+        </div>
+      </details>
+      <details class="fold">
+        <summary>Flood zones and news reports</summary>
+        <div class="fold-body">
+          <div id="fema-control">
+            <label for="fema-toggle">
+              <input id="fema-toggle" type="checkbox" checked>
+              Regulatory flood zones
+            </label>
+            <p id="fema-date"></p>
+          </div>
+          <div id="reports-control">
+            <label for="reports-toggle">
+              <input id="reports-toggle" type="checkbox">
+              September 2021 news reports
+            </label>
+            <p id="reports-note">Off until checked. Black dashes are a news report, not a model depth.</p>
+          </div>
+          <h2>Regulatory flood zones</h2>
+          <div id="fema"></div>
+        </div>
+      </details>
+      <details class="fold" id="enso-panel">
+        <summary class="enso-role">Does not change road depth.</summary>
+        <div class="fold-body">
+          <h2>ENSO context</h2>
+          <div id="enso"></div>
+        </div>
+      </details>
+      <details class="fold">
+        <summary>Bridge decks</summary>
+        <div id="decks" class="fold-body"></div>
+      </details>
+      <details class="fold" id="selected-road">
+        <summary>Selected road</summary>
+        <div id="road-detail" class="fold-body"><p class="empty">Click a centerline on the map.</p></div>
+      </details>
+      <details class="fold">
+        <summary>September 2021 records</summary>
+        <div id="ida" class="fold-body"></div>
+      </details>
     </aside>
   </main>
   <script src="/vendor/leaflet/leaflet.js"></script>

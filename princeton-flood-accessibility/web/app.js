@@ -100,7 +100,9 @@ Promise.all([
   fema = femaPayload;
   femaZones = zonePayload;
   observedReports = reportPayload;
-  document.getElementById("banner").textContent = summary.banner;
+  document.getElementById("banner").textContent = "Not Hurricane Ida. Two assumptions, not hours.";
+  const scenarioNote = document.getElementById("scenario-note");
+  if (scenarioNote) scenarioNote.textContent = summary.banner;
   const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
   document.getElementById("product-line").textContent =
     "Hypothetical 3DEP scenario. Not Hurricane Ida. " + stamp;
@@ -319,6 +321,8 @@ function selectLayer(layer) {
   selected = layer;
   layer.setStyle({ weight: 7, color: "#111" });
   layer.bringToFront();
+  const fold = document.getElementById("selected-road");
+  if (fold) fold.open = true;
   showDetail(layer.feature.properties);
 }
 
@@ -375,6 +379,8 @@ function findRoad(query) {
     note.className = "empty";
     note.textContent = "No centerline name contains “" + query.trim() + "”.";
     root.append(note);
+    const fold = document.getElementById("selected-road");
+    if (fold) fold.open = true;
     return;
   }
   const group = L.featureGroup(hits);
