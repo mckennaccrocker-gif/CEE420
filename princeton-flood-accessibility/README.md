@@ -4,7 +4,7 @@ Princeton, New Jersey flood-exposure and road-accessibility project. Stage 1 is 
 
 The depth values 0.10 m and 0.30 m in `config/settings.yaml` are preliminary assumptions, not official NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida observations. Stage 2 only labels them. Stage 3 uses the same cuts to decide which centerlines leave the routable graph. That decision is still an assumption.
 
-A plain-language briefing for Princeton municipal staff is in [docs/municipal-briefing.md](docs/municipal-briefing.md).
+A plain-language briefing for Princeton municipal staff is in [docs/municipal-briefing.md](docs/municipal-briefing.md). A one-page walkthrough of the dashboard is in [docs/demo-script.md](docs/demo-script.md).
 
 ## What is already true about flood data
 
