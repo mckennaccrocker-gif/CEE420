@@ -184,6 +184,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="stage-slider"' in html
         assert 'step="0.25"' in html
         assert "chosen rise above the channel, not a forecast." in html
+        assert 'id="scenario-summary"' in html
+        assert 'id="stage-caption"' in html
         assert 'id="fema-toggle"' in html
         assert "Regulatory flood zones" in html
         assert 'id="reports-toggle"' in html
@@ -192,6 +194,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert html.count('type="range"') == 1
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
         assert "nearestStageId" in script
+        assert "function showScenarioSummary" in script
+        assert "function wetCaption" in script
         assert "not a threshold on the weekly anomaly" in script
         assert "does not set Princeton road depths" in script
         assert "last saved observation" in script

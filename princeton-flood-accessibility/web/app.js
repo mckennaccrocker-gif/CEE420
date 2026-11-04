@@ -217,10 +217,40 @@ function nearestStageId(raw) {
   return best.id;
 }
 
+function groupedMetres(length) {
+  return String(Math.round(length)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function wetCaption(row) {
-  const length = Math.round(row.wet_piece_length_m);
-  const text = String(length).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return "chosen rise, not a forecast. " + text + " m at or above 0.30 m";
+  return "chosen rise, not a forecast. " + groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m";
+}
+
+function scenarioSummaryLines(row) {
+  const lines = [
+    riseText(row.stage_above_channel_dem_m) + " chosen rise",
+    groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m",
+    row.n_assumed_closed + " assumed-closed centerlines",
+  ];
+  (nameCheck && nameCheck.rows || []).forEach((road) => {
+    const step = (road.steps || []).find((item) => item.id === row.id);
+    let result = "missed";
+    if (step && step.result === "captured") {
+      result = step.captured_of ? "captured, " + step.captured_of : "captured";
+    }
+    lines.push(road.road + " " + result);
+  });
+  return lines;
+}
+
+function showScenarioSummary(row) {
+  const node = document.getElementById("scenario-summary");
+  if (!node || !nameCheck) return;
+  node.replaceChildren();
+  scenarioSummaryLines(row).forEach((text) => {
+    const line = document.createElement("p");
+    line.textContent = text;
+    node.append(line);
+  });
 }
 
 function riseText(metres) {
@@ -244,6 +274,7 @@ function setStage(next) {
   const captionNode = document.getElementById("stage-caption");
   if (captionNode) captionNode.textContent = caption;
   if (slider) slider.setAttribute("aria-valuetext", riseText(row.stage_above_channel_dem_m) + ". " + caption);
+  showScenarioSummary(row);
   showNameCheck(stage);
   if (roadLayer) {
     roadLayer.eachLayer((layer) => {
