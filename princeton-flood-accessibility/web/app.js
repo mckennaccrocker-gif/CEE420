@@ -92,7 +92,8 @@ Promise.all([
   fetch("/api/fema").then((response) => response.json()),
   fetch("/api/fema-zones.geojson").then((response) => response.json()),
   fetch("/api/observed-reports.geojson").then((response) => response.json()),
-]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload, reportPayload]) => {
+  fetch("/api/name-check").then((response) => response.json()),
+]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload, reportPayload, nameCheckPayload]) => {
   summary = summaryPayload;
   roads = roadPayload;
   fema = femaPayload;
@@ -108,6 +109,7 @@ Promise.all([
   drawChart();
   renderEnso(ensoPayload);
   renderIda(idaPayload);
+  renderNameCheck(nameCheckPayload);
   renderDecks(deckPayload);
   renderFema(femaPayload);
   setStage("1.00");
@@ -513,6 +515,49 @@ function renderEnso(record) {
   context.className = "hint";
   context.textContent = record.context;
   root.append(context);
+}
+
+function renderNameCheck(record) {
+  const root = document.getElementById("name-check");
+  if (!root) return;
+  root.replaceChildren();
+  const hint = root.previousElementSibling;
+  if (hint && record.label) hint.textContent = record.label;
+  const table = document.createElement("table");
+  table.className = "name-check";
+  const head = document.createElement("tr");
+  ["Road", "+1.0 m", "+2.0 m"].forEach((text) => {
+    const cell = document.createElement("th");
+    cell.textContent = text;
+    head.append(cell);
+  });
+  table.append(head);
+  (record.rows || []).forEach((row) => {
+    const line = document.createElement("tr");
+    const name = document.createElement("td");
+    name.textContent = row.road;
+    line.append(name, resultCell(row, "plus_1_00"), resultCell(row, "plus_2_00"));
+    table.append(line);
+  });
+  root.append(table);
+  const note = document.createElement("p");
+  note.className = "hint";
+  note.textContent = "Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.";
+  root.append(note);
+}
+
+function resultCell(row, stage) {
+  const cell = document.createElement("td");
+  const result = row[stage];
+  cell.className = result === "captured" ? "result" : "missed";
+  if (result === "captured" && row.captured_of) {
+    cell.textContent = "Captured, " + row.captured_of;
+  } else if (result === "captured") {
+    cell.textContent = "Captured";
+  } else {
+    cell.textContent = "Missed";
+  }
+  return cell;
 }
 
 function renderIda(record) {

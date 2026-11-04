@@ -269,7 +269,27 @@ dl { margin: 0.8rem 0 0; }
 
 .metric { margin-top: 0.35rem; font-size: 0.78rem; color: var(--muted); }
 
-#road-detail p, #enso p, #ida p { margin: 0.35rem 0; }
+#road-detail p, #enso p, #ida p, #name-check p { margin: 0.35rem 0; }
+
+.name-check {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.7rem;
+  font-size: 0.82rem;
+}
+
+.name-check th, .name-check td {
+  text-align: left;
+  padding: 0.35rem 0.3rem;
+  border-bottom: 1px solid #eee8dc;
+  vertical-align: top;
+}
+
+.name-check th { color: var(--muted); font-weight: 650; font-size: 0.75rem; }
+
+.name-check .result { font-weight: 650; color: var(--ink); }
+
+.name-check .missed { color: var(--muted); font-weight: 650; }
 
 .empty { color: var(--muted); }
 

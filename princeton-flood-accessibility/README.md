@@ -51,7 +51,7 @@ python3 scripts/check_raster_coverage.py /path/to/chaddsford_depth_grid.tif
 python3 -m pytest
 ```
 
-`dashboard.py` serves http://127.0.0.1:8765/ and does not interpolate the two stages. A separate checkbox, off until checked, draws black dashes for the September 2021 news reports. Those dashes are not scenario depths. `update_enso.py` refreshes the NOAA cache in `data/processed/enso_latest.json`. If NOAA is unreachable and a previous file exists, that observation and its date stay in place. `validate_ida.py` writes a qualitative comparison. It does not score the scenario.
+`dashboard.py` serves http://127.0.0.1:8765/ and does not interpolate the two stages. A separate checkbox, off until checked, draws black dashes for the September 2021 news reports. Those dashes are not scenario depths. The side panel is a name check of those five roads, not a validation, and it does not score the scenario. `update_enso.py` refreshes the NOAA cache in `data/processed/enso_latest.json`. If NOAA is unreachable and a previous file exists, that observation and its date stay in place. `validate_ida.py` writes a qualitative comparison. It does not score the scenario.
 
 `download_roads.py` calls the Overpass API, writes the network, the stats, and the baseline map, and stops if the boundary is the wrong town, the graph is empty, the CRS is not EPSG:3424, or the ellipsoidal and State Plane lengths disagree by more than 2%. The OSMnx cache is `data/raw/osmnx_cache/` and is gitignored. Re-running the script rebuilds the baseline files and the map.
 

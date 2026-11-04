@@ -199,6 +199,17 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         assert reports["is_model_depth"] is False
         assert reports["scenario_depth_assigned"] is False
         assert all(feature["properties"]["scenario_depth_m"] is None for feature in reports["features"])
+        connection.request("GET", "/api/name-check")
+        check_response = connection.getresponse()
+        check = json.loads(check_response.read().decode("utf-8"))
+        assert check_response.status == 200
+        assert check["validated"] is False
+        assert check["depths_recomputed"] is False
+        assert "precision" not in check
+        assert "recall" not in check
+        assert [row["road"] for row in check["rows"]][1] == "Mercer Road"
+        assert check["rows"][1]["plus_2_00"] == "captured"
+        assert check["rows"][1]["captured_of"] == "2 of 14"
     finally:
         server.shutdown()
         server.server_close()
