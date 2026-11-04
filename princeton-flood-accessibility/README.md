@@ -4,6 +4,8 @@ Princeton, New Jersey flood-exposure and road-accessibility project. Stage 1 is 
 
 The depth values 0.10 m and 0.30 m in `config/settings.yaml` are preliminary assumptions, not official NJDOT, FEMA, or Princeton closure standards, and they are not Hurricane Ida observations. Stage 2 only labels them. Stage 3 uses the same cuts to decide which centerlines leave the routable graph. That decision is still an assumption.
 
+A plain-language briefing for Princeton municipal staff is in [docs/municipal-briefing.md](docs/municipal-briefing.md).
+
 ## What is already true about flood data
 
 No Hurricane Ida flood-depth raster is in this repository, and none was found whose extent intersects the Princeton municipal boundary. The only Ida depth grids inspected are five USGS Pennsylvania community grids (Chadds Ford, Downingtown, Modena, Norristown, Perkiomen). Their extents are tens of kilometres from Princeton. See `data/processed/ida_raster_coverage_check.json` for the header values actually read (CRS, resolution, bounds, nodata, file time). Those GeoTIFFs do not declare vertical units. They are not used by the road network.
