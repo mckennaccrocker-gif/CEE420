@@ -20,6 +20,7 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
         aadt = stats["aadt"]["by_stage"][key]
         hospital = _hospital_state(stage)
         hospital_by_stage[key] = hospital
+        counts = stage.get("routing_status_counts") or {}
         stages.append(
             {
                 "id": key,
@@ -30,6 +31,7 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
                 "wet_piece_length_m": stage["piece_length_m_at_or_above_0_30"],
                 "wet_piece_percent_of_network": stage["percent_inside_length_piece_at_or_above_0_30"],
                 "n_assumed_closed": stage["n_assumed_closed"],
+                "n_still_open": counts.get("accessible_routable"),
                 "assumed_closed_length_m": stage["assumed_closed_length_m_inside"],
                 "assumed_closed_percent_of_network": stage["percent_inside_length_assumed_closed"],
                 "n_weak_components": stage["n_weak_components"],
@@ -38,6 +40,7 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
                 "hospital_disconnected": hospital["disconnected"],
                 "hospital_n_connected": hospital["n_connected"],
                 "hospital_n_disconnected": hospital["n_disconnected"],
+                "facility_routes": _facility_routes(stage),
                 "aadt_records": aadt["n_station_records_snapped"],
                 "aadt_nearest_edge_assumed_closed": aadt["n_station_records_nearest_edge_assumed_closed"],
             }
@@ -47,6 +50,23 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
         for item in stages
         if item["hospital_disconnected"]
     ]
+    saved_ids = [item["id"] for item in stages]
+    computed_ids = [item["id"] for item in stages if item["facility_routes"]]
+    every_mark = bool(saved_ids) and computed_ids == saved_ids
+    if every_mark:
+        facility_note = (
+            "Hospital, fire, and police routes are already saved for every mark "
+            "from 0 m to 2.0 m by 0.25 m. No route was added."
+        )
+    elif computed_ids:
+        shown = ", ".join(f"+{item['stage_above_channel_dem_m']:.2f} m" for item in stages if item["facility_routes"])
+        facility_note = (
+            "Hospital, fire, and police routes are saved only for "
+            + shown
+            + ". They are not shown for the other marks. No route was added."
+        )
+    else:
+        facility_note = "No hospital, fire, or police route is saved. None was added."
     return {
         "product": "scenario_accessibility_dashboard",
         "depth_product": stats.get("depth_product"),
@@ -77,12 +97,44 @@ def build_summary(stats: dict[str, Any]) -> dict[str, Any]:
             "disconnected_rises_m": disconnected,
             "by_stage": hospital_by_stage,
         },
+        "facility_routes": {
+            "computed_for_every_saved_mark": every_mark,
+            "computed_stage_ids": computed_ids,
+            "note": facility_note,
+        },
         "aadt_note": (
             "The count is station-records whose nearest edge is assumed closed. "
             "AADT is not summed and is not a count of travelers."
         ),
         "component_note": "A weak-component count is not evidence that a neighborhood is isolated.",
     }
+
+
+def _facility_routes(stage: dict[str, Any]) -> list[dict[str, Any]]:
+    """Saved hospital, fire, and police pairs only. Unknown statuses are omitted."""
+    routes = []
+    for row in stage.get("od_pairs") or []:
+        roles = {row.get("origin_role"), row.get("destination_role")}
+        if not roles & {"hospital", "fire_station", "police"}:
+            continue
+        status = row.get("scenario_status")
+        if status == "disconnected":
+            plain = "blocked"
+        elif status in {"connected", "same_node"}:
+            plain = "still open"
+        else:
+            continue
+        routes.append(
+            {
+                "origin": row.get("origin"),
+                "destination": row.get("destination"),
+                "origin_role": row.get("origin_role"),
+                "destination_role": row.get("destination_role"),
+                "scenario_status": status,
+                "plain": plain,
+            }
+        )
+    return routes
 
 
 def _hospital_state(stage: dict[str, Any]) -> dict[str, Any]:

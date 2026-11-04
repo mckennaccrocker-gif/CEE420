@@ -88,6 +88,37 @@ def test_summary_keeps_the_two_stages_separate(project_root: Path) -> None:
     assert summary["enso_scales_depths"] is False
     assert summary["event_time"] is None
     by_id = {stage["id"]: stage for stage in summary["stages"]}
+    assert by_id["0.25"]["n_assumed_closed"] == 15
+    assert by_id["0.25"]["n_still_open"] == 946
+    low_routes = by_id["0.25"]["facility_routes"]
+    assert low_routes
+    assert all(item["plain"] == "still open" for item in low_routes)
+    assert any(
+        item["origin_role"] == "hospital" and item["destination_role"] == "fire_station"
+        for item in low_routes
+    )
+    assert any(
+        item["origin_role"] == "fire_station" and item["destination_role"] == "police"
+        for item in low_routes
+    )
+    assert not any(
+        item["origin_role"] == "school" and item["destination_role"] == "municipal"
+        for item in low_routes
+    )
+    assert summary["facility_routes"]["computed_for_every_saved_mark"] is True
+    assert "No route was added." in summary["facility_routes"]["note"]
+    high_blocked = {
+        (item["origin_role"], item["destination_role"])
+        for item in by_id["2.00"]["facility_routes"]
+        if item["plain"] == "blocked"
+    }
+    assert high_blocked == {
+        ("hospital", "school"),
+        ("hospital", "fire_station"),
+        ("hospital", "police"),
+        ("hospital", "municipal"),
+    }
+    assert by_id["2.00"]["n_still_open"] == 804
     assert by_id["1.00"]["n_assumed_closed"] == 33
     assert by_id["1.00"]["n_weak_components"] == 13
     assert by_id["1.00"]["hospital_disconnected"] is False
@@ -181,6 +212,11 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         html = page.read().decode("utf-8")
         assert page.status == 200
         assert "Road accessibility" in html
+        assert "Early warning" in html
+        assert "How high the water is set" in html
+        assert "Where not to go" in html
+        assert "Which roads stay open" in html
+        assert 'value="0.25"' in html
         assert 'id="stage-slider"' in html
         assert 'step="0.25"' in html
         assert "chosen rise above the channel, not a forecast." in html
@@ -195,6 +231,9 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
         assert "nearestStageId" in script
         assert "function showScenarioSummary" in script
+        assert 'setStage("0.25")' in script
+        assert "affected / do not use" in script
+        assert "still open" in script
         assert 'line.className = item.captured ? "captured" : "missed"' in script
         assert "function wetCaption" in script
         assert "not a threshold on the weekly anomaly" in script

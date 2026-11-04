@@ -12,20 +12,21 @@
   <header>
     <div class="mast">
       <p class="kicker">Municipality of Princeton, New Jersey</p>
-      <h1>Road accessibility</h1>
-      <p id="product-line" class="product"></p>
+      <h1>Early warning</h1>
+      <p id="product-line" class="product">Road accessibility. Hypothetical 3DEP scenario. Not Hurricane Ida.</p>
     </div>
   </header>
   <div class="page">
     <section class="lede" aria-label="What this is">
       <h2>What this is</h2>
-      <p>A chosen rise above the channel, and the saved road result for that mark. Not Hurricane Ida. Not a forecast. Moving the slider does not invent a depth between the saved marks.</p>
+      <p>An early warning for a chosen water rise. Pick a saved mark. The page reads the roads already computed for that mark. It does not invent a depth between the marks.</p>
     </section>
 
-    <section class="rise-panel" aria-label="Chosen rise">
+    <section class="rise-panel answer" aria-label="How high the water is set">
+      <h2>How high the water is set</h2>
       <div class="rise">
         <label for="stage-slider">chosen rise above the channel, not a forecast.</label>
-        <input id="stage-slider" type="range" min="0" max="2" step="0.25" value="1" aria-valuemin="0" aria-valuemax="2" aria-valuenow="1" aria-valuetext="+1.0 m. chosen rise, not a forecast. 8,307 m at or above 0.30 m">
+        <input id="stage-slider" type="range" min="0" max="2" step="0.25" value="0.25" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0.25" aria-valuetext="+0.25 m. chosen rise, not a forecast. 3,111 m at or above 0.30 m">
         <div class="rise-scale" aria-hidden="true">
           <span>0</span>
           <span>0.5</span>
@@ -35,14 +36,55 @@
         </div>
       </div>
       <div class="result">
-        <p id="stage-readout" class="rise-value">+1.0 m</p>
-        <p id="stage-caption" class="rise-caption">chosen rise, not a forecast. 8,307 m at or above 0.30 m</p>
-        <div id="scenario-summary" class="scenario-summary" aria-live="polite">
-          <p class="summary-fact"><span class="fact-label">Chosen rise</span><span class="fact-value">+1.0 m</span></p>
-          <p class="summary-fact"><span class="fact-label">Wet centerline at or above 0.30 m</span><span class="fact-value">8,307 m</span></p>
-          <p class="summary-fact alert"><span class="fact-label">Assumed closed</span><span class="fact-value">33 centerlines</span></p>
-        </div>
+        <p id="stage-readout" class="rise-value">+0.25 m</p>
+        <p id="stage-caption" class="rise-caption">chosen rise, not a forecast. 3,111 m at or above 0.30 m</p>
       </div>
+    </section>
+
+    <section class="answer" aria-label="Which roads are affected">
+      <h2>Which roads are affected</h2>
+      <div id="scenario-summary" aria-live="polite">
+        <p id="affected-lead" class="answer-lead alert">15 centerlines are affected. Do not use them.</p>
+        <p class="hint">Affected means assumed closed at this saved mark. Do not use those roads.</p>
+      </div>
+    </section>
+
+    <section class="answer" aria-label="Where not to go">
+      <h2>Where not to go</h2>
+      <p id="avoid-lead" class="hint">Do not send traffic onto these roads.</p>
+      <ul id="avoid-list" class="name-list">
+        <li>Bertrand Drive, 2 centerlines</li>
+        <li>Christopher Drive</li>
+        <li>Cuyler Road</li>
+        <li>Ewing Street</li>
+        <li>Flexner Lane</li>
+        <li>Goldman Lane</li>
+        <li>Great Road East</li>
+        <li>Meetinghouse Court</li>
+        <li>Meritt Lane, 2 centerlines</li>
+        <li>North Harrison Street</li>
+        <li>South Olden Lane</li>
+        <li>Thanet Circle</li>
+        <li>Valley Road</li>
+      </ul>
+    </section>
+
+    <section class="answer" id="stay-open" aria-label="Which roads stay open">
+      <h2>Which roads stay open</h2>
+      <p id="open-lead" class="answer-lead open">946 centerlines are still open. Send traffic there.</p>
+      <p class="hint">Still open means accessible and still routed.</p>
+      <h3>Five named roads</h3>
+      <p class="hint">Affected / do not use means at least one centerline of that name is assumed closed. Still open means none are.</p>
+      <ul id="summary-roads" class="summary-roads">
+        <li class="missed"><span class="road-name">Quaker Road</span><span class="road-result">still open</span></li>
+        <li class="missed"><span class="road-name">Mercer Road</span><span class="road-result">still open</span></li>
+        <li class="missed"><span class="road-name">Stockton Street / Route 206</span><span class="road-result">still open</span></li>
+        <li class="missed"><span class="road-name">South Harrison Street</span><span class="road-result">still open</span></li>
+        <li class="missed"><span class="road-name">Rosedale Road</span><span class="road-result">still open</span></li>
+      </ul>
+      <h3>Hospital, fire, and police</h3>
+      <p id="facility-note" class="hint">Hospital, fire, and police routes are already saved for every mark from 0 m to 2.0 m by 0.25 m. No route was added.</p>
+      <ul id="facility-routes" class="summary-roads"></ul>
     </section>
 
     <section id="map-wrap" aria-label="Centerline map">
@@ -53,18 +95,6 @@
       </form>
     </section>
     <div id="legend" class="legend-strip"></div>
-
-    <section class="roads-block" aria-label="Five named roads">
-      <h2>Five named roads</h2>
-      <p class="hint">Captured means at least one centerline of that name is assumed closed. Missed means none are.</p>
-      <ul id="summary-roads" class="summary-roads">
-        <li class="missed"><span class="road-name">Quaker Road</span><span class="road-result">missed</span></li>
-        <li class="missed"><span class="road-name">Mercer Road</span><span class="road-result">missed</span></li>
-        <li class="missed"><span class="road-name">Stockton Street / Route 206</span><span class="road-result">missed</span></li>
-        <li class="missed"><span class="road-name">South Harrison Street</span><span class="road-result">missed</span></li>
-        <li class="missed"><span class="road-name">Rosedale Road</span><span class="road-result">missed</span></li>
-      </ul>
-    </section>
 
     <section class="details" aria-label="More detail">
       <h2>More detail</h2>

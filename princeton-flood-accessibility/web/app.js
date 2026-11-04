@@ -10,19 +10,19 @@ const COLORS = {
 };
 
 const LEGEND = [
-  ["accessible_routable", "Accessible"],
+  ["accessible_routable", "Still open"],
   ["at_risk_routable", "At risk"],
   ["partial_above_0_30_not_closed", "Partly deep but still routed"],
-  ["assumed_closed", "Assumed closed"],
+  ["assumed_closed", "Affected / do not use"],
   ["bridge_deck_unmatched", "Unknown bridge deck"],
   ["unmatched_no_channel", "Unmatched (not dry)"],
 ];
 
 const STATUS_LABEL = {
-  accessible_routable: "Accessible",
+  accessible_routable: "Still open",
   at_risk_routable: "At risk, still routable",
   partial_above_0_30_not_closed: "Partly at or above 0.30 m, not closed",
-  assumed_closed: "Assumed closed",
+  assumed_closed: "Affected / do not use",
   bridge_deck_unmatched: "Bridge deck unmatched",
   bridge_deck_sampled: "Bridge deck sampled",
   unmatched_no_channel: "Unmatched, no channel",
@@ -33,7 +33,7 @@ let summary = null;
 let roads = null;
 let fema = null;
 let femaZones = null;
-let stage = "1.00";
+let stage = "0.25";
 let selected = null;
 let roadLayer = null;
 let femaLayer = null;
@@ -97,7 +97,7 @@ Promise.all([
   if (scenarioNote) scenarioNote.textContent = summary.banner;
   const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
   document.getElementById("product-line").textContent =
-    "Hypothetical 3DEP scenario. Not Hurricane Ida. " + stamp;
+    "Road accessibility. Hypothetical 3DEP scenario. Not Hurricane Ida. " + stamp;
   document.getElementById("component-note").textContent = summary.component_note;
   drawLegend();
   drawMap(boundaryPayload);
@@ -107,7 +107,7 @@ Promise.all([
   renderNameCheck(nameCheckPayload);
   renderDecks(deckPayload);
   renderFema(femaPayload);
-  setStage("1.00");
+  setStage("0.25");
 }).catch((error) => {
   document.getElementById("banner").textContent = "The dashboard data did not load. " + error;
 });
@@ -227,39 +227,101 @@ function wetCaption(row) {
 }
 
 function scenarioSummaryLines(row) {
-  const facts = [
-    { label: "Chosen rise", value: riseText(row.stage_above_channel_dem_m) },
-    { label: "Wet centerline at or above 0.30 m", value: groupedMetres(row.wet_piece_length_m) + " m" },
-    { label: "Assumed closed", value: row.n_assumed_closed + " centerlines", alert: true },
-  ];
   const roads = (nameCheck && nameCheck.rows || []).map((road) => {
     const step = (road.steps || []).find((item) => item.id === row.id);
     const captured = Boolean(step && step.result === "captured");
-    let result = "missed";
-    if (captured) result = step.captured_of ? "captured, " + step.captured_of : "captured";
+    let result = "still open";
+    if (captured) result = step.captured_of ? "affected / do not use, " + step.captured_of : "affected / do not use";
     return { road: road.road, result: result, captured: captured };
   });
-  return { facts: facts, roads: roads };
+  return { roads: roads };
+}
+
+function affectedLead(count) {
+  if (count === 0) return "No centerline is affected. None is assumed closed.";
+  if (count === 1) return "1 centerline is affected. Do not use it.";
+  return count + " centerlines are affected. Do not use them.";
+}
+
+function openLead(count) {
+  if (count === null || count === undefined) return "The still-open count is not saved for this mark.";
+  if (count === 1) return "1 centerline is still open. Send traffic there.";
+  return count + " centerlines are still open. Send traffic there.";
+}
+
+function affectedRoadNames(stageId) {
+  const key = "status_" + stageKey(stageId);
+  const counts = new Map();
+  ((roads && roads.features) || []).forEach((feature) => {
+    const props = feature.properties || {};
+    if (props[key] !== "assumed_closed") return;
+    const name = props.name || "Unnamed centerline";
+    counts.set(name, (counts.get(name) || 0) + 1);
+  });
+  return [...counts.entries()].sort((left, right) => left[0].localeCompare(right[0]));
+}
+
+function showAvoidList(stageId, affectedCount) {
+  const lead = document.getElementById("avoid-lead");
+  const list = document.getElementById("avoid-list");
+  if (!list) return;
+  const names = affectedRoadNames(stageId);
+  list.replaceChildren();
+  if (!names.length) {
+    if (lead) lead.textContent = affectedCount ? "The affected names are not in the saved centerlines." : "No road is assumed closed. There is nowhere new to avoid.";
+    return;
+  }
+  if (lead) lead.textContent = "Do not send traffic onto these roads.";
+  names.forEach(([name, count]) => {
+    const item = document.createElement("li");
+    item.textContent = count > 1 ? name + ", " + count + " centerlines" : name;
+    list.append(item);
+  });
+}
+
+function showFacilityRoutes(row) {
+  const note = document.getElementById("facility-note");
+  const list = document.getElementById("facility-routes");
+  if (!list) return;
+  const meta = (summary && summary.facility_routes) || {};
+  if (note) note.textContent = meta.note || "";
+  list.replaceChildren();
+  const routes = row.facility_routes || [];
+  if (!routes.length) {
+    const item = document.createElement("li");
+    item.className = "missed";
+    const name = document.createElement("span");
+    name.className = "road-name";
+    name.textContent = "Not computed for this mark.";
+    item.append(name);
+    list.append(item);
+    return;
+  }
+  routes.forEach((route) => {
+    const item = document.createElement("li");
+    item.className = route.plain === "blocked" ? "captured" : "missed";
+    const name = document.createElement("span");
+    name.className = "road-name";
+    name.textContent = route.origin + " to " + route.destination;
+    const result = document.createElement("span");
+    result.className = "road-result";
+    result.textContent = route.scenario_status === "same_node" ? "still open, same corner" : route.plain;
+    item.append(name, result);
+    list.append(item);
+  });
 }
 
 function showScenarioSummary(row) {
   const node = document.getElementById("scenario-summary");
   const roadNode = document.getElementById("summary-roads");
+  const affected = document.getElementById("affected-lead");
+  const open = document.getElementById("open-lead");
+  if (affected) affected.textContent = affectedLead(row.n_assumed_closed);
+  if (open) open.textContent = openLead(row.n_still_open);
+  showAvoidList(row.id, row.n_assumed_closed);
+  showFacilityRoutes(row);
   if (!node || !nameCheck) return;
   const lines = scenarioSummaryLines(row);
-  node.replaceChildren();
-  lines.facts.forEach((item) => {
-    const line = document.createElement("p");
-    line.className = item.alert ? "summary-fact alert" : "summary-fact";
-    const label = document.createElement("span");
-    label.className = "fact-label";
-    label.textContent = item.label;
-    const value = document.createElement("span");
-    value.className = "fact-value";
-    value.textContent = item.value;
-    line.append(label, value);
-    node.append(line);
-  });
   if (!roadNode) return;
   roadNode.replaceChildren();
   lines.roads.forEach((item) => {
@@ -329,7 +391,7 @@ function renderStats() {
   addStat(stats, "Weak components", String(row.n_weak_components));
   addStat(stats, "Largest component", metres(row.largest_component_length_m) + " (" + row.largest_component_n_nodes + " nodes)");
   const hospital = document.getElementById("hospital");
-  const showing = row.hospital_disconnected ? "disconnected from the high school, fire station, police, and municipal building" : "still connected to those destinations";
+  const showing = row.hospital_disconnected ? "blocked from the high school, fire station, police, and municipal building" : "still open to those destinations";
   let only = "";
   if (summary.hospital.disconnects_only_at_2_00) {
     only = "The hospital routes disconnect only at the +2.0 m rise. ";
@@ -630,7 +692,7 @@ function renderNameCheck(record) {
   root.append(list);
   const note = document.createElement("p");
   note.className = "hint";
-  note.textContent = "The five rows follow the selected rise. Captured means at least one centerline of that name is assumed closed at that mark. Missed means none are. Click a name to turn on the news dashes and zoom to those centerlines.";
+  note.textContent = "The five rows follow the selected rise. Affected / do not use means at least one centerline of that name is assumed closed at that mark. Still open means none are. Click a name to turn on the news dashes and zoom to those centerlines.";
   root.append(note);
   showNameCheck(stage);
 }
@@ -638,10 +700,10 @@ function renderNameCheck(record) {
 function nameCheckLine(step) {
   const label = riseText(step.stage_m);
   if (step.result === "captured" && step.captured_of) {
-    return label + " Captured, " + step.captured_of;
+    return label + " Affected / do not use, " + step.captured_of;
   }
-  if (step.result === "captured") return label + " Captured";
-  return label + " Missed";
+  if (step.result === "captured") return label + " Affected / do not use";
+  return label + " Still open";
 }
 
 function showNameCheck(stageId) {
