@@ -12,8 +12,22 @@ One page for a Princeton official. Say only what is below. The figures are the o
 
 **September 2021 news reports.** The checkbox under the flood-zone control is off until you check it. Black dashes then mark Quaker Road, Mercer Road, Stockton Street, South Harrison Street, and Rosedale Road. The dashes are the news reports. They are not a model depth, and they do not replace the green, yellow, orange, or red road color. Click a dash and read the news date. Quaker Road, Stockton Street, South Harrison Street, and Rosedale Road: the scenario did not close the road. Mercer Road: the scenario did not close it at +1.0 m, and it assumed 2 of 14 centerlines closed at +2.0 m. Rosedale Road was reported open again at about 4 p.m. on 2 September 2021. That sentence is not a closure log. South Harrison Street has a wording gap: Patch named South Harrison Street, and Planet Princeton named Harrison Street without the word South.
 
+**Name check.** Point at the side panel. It compares these five September 2021 named roads with the scenario. It is a name check, not a validation. It was not scored. There is no precision and no recall. Depths were not recomputed.
+
+Captured means the scenario assumed at least one centerline of that name closed. Missed means it assumed none closed.
+
+| Road | +1.0 m | +2.0 m |
+| --- | --- | --- |
+| Quaker Road | Missed | Missed |
+| Mercer Road | Missed | Captured, 2 of 14 |
+| Stockton Street / Route 206 | Missed | Missed |
+| South Harrison Street | Missed | Missed |
+| Rosedale Road | Missed | Missed |
+
+Quaker Road is 10 centerlines, none assumed closed at either assumption. Mercer Road is 14 centerlines, not closed at +1.0 m, and 2 assumed closed at +2.0 m. Stockton Street is 11 centerlines, none assumed closed. South Harrison Street is 4 centerlines, none assumed closed, and the wording gap is left as written. Rosedale Road is 12 centerlines, none assumed closed. Its 2 September sentence is a reopening time, not a closure log.
+
 **ENSO panel.** Point at it last. Fetched 2 November 2026 at 23:14 UTC: weekly Niño-3.4 anomaly +3.4 °C for the week centered 28 October 2026, Oceanic Niño Index +2.16 °C for July–September 2026, and an El Niño Advisory from the discussion issued 8 October 2026. The panel says this is Pacific context. It does not set a Princeton road depth, and the October advisory was not rewritten from the later weekly number.
 
-**Do not claim.** This is not an Ida reconstruction and not a forecast hour. Do not say the model found Quaker Road dry. Do not treat 65.5 feet as a deck or a scenario depth. Do not treat a larger piece-count as a neighborhood cut off from services. Do not sum the 39 traffic counts or call zero records a statement that no counted road is near water. The September 2021 news check was not scored.
+**Do not claim.** This is not an Ida reconstruction and not a forecast hour. Do not say the model found Quaker Road dry. Do not treat 65.5 feet as a deck or a scenario depth. Do not treat a larger piece-count as a neighborhood cut off from services. Do not sum the 39 traffic counts or call zero records a statement that no counted road is near water. The September 2021 name check is not a validation and was not scored. Do not quote a precision or a recall.
 
 A 46-second walkthrough of this page was recorded. The dashboard stays at http://127.0.0.1:8765/.
