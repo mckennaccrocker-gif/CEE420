@@ -195,6 +195,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
         assert "nearestStageId" in script
         assert "function showScenarioSummary" in script
+        assert 'line.className = item.captured ? "captured" : "missed"' in script
         assert "function wetCaption" in script
         assert "not a threshold on the weekly anomaly" in script
         assert "does not set Princeton road depths" in script

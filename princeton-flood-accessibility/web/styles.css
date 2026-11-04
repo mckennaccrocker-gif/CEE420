@@ -228,15 +228,41 @@ aside .fold:first-child {
 .rise { flex: 1 1 22rem; max-width: 28rem; margin: 0; }
 
 .scenario-summary {
-  flex: 0 1 auto;
+  flex: 0 1 26rem;
   display: grid;
-  gap: 0.08rem;
+  gap: 1.05rem;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   line-height: 1.35;
 }
 
-.scenario-summary p { margin: 0; }
+.summary-facts,
+.summary-roads {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-roads { list-style: none; }
+
+.summary-facts p,
+.summary-roads li {
+  margin: 0;
+  padding: 0.28rem 0.2rem 0.28rem 0.7rem;
+  border-left: 3px solid transparent;
+}
+
+.summary-roads .missed {
+  color: var(--muted);
+  border-left-color: #e4dfd6;
+}
+
+.summary-roads .captured {
+  color: var(--ink);
+  font-weight: 650;
+  border-left-color: var(--red);
+}
 
 .rise label {
   display: block;

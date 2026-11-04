@@ -226,31 +226,41 @@ function wetCaption(row) {
 }
 
 function scenarioSummaryLines(row) {
-  const lines = [
+  const facts = [
     riseText(row.stage_above_channel_dem_m) + " chosen rise",
     groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m",
     row.n_assumed_closed + " assumed-closed centerlines",
   ];
-  (nameCheck && nameCheck.rows || []).forEach((road) => {
+  const roads = (nameCheck && nameCheck.rows || []).map((road) => {
     const step = (road.steps || []).find((item) => item.id === row.id);
+    const captured = Boolean(step && step.result === "captured");
     let result = "missed";
-    if (step && step.result === "captured") {
-      result = step.captured_of ? "captured, " + step.captured_of : "captured";
-    }
-    lines.push(road.road + " " + result);
+    if (captured) result = step.captured_of ? "captured, " + step.captured_of : "captured";
+    return { text: road.road + " " + result, captured: captured };
   });
-  return lines;
+  return { facts: facts, roads: roads };
 }
 
 function showScenarioSummary(row) {
   const node = document.getElementById("scenario-summary");
   if (!node || !nameCheck) return;
-  node.replaceChildren();
-  scenarioSummaryLines(row).forEach((text) => {
+  const lines = scenarioSummaryLines(row);
+  const facts = document.createElement("div");
+  facts.className = "summary-facts";
+  lines.facts.forEach((text) => {
     const line = document.createElement("p");
     line.textContent = text;
-    node.append(line);
+    facts.append(line);
   });
+  const roads = document.createElement("ul");
+  roads.className = "summary-roads";
+  lines.roads.forEach((item) => {
+    const line = document.createElement("li");
+    line.className = item.captured ? "captured" : "missed";
+    line.textContent = item.text;
+    roads.append(line);
+  });
+  node.replaceChildren(facts, roads);
 }
 
 function riseText(metres) {
