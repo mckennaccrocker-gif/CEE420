@@ -175,6 +175,25 @@ main {
   font-size: 0.78rem;
 }
 
+#enso-panel {
+  position: absolute;
+  z-index: 500;
+  top: 14.6rem;
+  right: 12px;
+  width: 16.5rem;
+  max-height: 42%;
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--navy);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem 0.6rem;
+  box-shadow: 0 1px 4px rgba(22, 50, 79, 0.12);
+}
+
+#enso-panel h2 { margin-bottom: 0.35rem; }
+
+#enso-panel p { margin: 0.28rem 0; font-size: 0.78rem; }
+
 .report-popup p { margin: 0.35rem 0; }
 
 .legend-heading {

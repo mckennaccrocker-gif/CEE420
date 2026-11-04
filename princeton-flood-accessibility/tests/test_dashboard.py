@@ -149,7 +149,7 @@ def test_saved_ida_comparison_is_not_a_validation(project_root: Path) -> None:
     assert "Stony Brook crossings" in titles
 
 
-def test_server_serves_the_scenario_summary(settings: dict) -> None:
+def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) -> None:
     from test_placeholders import _load
 
     dashboard = _load("dashboard.py")
@@ -178,7 +178,12 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         assert "Regulatory flood zones" in html
         assert 'id="reports-toggle"' in html
         assert 'id="reports-toggle" type="checkbox" checked' not in html
+        assert 'id="enso-panel"' in html
         assert 'type="range"' not in html
+        script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
+        assert "not a threshold on the weekly anomaly" in script
+        assert "does not set Princeton road depths" in script
+        assert "last saved observation" in script
         connection.request("GET", "/api/fema")
         fema_response = connection.getresponse()
         fema = json.loads(fema_response.read().decode("utf-8"))
@@ -210,6 +215,19 @@ def test_server_serves_the_scenario_summary(settings: dict) -> None:
         assert [row["road"] for row in check["rows"]][1] == "Mercer Road"
         assert check["rows"][1]["plus_2_00"] == "captured"
         assert check["rows"][1]["captured_of"] == "2 of 14"
+        connection.request("GET", "/api/enso")
+        enso_response = connection.getresponse()
+        enso = json.loads(enso_response.read().decode("utf-8"))
+        assert enso_response.status == 200
+        assert enso["enso_scales_depths"] is False
+        assert enso["weekly"]["nino34_anomaly_c"] == 3.4
+        assert enso["weekly"]["week_centered"] == "2026-10-28"
+        assert enso["oni"]["anomaly_c"] == 2.16
+        assert enso["oni"]["season"] == "JAS"
+        assert enso["oni"]["year"] == 2026
+        assert enso["official_phase"]["status"] == "El Niño Advisory"
+        assert enso["official_phase"]["issued"] == "8 October 2026"
+        assert enso["official_phase"]["classified_from_weekly_anomaly"] is False
     finally:
         server.shutdown()
         server.server_close()

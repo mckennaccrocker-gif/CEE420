@@ -486,36 +486,44 @@ function renderDecks(record) {
 
 function renderEnso(record) {
   const root = document.getElementById("enso");
+  if (!root) return;
   root.replaceChildren();
   if (!record.ok) {
     const fail = document.createElement("p");
-    fail.textContent = record.fetch_error || "ENSO observations are unavailable.";
+    fail.textContent = record.fetch_error || "No saved ENSO observation.";
     root.append(fail);
     return;
   }
-  if (record.using_saved_observation) {
-    const saved = document.createElement("p");
-    saved.textContent = "NOAA could not be reached. Showing the last successful observation, retrieved " + record.fetched_at_utc + ".";
-    root.append(saved);
+  const saved = document.createElement("p");
+  saved.className = "hint";
+  const retrieved = formatStamp(record.fetched_at_utc);
+  saved.textContent = record.using_saved_observation
+    ? "Showing the last saved observation, retrieved " + retrieved + "."
+    : "Saved observation, retrieved " + retrieved + ".";
+  root.append(saved);
+  const weekly = record.weekly || {};
+  const oni = record.oni || {};
+  if (weekly.nino34_anomaly_c != null) {
+    const week = document.createElement("p");
+    week.textContent = "Weekly Niño-3.4 " + signed(weekly.nino34_anomaly_c) + " °C (week centered " + formatIsoDate(weekly.week_centered) + ")";
+    root.append(week);
   }
-  const weekly = record.weekly;
-  const oni = record.oni;
-  addLine(root, "Weekly Niño-3.4 anomaly", signed(weekly.nino34_anomaly_c) + " °C");
-  addLine(root, "Week centered", weekly.week_centered);
-  addLine(root, "Weekly Niño-3.4 SST", weekly.nino34_sst_c.toFixed(1) + " °C");
-  addLine(root, "ONI", oni.season + " " + oni.year + " (" + oni.season_label + "), anomaly " + signed(oni.anomaly_c) + " °C");
-  addLine(root, "Retrieved", record.fetched_at_utc);
+  if (oni.anomaly_c != null) {
+    const index = document.createElement("p");
+    index.textContent = "ONI " + signed(oni.anomaly_c) + " °C for " + (oni.season || "") + " " + (oni.year || "");
+    root.append(index);
+  }
   const phase = document.createElement("p");
-  if (record.official_phase) {
-    phase.textContent = "Official phase: " + record.official_phase.status + ", issued " + (record.official_phase.issued || "date not parsed") + ". " + record.official_phase.note;
+  if (record.official_phase && record.official_phase.status) {
+    phase.textContent = record.official_phase.status + " from the " + (record.official_phase.issued || "undated") + " discussion.";
   } else {
-    phase.textContent = record.official_phase_note || "No official phase is shown.";
+    phase.textContent = record.official_phase_note || "No official phase is shown. The weekly anomaly is not a phase.";
   }
   root.append(phase);
-  const context = document.createElement("p");
-  context.className = "hint";
-  context.textContent = record.context;
-  root.append(context);
+  const rule = document.createElement("p");
+  rule.className = "hint";
+  rule.textContent = "The phase is NOAA’s sentence, not a threshold on the weekly anomaly. ENSO does not set Princeton road depths.";
+  root.append(rule);
 }
 
 function renderNameCheck(record) {
@@ -677,6 +685,20 @@ function addLine(root, label, value) {
 function metres(value) {
   if (value >= 1000) return (value / 1000).toFixed(1) + " km";
   return Math.round(value) + " m";
+}
+
+function formatStamp(iso) {
+  if (!iso) return "date not recorded";
+  const date = formatIsoDate(iso.slice(0, 10));
+  const time = iso.length >= 16 ? iso.slice(11, 16) : "";
+  return time ? date + ", " + time + " UTC" : date;
+}
+
+function formatIsoDate(iso) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return iso || "date not recorded";
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const parts = iso.slice(0, 10).split("-");
+  return Number(parts[2]) + " " + months[Number(parts[1]) - 1] + " " + parts[0];
 }
 
 function signed(value) {

@@ -47,7 +47,14 @@ def build_context(settings: dict) -> dict:
     boundary = json.loads(resolve(settings, "boundary").read_text(encoding="utf-8"))
     enso_path = resolve(settings, "enso_cache")
     ida_path = resolve(settings, "ida_comparison")
-    enso = load_cached(enso_path) if enso_path.is_file() else {"ok": False, "fetch_error": "No saved ENSO observation. Run scripts/update_enso.py."}
+    enso = load_cached(enso_path) if enso_path.is_file() else {
+        "ok": False,
+        "using_saved_observation": False,
+        "enso_scales_depths": False,
+        "hurricane_ida_depth": False,
+        "fetched_at_utc": None,
+        "fetch_error": "No saved ENSO observation. Run scripts/update_enso.py.",
+    }
     ida = json.loads(ida_path.read_text(encoding="utf-8")) if ida_path.is_file() else {
         "validated": False,
         "hurricane_ida_depth": False,

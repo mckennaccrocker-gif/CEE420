@@ -114,7 +114,7 @@ The Pacific numbers were fetched 2 November 2026 at 23:14 UTC. They are not used
 | Oceanic Niño Index | +2.16 °C (three-month mean sea-surface temperature 29.12 °C) | July–September 2026 |
 | Official alert | El Niño Advisory | Diagnostic discussion issued 8 October 2026 |
 
-The advisory is the status line in that 8 October discussion. It was not reclassified from the later weekly anomaly. The panel states that ENSO is large-scale context for Atlantic tropical cyclone activity and that it does not set a Princeton road depth.
+The advisory is the status line in that 8 October discussion. It was not reclassified from the later weekly anomaly. The panel states that ENSO is large-scale context for Atlantic tropical cyclone activity and that it does not set a Princeton road depth. The phase is NOAA’s sentence, not a threshold on the weekly anomaly, and ENSO does not set Princeton road depths.
 
 ## NJOGIS and OpenStreetMap
 
