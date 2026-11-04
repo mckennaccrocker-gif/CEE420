@@ -13,3 +13,5 @@ One page for a Princeton official. Say only what is below. The figures are the o
 **ENSO panel.** Point at it last. Fetched 2 November 2026 at 23:14 UTC: weekly Niño-3.4 anomaly +3.4 °C for the week centered 28 October 2026, Oceanic Niño Index +2.16 °C for July–September 2026, and an El Niño Advisory from the discussion issued 8 October 2026. The panel says this is Pacific context. It does not set a Princeton road depth, and the October advisory was not rewritten from the later weekly number.
 
 **Do not claim.** This is not an Ida reconstruction and not a forecast hour. Do not say the model found Quaker Road dry. Do not treat 65.5 feet as a deck or a scenario depth. Do not treat a larger piece-count as a neighborhood cut off from services. Do not sum the 39 traffic counts or call zero records a statement that no counted road is near water. The September 2021 news check was not scored.
+
+A 46-second walkthrough of this page was recorded. The dashboard stays at http://127.0.0.1:8765/.
