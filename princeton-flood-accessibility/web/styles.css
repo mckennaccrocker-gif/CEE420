@@ -42,7 +42,7 @@ header {
 }
 
 .mast {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 1.7rem 1.75rem 1.85rem;
 }
@@ -71,9 +71,9 @@ h1 {
 }
 
 .page {
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 2.4rem 1.75rem 4.5rem;
+  padding: 1.8rem 1.75rem 4.5rem;
 }
 
 .lede,
@@ -116,6 +116,7 @@ h1 {
 .lede { margin-top: 0; max-width: 42rem; }
 
 .page > section > h2,
+.warning-lists > .answer > h2,
 .roads-block > h2,
 .details > h2,
 .lede h2 {
@@ -134,8 +135,26 @@ h1 {
 }
 
 .rise-panel {
-  margin-top: 2.75rem;
-  padding-bottom: 0.4rem;
+  margin-top: 2.2rem;
+  padding-bottom: 0.2rem;
+}
+
+.warning-split {
+  display: grid;
+  grid-template-columns: minmax(22rem, 0.92fr) minmax(26rem, 1.08fr);
+  gap: 1.5rem 2.25rem;
+  align-items: start;
+  margin-top: 2rem;
+}
+
+.warning-lists .rise-panel,
+.warning-lists .answer:first-child { margin-top: 0; }
+
+.warning-lists .answer { max-width: none; }
+
+.warning-map {
+  position: sticky;
+  top: 0.75rem;
 }
 
 .rise { max-width: 38rem; }
@@ -223,8 +242,9 @@ h1 {
 
 #map-wrap {
   position: relative;
-  height: 640px;
-  margin-top: 2rem;
+  height: min(680px, calc(100vh - 8.5rem));
+  min-height: 420px;
+  margin-top: 0;
   background: #e7eef2;
   border: 1px solid var(--line);
 }
@@ -478,6 +498,12 @@ a { color: var(--navy-soft); }
 
 .leaflet-control-zoom a {
   color: var(--navy);
+}
+
+@media (max-width: 960px) {
+  .warning-split { grid-template-columns: 1fr; }
+  .warning-map { position: static; }
+  #map-wrap { height: 70vh; min-height: 420px; }
 }
 
 @media (max-width: 800px) {

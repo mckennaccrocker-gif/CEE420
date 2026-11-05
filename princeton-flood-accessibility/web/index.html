@@ -22,6 +22,8 @@
       <p>An early warning for a chosen water rise. Pick a saved mark. The page reads the roads already computed for that mark. It does not invent a depth between the marks.</p>
     </section>
 
+    <div class="warning-split">
+    <div class="warning-lists">
     <section class="rise-panel answer" aria-label="How high the water is set">
       <h2>How high the water is set</h2>
       <div class="rise">
@@ -87,14 +89,18 @@
       <ul id="facility-routes" class="summary-roads"></ul>
     </section>
 
-    <section id="map-wrap" aria-label="Centerline map">
-      <div id="map"></div>
-      <form id="search">
-        <label for="road-query">Find a road</label>
-        <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
-      </form>
-    </section>
-    <div id="legend" class="legend-strip"></div>
+    </div>
+    <div class="warning-map">
+      <section id="map-wrap" aria-label="Centerline map">
+        <div id="map"></div>
+        <form id="search">
+          <label for="road-query">Find a road</label>
+          <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
+        </form>
+      </section>
+      <div id="legend" class="legend-strip"></div>
+    </div>
+    </div>
 
     <section class="details" aria-label="More detail">
       <h2>More detail</h2>

@@ -216,6 +216,12 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "How high the water is set" in html
         assert "Where not to go" in html
         assert "Which roads stay open" in html
+        assert 'class="warning-split"' in html
+        assert html.index("Where not to go") < html.index('id="map-wrap"')
+        assert html.index("Hospital, fire, and police") < html.index('id="map-wrap"')
+        css = (project_root / "web" / "styles.css").read_text(encoding="utf-8")
+        assert "position: sticky" in css
+        assert "grid-template-columns: 1fr" in css
         assert 'value="0.25"' in html
         assert 'id="stage-slider"' in html
         assert 'step="0.25"' in html

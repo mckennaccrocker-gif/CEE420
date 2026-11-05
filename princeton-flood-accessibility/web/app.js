@@ -1,7 +1,7 @@
 const COLORS = {
   accessible_routable: "#1f7a4d",
   at_risk_routable: "#c4920a",
-  assumed_closed: "#c0392b",
+  assumed_closed: "#b42318",
   partial_above_0_30_not_closed: "#e07a2f",
   bridge_deck_unmatched: "#6d4ea8",
   bridge_deck_sampled: "#0e7c86",
@@ -191,6 +191,7 @@ function drawMap(boundary) {
   }).addTo(map);
   map.fitBounds(roadLayer.getBounds(), { padding: [28, 28] });
   requestAnimationFrame(() => map.invalidateSize());
+  window.addEventListener("resize", () => map.invalidateSize());
 }
 
 function styleFor(status, deckStatus) {
@@ -198,7 +199,7 @@ function styleFor(status, deckStatus) {
   const color = deckStatus === "bridge_deck_sampled" ? COLORS.bridge_deck_sampled : (COLORS[status] || "#444");
   return {
     color: color,
-    weight: closed || deckStatus === "bridge_deck_sampled" ? 4 : status === "partial_above_0_30_not_closed" ? 3 : 2.2,
+    weight: closed ? 5 : deckStatus === "bridge_deck_sampled" ? 4 : status === "accessible_routable" ? 2.6 : status === "partial_above_0_30_not_closed" ? 3 : 2.2,
     opacity: 0.92,
   };
 }
