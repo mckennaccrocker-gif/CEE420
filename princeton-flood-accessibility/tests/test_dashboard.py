@@ -216,6 +216,14 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "How high the water is set" in html
         assert "Where not to go" in html
         assert "Which roads stay open" in html
+        static = json.loads((project_root / "web" / "data" / "summary.json").read_text(encoding="utf-8"))
+        static_row = next(item for item in static["stages"] if item["id"] == "0.25")
+        assert static["hurricane_ida_depth"] is False
+        assert static["interpolated"] is False
+        assert static["enso_scales_depths"] is False
+        assert static_row["n_assumed_closed"] == 15
+        assert static_row["n_still_open"] == 946
+        assert 'href="styles.css"' in html
         assert 'class="warning-split"' in html
         assert html.index("Where not to go") < html.index('id="map-wrap"')
         assert html.index("Hospital, fire, and police") < html.index('id="map-wrap"')
@@ -235,6 +243,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="enso-panel"' in html
         assert html.count('type="range"') == 1
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
+        assert "data/summary.json" in script
         assert "nearestStageId" in script
         assert "function showScenarioSummary" in script
         assert 'setStage("0.25")' in script

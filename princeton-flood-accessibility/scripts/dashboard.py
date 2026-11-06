@@ -141,10 +141,7 @@ def make_handler(context: dict) -> type[BaseHTTPRequestHandler]:
             if path == "/":
                 self._file(WEB / "index.html")
                 return
-            if path.startswith("/vendor/") or path in {"/app.js", "/styles.css"}:
-                self._file(WEB / path.lstrip("/"))
-                return
-            self.send_error(404)
+            self._file(WEB / path.lstrip("/"))
 
         def _json(self, payload: object) -> None:
             body = json.dumps(payload).encode("utf-8")

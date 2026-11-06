@@ -76,16 +76,16 @@ document.getElementById("reports-toggle").addEventListener("change", (event) => 
 });
 
 Promise.all([
-  fetch("/api/summary").then((response) => response.json()),
-  fetch("/api/roads.geojson").then((response) => response.json()),
-  fetch("/api/boundary.geojson").then((response) => response.json()),
-  fetch("/api/enso").then((response) => response.json()),
-  fetch("/api/ida").then((response) => response.json()),
-  fetch("/api/bridge-decks").then((response) => response.json()),
-  fetch("/api/fema").then((response) => response.json()),
-  fetch("/api/fema-zones.geojson").then((response) => response.json()),
-  fetch("/api/observed-reports.geojson").then((response) => response.json()),
-  fetch("/api/name-check").then((response) => response.json()),
+  fetch("data/summary.json").then((response) => response.json()),
+  fetch("data/roads.geojson").then((response) => response.json()),
+  fetch("data/boundary.geojson").then((response) => response.json()),
+  fetch("data/enso.json").then((response) => response.json()),
+  fetch("data/ida.json").then((response) => response.json()),
+  fetch("data/bridge-decks.json").then((response) => response.json()),
+  fetch("data/fema.json").then((response) => response.json()),
+  fetch("data/fema-zones.geojson").then((response) => response.json()),
+  fetch("data/observed-reports.geojson").then((response) => response.json()),
+  fetch("data/name-check.json").then((response) => response.json()),
 ]).then(([summaryPayload, roadPayload, boundaryPayload, ensoPayload, idaPayload, deckPayload, femaPayload, zonePayload, reportPayload, nameCheckPayload]) => {
   summary = summaryPayload;
   roads = roadPayload;

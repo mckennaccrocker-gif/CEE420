@@ -87,7 +87,7 @@ def test_name_check_panel_is_in_the_page(project_root: Path) -> None:
     script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
     assert "renderNameCheck" in script
     assert "showNameCheck(stage)" in script
-    assert "/api/name-check" in script
+    assert "data/name-check.json" in script
     assert "function focusReportedRoad" in script
     assert "feature.properties.title === row.road" in script
     assert "setReportsVisible(true)" in script
