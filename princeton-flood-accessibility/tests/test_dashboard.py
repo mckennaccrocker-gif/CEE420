@@ -16,6 +16,7 @@ from dashboard.enso import parse_weekly
 from dashboard.enso import refresh
 from dashboard.ida_check import compare_places
 from dashboard.roads import build_road_collection
+from dashboard.summary import attach_facility_places
 from dashboard.summary import build_summary
 
 WEEKLY = """
@@ -130,6 +131,32 @@ def test_summary_keeps_the_two_stages_separate(project_root: Path) -> None:
     assert by_id["2.00"]["aadt_records"] == 39
     with pytest.raises(ValueError):
         build_summary({"hurricane_ida_depth": True})
+    places = json.loads((project_root / "data" / "raw" / "osm_destinations_princeton.geojson").read_text(encoding="utf-8"))
+    attach_facility_places(
+        summary,
+        [
+            {
+                "osm_id": feature["properties"]["osm_id"],
+                "lon": feature["properties"]["lon"],
+                "lat": feature["properties"]["lat"],
+            }
+            for feature in places["features"]
+        ],
+    )
+    fire = next(
+        item for item in by_id["0.25"]["facility_routes"]
+        if item["origin_role"] == "hospital" and item["destination_role"] == "fire_station"
+    )
+    assert fire["origin_lat"] == pytest.approx(40.38834555, abs=1e-5)
+    assert fire["destination_lat"] == pytest.approx(40.3601579, abs=1e-5)
+    assert isinstance(fire["scenario_path_length_m"], float)
+    blocked = next(
+        item for item in by_id["2.00"]["facility_routes"]
+        if item["origin_role"] == "hospital" and item["destination_role"] == "fire_station"
+    )
+    assert blocked["plain"] == "blocked"
+    assert blocked["scenario_path_length_m"] is None
+    assert blocked["origin_lon"] == pytest.approx(-74.653667, abs=1e-4)
 
 
 def test_roads_are_not_marked_as_ida(project_root: Path) -> None:
@@ -242,27 +269,32 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="scenario-summary"' in html
         assert 'id="stage-caption"' in html
         assert 'id="fema-toggle"' in html
+        assert 'id="fema-toggle" type="checkbox" checked' not in html
         assert "Regulatory flood zones" in html
-        assert 'id="reports-toggle"' in html
-        assert 'id="reports-toggle" type="checkbox" checked' not in html
-        assert 'id="enso-panel"' in html
+        assert "A zone does not change the road depth." in html
+        assert 'id="open-fold"' in html
+        assert 'id="map-blurb"' in html
+        assert "Mckenna Crocker and Annie Huettel." in html
+        assert "USGS 3DEP" in html
+        assert "More detail" not in html
+        assert "Flood statistics" not in html
+        assert 'id="reports-toggle"' not in html
+        assert 'id="enso-panel"' not in html
         assert html.count('type="range"') == 1
         script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
         assert "data/summary.json" in script
         assert "nearestStageId" in script
         assert "function showScenarioSummary" in script
         assert 'setStage("0.25")' in script
-        assert "affected / do not use" in script
+        assert "Affected / do not use" in script
         assert "still open" in script
-        assert 'line.className = item.captured ? "captured" : "missed"' in script
         assert "function wetCaption" in script
         assert "function focusNamedRoad" in script
+        assert "function focusFacilityRoute" in script
+        assert "This does not change the road depth." in script
         assert "fillOpacity: 0" in script
         assert 'weight: 4.5' in script
         assert "Princeton boundary" in script
-        assert "not a threshold on the weekly anomaly" in script
-        assert "does not set Princeton road depths" in script
-        assert "last saved observation" in script
         connection.request("GET", "/api/fema")
         fema_response = connection.getresponse()
         fema = json.loads(fema_response.read().decode("utf-8"))

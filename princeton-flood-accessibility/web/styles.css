@@ -271,6 +271,76 @@ button.road-link[aria-pressed="true"] { background: #f3efe4; }
 
 #map { position: absolute; inset: 0; background: #e7eef2; }
 
+.map-blurb {
+  position: absolute;
+  z-index: 500;
+  left: 12px;
+  bottom: 12px;
+  max-width: min(20rem, calc(100% - 24px));
+  background: rgba(255, 252, 248, 0.96);
+  border: 1px solid var(--line);
+  padding: 0.7rem 0.85rem;
+}
+
+.map-blurb[hidden] { display: none; }
+
+.blurb-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+#blurb-status { margin-top: 0.2rem; }
+
+.zone-control {
+  margin-top: 0.85rem;
+  font-size: 0.95rem;
+}
+
+.zone-control label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: 650;
+  color: var(--navy);
+}
+
+.zone-control p {
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.name-fold { margin-top: 0.7rem; }
+
+.name-fold summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--navy);
+}
+
+.name-fold .name-list {
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.sources {
+  margin-top: 2.4rem;
+  max-width: 42rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.sources h2 {
+  margin-bottom: 0.35rem;
+  color: var(--navy);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sources p + p { margin-top: 0.25rem; }
+
 #search {
   position: absolute;
   z-index: 500;

@@ -47,34 +47,19 @@
 
     <section class="answer" aria-label="Where not to go">
       <h2>Where not to go</h2>
-      <ul id="avoid-list" class="name-list">
-        <li>Bertrand Drive, 2 centerlines</li>
-        <li>Christopher Drive</li>
-        <li>Cuyler Road</li>
-        <li>Ewing Street</li>
-        <li>Flexner Lane</li>
-        <li>Goldman Lane</li>
-        <li>Great Road East</li>
-        <li>Meetinghouse Court</li>
-        <li>Meritt Lane, 2 centerlines</li>
-        <li>North Harrison Street</li>
-        <li>South Olden Lane</li>
-        <li>Thanet Circle</li>
-        <li>Valley Road</li>
-      </ul>
+      <details id="avoid-fold" class="name-fold">
+        <summary>Road names</summary>
+        <ul id="avoid-list" class="name-list"></ul>
+      </details>
     </section>
 
     <section class="answer" id="stay-open" aria-label="Which roads stay open">
       <h2>Which roads stay open</h2>
       <p id="open-lead" class="answer-lead open">946 centerlines are still open. Send traffic there.</p>
-      <h3>Five named roads</h3>
-      <ul id="summary-roads" class="summary-roads">
-        <li class="missed"><button type="button" class="road-link" data-road="Quaker Road"><span class="road-name">Quaker Road</span><span class="road-result">still open</span></button></li>
-        <li class="missed"><button type="button" class="road-link" data-road="Mercer Road"><span class="road-name">Mercer Road</span><span class="road-result">still open</span></button></li>
-        <li class="missed"><button type="button" class="road-link" data-road="Stockton Street / Route 206"><span class="road-name">Stockton Street / Route 206</span><span class="road-result">still open</span></button></li>
-        <li class="missed"><button type="button" class="road-link" data-road="South Harrison Street"><span class="road-name">South Harrison Street</span><span class="road-result">still open</span></button></li>
-        <li class="missed"><button type="button" class="road-link" data-road="Rosedale Road"><span class="road-name">Rosedale Road</span><span class="road-result">still open</span></button></li>
-      </ul>
+      <details id="open-fold" class="name-fold">
+        <summary>Road names</summary>
+        <ul id="open-list" class="name-list"></ul>
+      </details>
       <h3>Hospital, fire, and police</h3>
       <p id="facility-note" class="hint">Hospital, fire, and police routes are already saved for every mark from 0 m to 2.0 m by 0.25 m. No route was added.</p>
       <ul id="facility-routes" class="summary-roads"></ul>
@@ -88,73 +73,27 @@
           <label for="road-query">Find a road</label>
           <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
         </form>
+        <aside id="map-blurb" class="map-blurb" hidden>
+          <p id="blurb-name" class="blurb-name"></p>
+          <p id="blurb-status"></p>
+          <p id="blurb-detail" class="hint"></p>
+        </aside>
       </section>
+      <div class="zone-control">
+        <label for="fema-toggle">
+          <input id="fema-toggle" type="checkbox">
+          Regulatory flood zones
+        </label>
+        <p>FEMA NFHL. A zone does not change the road depth.</p>
+      </div>
       <div id="legend" class="legend-strip"></div>
     </div>
     </div>
 
-    <section class="details" aria-label="More detail">
-      <h2>More detail</h2>
-      <details class="fold">
-        <summary id="name-check-summary">Name check</summary>
-        <div class="fold-body">
-          <p class="hint">A name check, not a validation. It was not scored.</p>
-          <div id="name-check"></div>
-        </div>
-      </details>
-      <details class="fold">
-        <summary>Flood statistics</summary>
-        <div class="fold-body">
-          <p id="scenario-note" class="hint"></p>
-          <dl id="stats"></dl>
-          <p id="hospital"></p>
-          <p id="aadt"></p>
-          <p id="component-note" class="hint"></p>
-          <h2>The two assumptions</h2>
-          <p class="hint">A comparison of the saved results. Not a hydrograph.</p>
-          <div id="chart"></div>
-        </div>
-      </details>
-      <details class="fold">
-        <summary>Flood zones and news reports</summary>
-        <div class="fold-body">
-          <div id="fema-control">
-            <label for="fema-toggle">
-              <input id="fema-toggle" type="checkbox" checked>
-              Regulatory flood zones
-            </label>
-            <p id="fema-date"></p>
-          </div>
-          <div id="reports-control">
-            <label for="reports-toggle">
-              <input id="reports-toggle" type="checkbox">
-              September 2021 news reports
-            </label>
-            <p id="reports-note">Off until checked. Black dashes are a news report, not a model depth.</p>
-          </div>
-          <h2>Regulatory flood zones</h2>
-          <div id="fema"></div>
-        </div>
-      </details>
-      <details class="fold" id="enso-panel">
-        <summary class="enso-role">Does not change road depth.</summary>
-        <div class="fold-body">
-          <h2>ENSO context</h2>
-          <div id="enso"></div>
-        </div>
-      </details>
-      <details class="fold">
-        <summary>Bridge decks</summary>
-        <div id="decks" class="fold-body"></div>
-      </details>
-      <details class="fold" id="selected-road">
-        <summary>Selected road</summary>
-        <div id="road-detail" class="fold-body"><p class="empty">Click a centerline on the map.</p></div>
-      </details>
-      <details class="fold">
-        <summary>September 2021 records</summary>
-        <div id="ida" class="fold-body"></div>
-      </details>
+    <section class="sources" aria-label="Sources">
+      <h2>Sources</h2>
+      <p>Mckenna Crocker and Annie Huettel.</p>
+      <p>OpenStreetMap. USGS 3DEP. NJGIN municipal boundary. FEMA NFHL.</p>
     </section>
   </div>
   <script src="vendor/leaflet/leaflet.js"></script>

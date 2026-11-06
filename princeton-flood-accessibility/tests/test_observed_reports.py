@@ -110,13 +110,7 @@ def test_click_text_follows_the_documented_scenario(project_root: Path) -> None:
     assert "2 September 2021" in rosedale["news_date"]
 
 
-def test_reports_toggle_defaults_off(project_root: Path) -> None:
+def test_reports_toggle_is_not_on_the_page(project_root: Path) -> None:
     html = (project_root / "web" / "index.html").read_text(encoding="utf-8")
-    assert 'id="reports-toggle"' in html
-    assert 'id="reports-toggle" type="checkbox" checked' not in html
-    script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
-    assert "setReportsVisible" in script
-    assert "not a model depth" in script
-    assert 'color: "#111111"' in script
-    assert 'dashArray: "2 8"' in script
-    assert 'pointer-events", "stroke"' in script
+    assert 'id="reports-toggle"' not in html
+    assert "September 2021 news reports" not in html

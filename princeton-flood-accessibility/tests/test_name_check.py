@@ -79,18 +79,9 @@ def test_refuses_precision_or_recall(project_root: Path) -> None:
         refuse_scored_name_check({**payload, "validated": True})
 
 
-def test_name_check_panel_is_in_the_page(project_root: Path) -> None:
+def test_name_check_panel_is_not_on_the_page(project_root: Path) -> None:
     html = (project_root / "web" / "index.html").read_text(encoding="utf-8")
-    assert 'id="name-check"' in html
-    assert "Name check" in html
-    assert "not a validation" in html
+    assert 'id="name-check"' not in html
+    assert "More detail" not in html
     script = (project_root / "web" / "app.js").read_text(encoding="utf-8")
-    assert "renderNameCheck" in script
-    assert "showNameCheck(stage)" in script
-    assert "data/name-check.json" in script
-    assert "function focusReportedRoad" in script
-    assert "feature.properties.title === row.road" in script
-    assert "setReportsVisible(true)" in script
-    assert "row.detail" in script
-    assert 'color: "#111111"' in script
-    assert "not a validation" in script
+    assert "renderNameCheck" not in script

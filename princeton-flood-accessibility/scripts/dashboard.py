@@ -26,6 +26,7 @@ from dashboard.enso import load_cached  # noqa: E402
 from dashboard.name_check import build_name_check  # noqa: E402
 from dashboard.observed_reports import build_observed_reports  # noqa: E402
 from dashboard.roads import build_road_collection  # noqa: E402
+from dashboard.summary import attach_facility_places  # noqa: E402
 from dashboard.summary import build_summary  # noqa: E402
 from network.roads import load_settings  # noqa: E402
 from network.roads import resolve  # noqa: E402
@@ -41,9 +42,30 @@ _TYPES = {
 }
 
 
+def _saved_places(settings: dict) -> list[dict]:
+    path = resolve(settings, "destinations")
+    if not path.is_file():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    places = []
+    for feature in payload.get("features") or []:
+        props = feature.get("properties") or {}
+        if props.get("osm_id") is None:
+            continue
+        places.append(
+            {
+                "osm_id": props.get("osm_id"),
+                "lon": props.get("lon"),
+                "lat": props.get("lat"),
+            }
+        )
+    return places
+
+
 def build_context(settings: dict) -> dict:
     stats = json.loads(resolve(settings, "accessibility_stats").read_text(encoding="utf-8"))
     summary = build_summary(stats)
+    attach_facility_places(summary, _saved_places(settings))
     boundary = json.loads(resolve(settings, "boundary").read_text(encoding="utf-8"))
     enso_path = resolve(settings, "enso_cache")
     ida_path = resolve(settings, "ida_comparison")

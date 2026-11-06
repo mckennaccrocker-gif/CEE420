@@ -124,17 +124,48 @@ def _facility_routes(stage: dict[str, Any]) -> list[dict[str, Any]]:
             plain = "still open"
         else:
             continue
+        length = row.get("scenario_path_length_m")
         routes.append(
             {
                 "origin": row.get("origin"),
                 "destination": row.get("destination"),
                 "origin_role": row.get("origin_role"),
                 "destination_role": row.get("destination_role"),
+                "origin_osm_id": row.get("origin_osm_id"),
+                "destination_osm_id": row.get("destination_osm_id"),
                 "scenario_status": status,
+                "scenario_path_length_m": None if length is None else float(length),
                 "plain": plain,
             }
         )
     return routes
+
+
+def attach_facility_places(summary: dict[str, Any], places: list[dict[str, Any]]) -> dict[str, Any]:
+    """Copy saved destination coordinates onto the routes. No path is computed."""
+    lookup: dict[int, tuple[float, float]] = {}
+    for place in places:
+        osm_id = place.get("osm_id")
+        lon = place.get("lon")
+        lat = place.get("lat")
+        if osm_id is None or lon is None or lat is None:
+            continue
+        lookup[int(osm_id)] = (float(lon), float(lat))
+    for stage in summary.get("stages") or []:
+        for route in stage.get("facility_routes") or []:
+            origin = lookup.get(_as_int(route.get("origin_osm_id")))
+            destination = lookup.get(_as_int(route.get("destination_osm_id")))
+            if origin:
+                route["origin_lon"], route["origin_lat"] = origin
+            if destination:
+                route["destination_lon"], route["destination_lat"] = destination
+    return summary
+
+
+def _as_int(value: Any) -> int | None:
+    if value is None or value == "":
+        return None
+    return int(value)
 
 
 def _hospital_state(stage: dict[str, Any]) -> dict[str, Any]:
