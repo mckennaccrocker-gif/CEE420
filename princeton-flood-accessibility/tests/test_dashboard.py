@@ -296,8 +296,9 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function wetCaption" in script
         assert "function focusNamedRoad" in script
         assert "function focusFacilityRoute" in script
-        assert "Still passable in a normal car." in script
-        assert "Do not drive." in script
+        assert "A passenger car can still pass." in script
+        assert "Do not drive a passenger car. Half the centerline is at or above 0.30 m." in script
+        assert "normal car" not in script
         assert "Pedestrians are not scored separately." not in script
         assert "affected plus still open" in script
         assert "This does not change the road depth." in script

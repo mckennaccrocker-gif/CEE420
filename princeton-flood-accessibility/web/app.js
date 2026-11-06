@@ -448,9 +448,10 @@ function selectLayer(layer) {
 
 function carLine(statuses) {
   const closed = statuses.filter((status) => status === "assumed_closed").length;
-  if (closed && closed === statuses.length) return "Do not drive.";
-  if (!closed) return "Still passable in a normal car.";
-  return "Do not drive on the affected centerlines. The others are still passable in a normal car.";
+  const lines = [];
+  if (closed) lines.push("Do not drive a passenger car. Half the centerline is at or above 0.30 m.");
+  if (closed < statuses.length) lines.push("A passenger car can still pass.");
+  return lines.join(" ");
 }
 
 function showShare(row) {
