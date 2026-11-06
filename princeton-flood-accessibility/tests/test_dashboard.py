@@ -211,7 +211,10 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         page = connection.getresponse()
         html = page.read().decode("utf-8")
         assert page.status == 200
-        assert "Road accessibility" in html
+        assert "Shows which roads would close, so the town can act before they are already closed." in html
+        assert "Each mark is a chosen rise already computed, not Hurricane Ida and not a forecast." in html
+        assert "What this is" not in html
+        assert "Affected means assumed closed" not in html
         assert "Early warning" in html
         assert "How high the water is set" in html
         assert "Where not to go" in html
@@ -223,6 +226,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert static["enso_scales_depths"] is False
         assert static_row["n_assumed_closed"] == 15
         assert static_row["n_still_open"] == 946
+        closed_at_two = next(item for item in static["stages"] if item["id"] == "2.00")
+        assert closed_at_two["n_assumed_closed"] == 90
         assert 'href="styles.css"' in html
         assert 'class="warning-split"' in html
         assert html.index("Where not to go") < html.index('id="map-wrap"')
@@ -233,7 +238,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'value="0.25"' in html
         assert 'id="stage-slider"' in html
         assert 'step="0.25"' in html
-        assert "chosen rise above the channel, not a forecast." in html
+        assert "Chosen rise" in html
         assert 'id="scenario-summary"' in html
         assert 'id="stage-caption"' in html
         assert 'id="fema-toggle"' in html
@@ -251,6 +256,10 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "still open" in script
         assert 'line.className = item.captured ? "captured" : "missed"' in script
         assert "function wetCaption" in script
+        assert "function focusNamedRoad" in script
+        assert "fillOpacity: 0" in script
+        assert 'weight: 4.5' in script
+        assert "Princeton boundary" in script
         assert "not a threshold on the weekly anomaly" in script
         assert "does not set Princeton road depths" in script
         assert "last saved observation" in script

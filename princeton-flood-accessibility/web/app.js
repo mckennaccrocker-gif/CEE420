@@ -42,6 +42,15 @@ let reportFocus = null;
 let observedReports = null;
 let nameCheck = null;
 let map = null;
+let highlighted = [];
+
+const EXACT_NAMES = {
+  "Quaker Road": ["Quaker Road"],
+  "Mercer Road": ["Mercer Road"],
+  "Stockton Street / Route 206": ["Stockton Street"],
+  "South Harrison Street": ["South Harrison Street"],
+  "Rosedale Road": ["Rosedale Road"],
+};
 
 const REPORT_STYLE = {
   color: "#111111",
@@ -92,12 +101,9 @@ Promise.all([
   fema = femaPayload;
   femaZones = zonePayload;
   observedReports = reportPayload;
-  document.getElementById("banner").textContent = "Not Hurricane Ida. Each mark is a chosen rise, not a forecast.";
+  document.getElementById("banner").textContent = "Each mark is a chosen rise already computed, not Hurricane Ida and not a forecast.";
   const scenarioNote = document.getElementById("scenario-note");
   if (scenarioNote) scenarioNote.textContent = summary.banner;
-  const stamp = (summary.computed_at_utc || "").replace("T", " ").replace("Z", " UTC");
-  document.getElementById("product-line").textContent =
-    "Road accessibility. Hypothetical 3DEP scenario. Not Hurricane Ida. " + stamp;
   document.getElementById("component-note").textContent = summary.component_note;
   drawLegend();
   drawMap(boundaryPayload);
@@ -126,16 +132,34 @@ function drawLegend() {
     row.append(swatch, label);
     root.append(row);
   });
+  const town = document.createElement("div");
+  town.className = "legend-row";
+  const townSwatch = document.createElement("span");
+  townSwatch.className = "swatch town-swatch";
+  const townLabel = document.createElement("span");
+  townLabel.textContent = "Princeton boundary";
+  town.append(townSwatch, townLabel);
+  root.append(town);
 }
 
 function drawMap(boundary) {
   map = L.map("map", { zoomControl: true }).setView([40.3562, -74.6693], 13);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Boundary: NJGIN Municipal Boundaries of NJ',
+  }).addTo(map);
+  map.createPane("town");
+  map.getPane("town").style.zIndex = 620;
+  map.getPane("town").style.pointerEvents = "none";
+  L.geoJSON(boundary, {
+    pane: "town",
+    interactive: false,
+    style: { color: "#ffffff", weight: 9, opacity: 0.95, fill: false, fillOpacity: 0 },
   }).addTo(map);
   L.geoJSON(boundary, {
-    style: { color: "#16324f", weight: 1.5, fill: false, dashArray: "4 4" },
+    pane: "town",
+    interactive: false,
+    style: { color: "#0b1f33", weight: 4.5, opacity: 1, fill: false, fillOpacity: 0 },
   }).addTo(map);
   map.createPane("fema");
   map.getPane("fema").style.zIndex = 350;
@@ -224,7 +248,7 @@ function groupedMetres(length) {
 }
 
 function wetCaption(row) {
-  return "chosen rise, not a forecast. " + groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m";
+  return groupedMetres(row.wet_piece_length_m) + " m at or above 0.30 m";
 }
 
 function scenarioSummaryLines(row) {
@@ -263,19 +287,25 @@ function affectedRoadNames(stageId) {
 }
 
 function showAvoidList(stageId, affectedCount) {
-  const lead = document.getElementById("avoid-lead");
   const list = document.getElementById("avoid-list");
   if (!list) return;
   const names = affectedRoadNames(stageId);
   list.replaceChildren();
   if (!names.length) {
-    if (lead) lead.textContent = affectedCount ? "The affected names are not in the saved centerlines." : "No road is assumed closed. There is nowhere new to avoid.";
+    const item = document.createElement("li");
+    item.textContent = affectedCount ? "The affected names are not in the saved centerlines." : "No road is affected.";
+    list.append(item);
     return;
   }
-  if (lead) lead.textContent = "Do not send traffic onto these roads.";
   names.forEach(([name, count]) => {
     const item = document.createElement("li");
-    item.textContent = count > 1 ? name + ", " + count + " centerlines" : name;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "road-link";
+    button.dataset.road = name;
+    button.textContent = count > 1 ? name + ", " + count + " centerlines" : name;
+    button.addEventListener("click", () => focusNamedRoad(name, [name], button));
+    item.append(button);
     list.append(item);
   });
 }
@@ -328,13 +358,19 @@ function showScenarioSummary(row) {
   lines.roads.forEach((item) => {
     const line = document.createElement("li");
     line.className = item.captured ? "captured" : "missed";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "road-link";
+    button.dataset.road = item.road;
     const name = document.createElement("span");
     name.className = "road-name";
     name.textContent = item.road;
     const result = document.createElement("span");
     result.className = "road-result";
     result.textContent = item.result;
-    line.append(name, result);
+    button.append(name, result);
+    button.addEventListener("click", () => focusNamedRoad(item.road, EXACT_NAMES[item.road] || [item.road], button));
+    line.append(button);
     roadNode.append(line);
   });
 }
@@ -371,12 +407,13 @@ function setStage(next) {
       }
     });
   }
+  if (highlighted.length) paintHighlight(highlighted);
   if (reportsLayer && map && map.hasLayer(reportsLayer)) {
     reportsLayer.bringToFront();
   }
   renderStats();
   drawChart();
-  if (selected) {
+  if (selected && !highlighted.length) {
     selected.setStyle({ weight: 7, color: "#111" });
     selected.bringToFront();
     showDetail(selected.feature.properties);
@@ -442,13 +479,47 @@ function metric(title, stages, value, max, label) {
   return block;
 }
 
+function clearRoadHighlight() {
+  highlighted.forEach((layer) => {
+    const status = layer.feature.properties["status_" + stageKey(stage)];
+    layer.setStyle(styleFor(status, layer.feature.properties.deck_status));
+  });
+  highlighted = [];
+  document.querySelectorAll(".road-link[aria-pressed='true']").forEach((button) => {
+    button.setAttribute("aria-pressed", "false");
+  });
+}
+
+function paintHighlight(layers) {
+  layers.forEach((layer) => {
+    layer.setStyle({ color: "#111111", weight: 8, opacity: 1 });
+    layer.bringToFront();
+  });
+}
+
+function focusNamedRoad(label, exactNames, button) {
+  if (!map || !roadLayer) return;
+  const wanted = new Set((exactNames && exactNames.length ? exactNames : [label]).map((name) => name.toLowerCase()));
+  const hits = [];
+  roadLayer.eachLayer((layer) => {
+    const name = (layer.feature.properties.name || "").toLowerCase();
+    if (wanted.has(name)) hits.push(layer);
+  });
+  if (!hits.length) return;
+  clearRoadHighlight();
+  highlighted = hits;
+  selected = hits.slice().sort((left, right) => (right.feature.properties.length_m_inside || 0) - (left.feature.properties.length_m_inside || 0))[0];
+  paintHighlight(hits);
+  if (button) button.setAttribute("aria-pressed", "true");
+  showDetail(selected.feature.properties);
+  map.fitBounds(L.featureGroup(hits).getBounds(), { padding: [36, 36], maxZoom: 16 });
+}
+
 function selectLayer(layer) {
-  if (selected) {
-    selected.setStyle(styleFor(selected.feature.properties["status_" + stageKey(stage)], selected.feature.properties.deck_status));
-  }
+  clearRoadHighlight();
+  highlighted = [layer];
   selected = layer;
-  layer.setStyle({ weight: 7, color: "#111" });
-  layer.bringToFront();
+  paintHighlight([layer]);
   const fold = document.getElementById("selected-road");
   if (fold) fold.open = true;
   showDetail(layer.feature.properties);

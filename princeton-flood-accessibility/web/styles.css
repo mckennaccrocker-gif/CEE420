@@ -108,10 +108,30 @@ h1 {
 
 .name-list li {
   margin: 0;
-  padding: 0.75rem 0.1rem;
+  padding: 0;
   border-bottom: 1px solid var(--line);
   font-size: 1.05rem;
 }
+
+.name-list button.road-link,
+.summary-roads button.road-link {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.name-list button.road-link {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0.1rem;
+}
+
+button.road-link:hover { text-decoration: underline; }
+
+button.road-link[aria-pressed="true"] { background: #f3efe4; }
 
 .lede { margin-top: 0; max-width: 42rem; }
 
@@ -299,6 +319,13 @@ h1 {
   border-radius: 1px;
 }
 
+.swatch.town-swatch {
+  height: 0;
+  background: transparent;
+  border-top: 4px solid #0b1f33;
+  box-shadow: 0 -2px 0 #ffffff;
+}
+
 .roads-block { max-width: 46rem; }
 
 .summary-roads {
@@ -317,6 +344,17 @@ h1 {
   padding: 0.85rem 0.1rem;
   border-bottom: 1px solid var(--line);
   font-size: 1.05rem;
+}
+
+.summary-roads li:has(button.road-link) { padding: 0; }
+
+.summary-roads button.road-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.85rem 0.1rem;
 }
 
 .summary-roads .road-name { color: var(--ink); }
