@@ -298,7 +298,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function focusFacilityRoute" in script
         assert "Still passable in a normal car." in script
         assert "Do not drive." in script
-        assert "Pedestrians are not scored separately." in script
+        assert "Pedestrians are not scored separately." not in script
         assert "affected plus still open" in script
         assert "This does not change the road depth." in script
         assert "fillOpacity: 0" in script

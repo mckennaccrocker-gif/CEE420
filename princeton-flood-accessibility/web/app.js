@@ -484,7 +484,7 @@ function blurbForRoads(layers) {
   if (wets.length) flood.push(groupedMetres(wets.reduce((sum, value) => sum + value, 0)) + " m at or above 0.30 m");
   const deepest = depths.length ? Math.max(...depths) : null;
   if (deepest) flood.push("Saved maximum depth " + deepest.toFixed(3) + " m");
-  showBlurb(name, flood.join(". ") + ".", [carLine(statusList), "Pedestrians are not scored separately."]);
+  showBlurb(name, flood.join(". ") + ".", [carLine(statusList)]);
 }
 
 function showRouteBlurb(route) {
