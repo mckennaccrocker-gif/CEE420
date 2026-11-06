@@ -243,6 +243,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "What this is" not in html
         assert "Affected means assumed closed" not in html
         assert "Early warning" in html
+        assert html.index("</header>") < html.index('id="limits"') < html.index('id="stage-slider"')
+        assert "This page does not include soil porosity, buildings, or storm drains, because no published Princeton dataset gives a road depth from those. Depths compare the chosen rise with USGS 3DEP bare-earth elevation only." in html
         assert "How high the water is set" in html
         assert "Where not to go" in html
         assert "Which roads stay open" in html

@@ -36,6 +36,14 @@ h1, h2, h3, p { margin: 0; }
   letter-spacing: 0.01em;
 }
 
+.limits {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 header {
   background: var(--navy);
   color: #f4f7fb;
