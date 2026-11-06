@@ -311,6 +311,43 @@ button.road-link[aria-pressed="true"] { background: #f3efe4; }
   font-size: 0.88rem;
 }
 
+.list-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.75rem;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: var(--navy);
+}
+
+.list-search input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 450;
+  padding: 0.45rem 0.6rem;
+}
+
+.rise-summary {
+  margin-top: 2.2rem;
+  max-width: 42rem;
+}
+
+.rise-summary h2 {
+  margin-bottom: 0.35rem;
+  color: var(--navy);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rise-summary p + p { margin-top: 0.35rem; }
+
+#cost-line { color: var(--muted); }
+
 .name-fold { margin-top: 0.7rem; }
 
 .name-fold summary {

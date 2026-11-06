@@ -274,6 +274,11 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "A zone does not change the road depth." in html
         assert 'id="open-fold"' in html
         assert 'id="map-blurb"' in html
+        assert 'id="avoid-query"' in html
+        assert 'id="open-query"' in html
+        assert 'id="share-line"' in html
+        assert html.index('id="share-line"') < html.index("Sources")
+        assert "Damage cost is not estimated." in html
         assert "Mckenna Crocker and Annie Huettel." in html
         assert "USGS 3DEP" in html
         assert "More detail" not in html
@@ -291,6 +296,10 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function wetCaption" in script
         assert "function focusNamedRoad" in script
         assert "function focusFacilityRoute" in script
+        assert "Still passable in a normal car." in script
+        assert "Do not drive." in script
+        assert "Pedestrians are not scored separately." in script
+        assert "affected plus still open" in script
         assert "This does not change the road depth." in script
         assert "fillOpacity: 0" in script
         assert 'weight: 4.5' in script

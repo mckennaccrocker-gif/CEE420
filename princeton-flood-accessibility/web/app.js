@@ -52,6 +52,8 @@ let map = null;
 let highlighted = [];
 let routeMarks = [];
 let lastRouteKey = null;
+let avoidNames = [];
+let openNames = [];
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -63,6 +65,8 @@ document.getElementById("search").addEventListener("submit", (event) => {
 document.getElementById("fema-toggle").addEventListener("change", (event) => {
   setFemaVisible(event.target.checked);
 });
+document.getElementById("avoid-query").addEventListener("input", () => applyNameFilter("avoid"));
+document.getElementById("open-query").addEventListener("input", () => applyNameFilter("open"));
 
 Promise.all([
   fetch("data/summary.json").then((response) => response.json()),
@@ -228,11 +232,28 @@ function namesFor(stageId, status) {
   return [...counts.entries()].sort((left, right) => left[0].localeCompare(right[0]));
 }
 
-function fillNameList(list, names, status) {
+function listQuery(which) {
+  const box = document.getElementById(which + "-query");
+  return box ? box.value.trim().toLowerCase() : "";
+}
+
+function applyNameFilter(which) {
+  const query = listQuery(which);
+  const source = which === "avoid" ? avoidNames : openNames;
+  const names = source.filter(([name]) => name.toLowerCase().includes(query));
+  const status = which === "avoid" ? "assumed_closed" : "accessible_routable";
+  fillNameList(document.getElementById(which + "-list"), names, status, query);
+  const fold = document.getElementById(which + "-fold");
+  if (fold && query) fold.open = true;
+}
+
+function fillNameList(list, names, status, query) {
   list.replaceChildren();
   if (!names.length) {
     const item = document.createElement("li");
-    item.textContent = status === "assumed_closed" ? "No road is affected." : "No road is still open.";
+    item.textContent = query
+      ? "No road name matches."
+      : (status === "assumed_closed" ? "No road is affected." : "No road is still open.");
     list.append(item);
     return;
   }
@@ -254,10 +275,11 @@ function showScenarioSummary(row) {
   const open = document.getElementById("open-lead");
   if (affected) affected.textContent = affectedLead(row.n_assumed_closed);
   if (open) open.textContent = openLead(row.n_still_open);
-  const avoidNames = namesFor(row.id, "assumed_closed");
-  const openNames = namesFor(row.id, "accessible_routable");
-  fillNameList(document.getElementById("avoid-list"), avoidNames, "assumed_closed");
-  fillNameList(document.getElementById("open-list"), openNames, "accessible_routable");
+  avoidNames = namesFor(row.id, "assumed_closed");
+  openNames = namesFor(row.id, "accessible_routable");
+  applyNameFilter("avoid");
+  applyNameFilter("open");
+  showShare(row);
   const avoidFold = document.getElementById("avoid-fold");
   if (avoidFold && !avoidFold.dataset.ready) {
     avoidFold.open = avoidNames.length > 0 && avoidNames.length <= LONG_LIST;
@@ -424,22 +446,45 @@ function selectLayer(layer) {
   blurbForRoads([layer]);
 }
 
+function carLine(statuses) {
+  const closed = statuses.filter((status) => status === "assumed_closed").length;
+  if (closed && closed === statuses.length) return "Do not drive.";
+  if (!closed) return "Still passable in a normal car.";
+  return "Do not drive on the affected centerlines. The others are still passable in a normal car.";
+}
+
+function showShare(row) {
+  const line = document.getElementById("share-line");
+  if (!line) return;
+  const affected = row.n_assumed_closed;
+  const open = row.n_still_open;
+  if (typeof affected !== "number" || typeof open !== "number" || affected + open === 0) {
+    line.textContent = "The affected share is not saved for this mark.";
+    return;
+  }
+  const counted = affected + open;
+  const percent = (100 * affected) / counted;
+  const shown = percent >= 10 ? String(Math.round(percent)) : percent.toFixed(1);
+  line.textContent = affected + " of " + counted + " centerlines are affected (" + shown + "% of affected plus still open). Avoid those roads.";
+}
+
 function blurbForRoads(layers) {
   const name = layers[0].feature.properties.name || "Unnamed";
   const key = stageKey(stage);
-  const statuses = [...new Set(layers.map((layer) => layer.feature.properties["status_" + key]))];
-  const statusText = statuses.length === 1 ? (STATUS_LABEL[statuses[0]] || statuses[0]) : layers.length + " centerlines";
+  const statusList = layers.map((layer) => layer.feature.properties["status_" + key]);
+  const statuses = [...new Set(statusList)];
+  const flood = [];
+  flood.push(statuses.length === 1 ? (STATUS_LABEL[statuses[0]] || statuses[0]) : layers.length + " centerlines");
   const depths = layers
     .map((layer) => layer.feature.properties["depth_max_m_" + key])
     .filter((value) => typeof value === "number");
   const wets = layers
     .map((layer) => layer.feature.properties["wet_m_" + key])
     .filter((value) => typeof value === "number");
-  const lines = [];
-  if (wets.length) lines.push(groupedMetres(wets.reduce((sum, value) => sum + value, 0)) + " m at or above 0.30 m");
+  if (wets.length) flood.push(groupedMetres(wets.reduce((sum, value) => sum + value, 0)) + " m at or above 0.30 m");
   const deepest = depths.length ? Math.max(...depths) : null;
-  if (deepest) lines.push("Saved maximum depth " + deepest.toFixed(3) + " m");
-  showBlurb(name, statusText, lines);
+  if (deepest) flood.push("Saved maximum depth " + deepest.toFixed(3) + " m");
+  showBlurb(name, flood.join(". ") + ".", [carLine(statusList), "Pedestrians are not scored separately."]);
 }
 
 function showRouteBlurb(route) {

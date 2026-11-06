@@ -47,6 +47,9 @@
 
     <section class="answer" aria-label="Where not to go">
       <h2>Where not to go</h2>
+      <label class="list-search" for="avoid-query">Search these roads
+        <input id="avoid-query" type="search" placeholder="Road name" autocomplete="off">
+      </label>
       <details id="avoid-fold" class="name-fold">
         <summary>Road names</summary>
         <ul id="avoid-list" class="name-list"></ul>
@@ -56,6 +59,9 @@
     <section class="answer" id="stay-open" aria-label="Which roads stay open">
       <h2>Which roads stay open</h2>
       <p id="open-lead" class="answer-lead open">946 centerlines are still open. Send traffic there.</p>
+      <label class="list-search" for="open-query">Search these roads
+        <input id="open-query" type="search" placeholder="Road name" autocomplete="off">
+      </label>
       <details id="open-fold" class="name-fold">
         <summary>Road names</summary>
         <ul id="open-list" class="name-list"></ul>
@@ -89,6 +95,12 @@
       <div id="legend" class="legend-strip"></div>
     </div>
     </div>
+
+    <section class="rise-summary" aria-live="polite">
+      <h2>This rise</h2>
+      <p id="share-line"></p>
+      <p id="cost-line">Damage cost is not estimated.</p>
+    </section>
 
     <section class="sources" aria-label="Sources">
       <h2>Sources</h2>
