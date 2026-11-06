@@ -1,0 +1,180 @@
+{
+  "checked_at_utc": "2026-11-02T21:55:13Z",
+  "princeton_boundary": "data/raw/princeton_boundary.geojson",
+  "these_are_not_princeton_flood_depths": true,
+  "rasters_in_repository": false,
+  "unit_note": "The GeoTIFF files do not declare vertical units. The USGS FGDC processing steps for these Pennsylvania products convert high-water-mark elevations from feet to metres using the international-foot factor 0.3048 and subtract a DEM. That narrative is not a unit tag in the file. Negative raw values are present, so the grids are not positive-only depth masks. None of these extents intersect Princeton, NJ.",
+  "metadata_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Metadata-Ida_flood_products_PA.xml",
+  "rasters": [
+    {
+      "file": "chaddsford_depth_grid.tif",
+      "source_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Depth_grid_Chaddsford.zip",
+      "crs": "EPSG:6318",
+      "width": 311,
+      "height": 407,
+      "dtype": "float32",
+      "resolution_x": 0.0002084827999999543,
+      "resolution_y": 0.0002084827999999568,
+      "resolution_axis": "degrees",
+      "approximate_pixel_width_m": 17.835380937777543,
+      "approximate_pixel_height_m": 23.14831383716861,
+      "bounds": {
+        "left": -75.63674210299996,
+        "bottom": 39.83330537500007,
+        "right": -75.57190395219997,
+        "top": 39.918157874600055
+      },
+      "nodata": -3.4028230607370965e+38,
+      "vertical_units_in_geotiff": null,
+      "geotiff_tags": {
+        "AREA_OR_POINT": "Area"
+      },
+      "band_descriptions": [
+        null
+      ],
+      "file_mtime_utc": "2023-01-27T09:09:24Z",
+      "raw_value_min": -73.89143371582031,
+      "raw_value_max": 7.462615966796875,
+      "raw_value_meaning": "Uninterpreted cell values from this file only. Not a Princeton depth and not used by the road network.",
+      "intersects_princeton": false,
+      "distance_to_princeton_m": 86981.97716227497,
+      "distance_to_princeton_km": 86.98197716227497
+    },
+    {
+      "file": "downingtown_depth_grid.tif",
+      "source_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Depth_grid_Downingtown.zip",
+      "crs": "EPSG:6318",
+      "width": 364,
+      "height": 574,
+      "dtype": "float32",
+      "resolution_x": 9.259259269215788e-05,
+      "resolution_y": 9.259259269217692e-05,
+      "resolution_axis": "degrees",
+      "approximate_pixel_width_m": 7.904805559768962,
+      "approximate_pixel_height_m": 10.281015952163674,
+      "bounds": {
+        "left": -75.72352443999995,
+        "bottom": 39.991049320000066,
+        "right": -75.68982073626,
+        "top": 40.044197468205375
+      },
+      "nodata": -3.4028230607370965e+38,
+      "vertical_units_in_geotiff": null,
+      "geotiff_tags": {
+        "AREA_OR_POINT": "Area"
+      },
+      "band_descriptions": [
+        null
+      ],
+      "file_mtime_utc": "2023-01-27T09:06:32Z",
+      "raw_value_min": -84.51689147949219,
+      "raw_value_max": 6.8462982177734375,
+      "raw_value_meaning": "Uninterpreted cell values from this file only. Not a Princeton depth and not used by the road network.",
+      "intersects_princeton": false,
+      "distance_to_princeton_m": 90169.95517089577,
+      "distance_to_princeton_km": 90.16995517089578
+    },
+    {
+      "file": "modena_depth_grid.tif",
+      "source_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Depth_grid_Modena.zip",
+      "crs": "EPSG:6318",
+      "width": 132,
+      "height": 50,
+      "dtype": "float32",
+      "resolution_x": 9.259259269216379e-05,
+      "resolution_y": 9.259259269214226e-05,
+      "resolution_axis": "degrees",
+      "approximate_pixel_width_m": 7.911142390636107,
+      "approximate_pixel_height_m": 10.280918178416046,
+      "bounds": {
+        "left": -75.80638888931777,
+        "bottom": 39.960356729000075,
+        "right": -75.79416666708241,
+        "top": 39.96498635863468
+      },
+      "nodata": -3.4028230607370965e+38,
+      "vertical_units_in_geotiff": null,
+      "geotiff_tags": {
+        "AREA_OR_POINT": "Area"
+      },
+      "band_descriptions": [
+        null
+      ],
+      "file_mtime_utc": "2023-01-27T09:01:18Z",
+      "raw_value_min": -28.004318237304688,
+      "raw_value_max": 3.7614212036132812,
+      "raw_value_meaning": "Uninterpreted cell values from this file only. Not a Princeton depth and not used by the road network.",
+      "intersects_princeton": false,
+      "distance_to_princeton_m": 101801.09833015897,
+      "distance_to_princeton_km": 101.80109833015898
+    },
+    {
+      "file": "norristown_depth_grid.tif",
+      "source_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Depth_grid_Norristown.zip",
+      "crs": "EPSG:6318",
+      "width": 836,
+      "height": 313,
+      "dtype": "float32",
+      "resolution_x": 9.259259269220346e-05,
+      "resolution_y": 9.259259269220129e-05,
+      "resolution_axis": "degrees",
+      "approximate_pixel_width_m": 7.89379940558583,
+      "approximate_pixel_height_m": 10.28118558526771,
+      "bounds": {
+        "left": -75.39542389499996,
+        "bottom": 40.09842592559473,
+        "right": -75.31801648750928,
+        "top": 40.12740740710739
+      },
+      "nodata": -3.4028230607370965e+38,
+      "vertical_units_in_geotiff": null,
+      "geotiff_tags": {
+        "AREA_OR_POINT": "Area"
+      },
+      "band_descriptions": [
+        null
+      ],
+      "file_mtime_utc": "2023-01-27T09:07:34Z",
+      "raw_value_min": -59.38347625732422,
+      "raw_value_max": 9.051692008972168,
+      "raw_value_meaning": "Uninterpreted cell values from this file only. Not a Princeton depth and not used by the road network.",
+      "intersects_princeton": false,
+      "distance_to_princeton_m": 57375.69685261654,
+      "distance_to_princeton_km": 57.375696852616535
+    },
+    {
+      "file": "perkiomen_depth_grid.tif",
+      "source_url": "https://pasda.psu.edu/download/usgs/Hurricane_Ida_Peak_Streamflow_and_Flooding_Data_PA_09-2023/Depth_grid_Perkiomen.zip",
+      "crs": "EPSG:6318",
+      "width": 304,
+      "height": 696,
+      "dtype": "float32",
+      "resolution_x": 0.00013991199999985326,
+      "resolution_y": 0.00013991199999985326,
+      "resolution_axis": "degrees",
+      "approximate_pixel_width_m": 11.910425002526992,
+      "approximate_pixel_height_m": 15.535650710022592,
+      "bounds": {
+        "left": -75.46783350599998,
+        "bottom": 40.16428160000006,
+        "right": -75.42530025800002,
+        "top": 40.26166035199996
+      },
+      "nodata": -3.4028230607370965e+38,
+      "vertical_units_in_geotiff": null,
+      "geotiff_tags": {
+        "AREA_OR_POINT": "Area"
+      },
+      "band_descriptions": [
+        null
+      ],
+      "file_mtime_utc": "2023-01-27T09:08:28Z",
+      "raw_value_min": -60.16343688964844,
+      "raw_value_max": 9.695852279663086,
+      "raw_value_meaning": "Uninterpreted cell values from this file only. Not a Princeton depth and not used by the road network.",
+      "intersects_princeton": false,
+      "distance_to_princeton_m": 61074.02070423297,
+      "distance_to_princeton_km": 61.07402070423297
+    }
+  ]
+}

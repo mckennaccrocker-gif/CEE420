@@ -1,0 +1,21 @@
+{
+  "source": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+  "export_url_pattern": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage",
+  "request": {
+    "bbox": "-74.72920367773322,40.29947686921709,-74.61042007400923,40.396458766885225",
+    "bboxSR": "4326",
+    "imageSR": "26918",
+    "size": "1013,1081",
+    "format": "tiff",
+    "pixelType": "F32",
+    "interpolation": "RSP_NearestNeighbor",
+    "f": "image"
+  },
+  "retrieved_at_utc": "2026-11-02T22:31:51Z",
+  "sha256": "8f8e495d115f7772e7df96de5be55a759a42bb27cf3e383bd3df9ed096ae625d",
+  "bytes": 4720327,
+  "interpolation": "RSP_NearestNeighbor",
+  "requested_pixel_m": 10.0,
+  "note": "Resampled export from the USGS 3DEP ImageServer, which serves a multi-resolution bare-earth mosaic at about 1 m in Web Mercator. This file is the requested 10 m nearest-neighbor sample, not the native lidar cloud and not a flood-depth grid. Do not replace this file in place; write a new name if a later clip is needed.",
+  "not_a_flood_depth": true
+}

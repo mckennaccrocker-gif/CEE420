@@ -1,0 +1,50 @@
+{
+  "retrieved_at_utc": "2026-11-03T20:48:16Z",
+  "source_service": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+  "source_horizontal_crs": "EPSG:4269",
+  "source_horizontal_datum": "NAD83",
+  "n_polygons_in_envelope": 362,
+  "firm_panels": {
+    "dfirm_id": "34021C",
+    "effective_date": "2016-07-20",
+    "effective_date_label": "20 July 2016",
+    "n_panels": 20,
+    "panels": [
+      "34021C0038F",
+      "34021C0039F",
+      "34021C0043F",
+      "34021C0044F",
+      "34021C0063F",
+      "34021C0126F",
+      "34021C0127F",
+      "34021C0128F",
+      "34021C0129F",
+      "34021C0131F",
+      "34021C0132F",
+      "34021C0133F",
+      "34021C0134F",
+      "34021C0136F",
+      "34021C0137F",
+      "34021C0141F",
+      "34021C0142F",
+      "34021C0151F",
+      "34021C0153F",
+      "34021C0161F"
+    ],
+    "suffix": "F"
+  },
+  "regulatory_water_surface_ft": 65.5,
+  "regulatory_water_surface_datum": "NAVD 88",
+  "regulatory_water_surface_units": "feet",
+  "not_a_deck_elevation": true,
+  "hurricane_ida_depth": false,
+  "scenario_files_sha256": {
+    "data/processed/princeton_centerline_exposure.gpkg": "027225d69ca86f334a7515b4c3e4b75c00068688fb485b7552e67efa0edef9f4",
+    "data/processed/princeton_centerline_exposure.geojson": "4c9e27b75dcbe02d394bb2b4ef54cedc6d511da3c8a3c4931a997417c3f8455d",
+    "data/processed/flood_exposure_stats.json": "081dcff5707b7c764b8949a949100d195cdd4a4b5a4d30ba7b06bfbfef3c247d",
+    "data/processed/princeton_accessibility.gpkg": "359f003316baffe5550d986c78d78d4ec709a3bac8ab14cc8d96e0cc65a43e26",
+    "data/processed/princeton_accessibility.geojson": "9f85ddbb4ccbdf3bc0db9b1bd9f77606e0a5320cf6af2ccc114bf7a66ff9f421",
+    "data/processed/accessibility_stats.json": "1b6275de0a517f0fae1cfac37a9edf6ecaa26e8f733770c192e14699d25313b5",
+    "data/processed/bridge_deck_join.json": "2ff8730cf3e01b24b20535e33cf9e8be2b763b392298a299fe34600210dbb7b8"
+  }
+}

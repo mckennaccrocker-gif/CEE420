@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "using_saved_observation": false,
+  "fetched_at_utc": "2026-11-02T23:14:42Z",
+  "fetch_error": null,
+  "weekly": {
+    "week_centered": "2026-10-28",
+    "nino34_sst_c": 30.2,
+    "nino34_anomaly_c": 3.4,
+    "source": "https://www.cpc.ncep.noaa.gov/data/indices/wksst9120.for",
+    "source_note": "Week-centered Ni\u00f1o-3.4 SST and anomaly from wksst9120.for. Not a phase."
+  },
+  "oni": {
+    "season": "JAS",
+    "year": 2026,
+    "season_label": "July\u2013September",
+    "sst_c": 29.12,
+    "anomaly_c": 2.16,
+    "phase_stated_in_file": false,
+    "source": "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+    "source_note": "Three-month mean (TOTAL) and anomaly (ANOM) as printed. No phase is read from this row."
+  },
+  "official_phase": {
+    "status": "El Ni\u00f1o Advisory",
+    "issued": "8 October 2026",
+    "source": "https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml",
+    "classified_from_weekly_anomaly": false,
+    "note": "Quoted from the ENSO Diagnostic Discussion. Not classified from the weekly anomaly."
+  },
+  "official_phase_note": "NOAA stated this status in the diagnostic discussion.",
+  "context": "ENSO is a large-scale Pacific ocean-atmosphere pattern. NOAA uses it as context for Atlantic tropical cyclone activity. It does not set the depth on a Princeton road, and this app does not scale the scenario by ENSO.",
+  "enso_scales_depths": false,
+  "hurricane_ida_depth": false
+}

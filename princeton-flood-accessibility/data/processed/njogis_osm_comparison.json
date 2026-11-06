@@ -1,0 +1,699 @@
+{
+  "product": "njogis_osm_centerline_comparison",
+  "replaces_routable_graph": false,
+  "routable_graph": "osm_drive",
+  "hurricane_ida_depth": false,
+  "event_time": null,
+  "rewrites_scenario_depths": false,
+  "rewrites_fema_zone_lengths": false,
+  "deck_search_reopened": false,
+  "terrain_elevation_used_as_deck": false,
+  "relative_level_used_as_deck": false,
+  "deck_elevation_assigned": false,
+  "crs": "EPSG:3424",
+  "crs_name": "NAD83 / New Jersey (ftUS)",
+  "linear_unit_of_geometry": "US survey foot",
+  "length_unit": "metre",
+  "length_conversion": "1200/3937",
+  "source": {
+    "title": "Road Centerlines of NJ, Hosted, 3424",
+    "item_url": "https://njogis-newjersey.opendata.arcgis.com/maps/fc3d0a95921b4026b386643eef5ff088",
+    "feature_service": "https://services2.arcgis.com/XVOqAjTOJ5P6ngMu/arcgis/rest/services/Tran_road/FeatureServer/0",
+    "service_data_last_edit_utc": "2026-09-23T17:43:11Z",
+    "item_modified_utc": "2026-09-23T19:36:12Z",
+    "retrieved_at_utc": "2026-11-03T21:10:37Z",
+    "horizontal_crs": "EPSG:3424",
+    "horizontal_datum": "NAD83",
+    "vertical_datum": null,
+    "bridge_attribute_present": false,
+    "sha256": "5f327faac6e1ebb36afae58d191079a4ee9be219759659b0ca801bd3ba1147e6"
+  },
+  "method": {
+    "clip": "Each centerline is intersected with the municipal polygon in EPSG:3424. Length is US survey feet times 1200/3937. A piece under 0.05 m is dropped.",
+    "proximity_m": 20.0,
+    "proximity": "A centerline is near the other source where its clipped geometry falls inside a 20 m buffer of that source. Twenty metres covers a lane-scale offset between two digitizations. It is not a segment match.",
+    "name_agreement": "Names are uppercased, apostrophes and hyphens are removed, and a trailing abbreviation such as RD or ST is expanded. An OSM tag with several names separated by semicolons contributes each name. A name with no street suffix agrees with the same words plus one suffix, so Broadmead agrees with Broadmead Street. Different suffixes do not agree, and a spacing difference does not agree. A length agrees when it lies within 20 m of at least one equivalent name. A centerline may be near several names. No centerline is assigned a partner id.",
+    "one_source": "Length beyond the 20 m buffer is in one source only for this proximity. A centerline is listed as mostly one source when at least half of its clipped length, and at least 50 m, is beyond the buffer. Names present in one inventory only are a separate list: the same road can carry two names.",
+    "drive_like": "Primary, secondary, local, and ramp (S1100, S1200, S1400, S1630) are reported beside the full NJOGIS total. The full total is the length compared with OSM."
+  },
+  "njogis_clip": {
+    "n_centerlines": 1612,
+    "length_m": 262462.2,
+    "drive_like_n_centerlines": 1612,
+    "drive_like_length_m": 262462.2,
+    "drive_like_classes": [
+      "S1100",
+      "S1200",
+      "S1400",
+      "S1630"
+    ],
+    "road_classes": [
+      {
+        "road_class": "S1400",
+        "label": "Local",
+        "n_centerlines": 1444,
+        "length_m": 233011.4,
+        "drive_like": true
+      },
+      {
+        "road_class": "S1200",
+        "label": "Secondary",
+        "n_centerlines": 162,
+        "length_m": 29085.5,
+        "drive_like": true
+      },
+      {
+        "road_class": "S1630",
+        "label": "Ramp",
+        "n_centerlines": 6,
+        "length_m": 365.3,
+        "drive_like": true
+      }
+    ],
+    "status_counts": [
+      {
+        "value": "A",
+        "n_centerlines": 1612
+      }
+    ],
+    "access_counts": [
+      {
+        "value": "N",
+        "n_centerlines": 1607
+      },
+      {
+        "value": "R",
+        "n_centerlines": 5
+      }
+    ],
+    "elevation_level_counts": [
+      {
+        "elevtyp_from": 0,
+        "elevtyp_from_label": "At Grade",
+        "elevtyp_to": 0,
+        "elevtyp_to_label": "At Grade",
+        "n_centerlines": 1612,
+        "deck_elevation_m": null
+      }
+    ],
+    "raised_centerlines": [],
+    "bridge_attribute_present": false,
+    "bridge_fields": [],
+    "elevation_level_fields": [
+      "ELEVTYP_F",
+      "ELEVTYP_T"
+    ],
+    "deck_elevation_m": null,
+    "deck_elevation_assigned": false,
+    "terrain_elevation_used_as_deck": false,
+    "relative_level_used_as_deck": false,
+    "elevation_level_reason": "ELEVTYP_F and ELEVTYP_T are relative intersection levels (at grade, level 1, level 2, level 3). They are not elevations in a vertical datum, and a terrain elevation is not a deck."
+  },
+  "osm": {
+    "n_centerlines_saved": 1298,
+    "n_centerlines": 1291,
+    "n_centerlines_below_min_piece": 7,
+    "length_m": 232984.8,
+    "length_m_saved": 232984.8,
+    "below_min_piece_m": 0.0,
+    "source": "data/processed/princeton_drive_network.gpkg layer centerlines",
+    "note": "The saved drive graph has one row per centerline, including rows whose inside length is under 0.05 m. The comparison uses the rows at or above that cut. Their summed length is the saved inside length."
+  },
+  "comparison": {
+    "assigns_one_partner": false,
+    "proximity_m": 20.0,
+    "length_difference_m": 29477.3,
+    "osm": {
+      "n_centerlines": 1291,
+      "length_m": 232984.8,
+      "length_m_within_proximity": 229961.7,
+      "length_m_beyond_proximity": 3023.1,
+      "length_m_near_named": 229410.9,
+      "length_m_name_agrees": 214573.8,
+      "n_mostly_one_source": 16,
+      "mostly_one_source": [
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 452.3,
+          "length_m_beyond_proximity": 380.6
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 406.2,
+          "length_m_beyond_proximity": 375.0
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 310.1,
+          "length_m_beyond_proximity": 310.1
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 317.4,
+          "length_m_beyond_proximity": 279.2
+        },
+        {
+          "name": "Roper Lane",
+          "name_key": "ROPER LANE",
+          "length_m": 407.7,
+          "length_m_beyond_proximity": 236.8
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 226.2,
+          "length_m_beyond_proximity": 205.1
+        },
+        {
+          "name": "General Johnson Road",
+          "name_key": "GENERAL JOHNSON ROAD",
+          "length_m": 390.5,
+          "length_m_beyond_proximity": 199.6
+        },
+        {
+          "name": "Sweetgum Drive",
+          "name_key": "SWEETGUM DRIVE",
+          "length_m": 163.2,
+          "length_m_beyond_proximity": 119.7
+        },
+        {
+          "name": "Thanet Way",
+          "name_key": "THANET WAY",
+          "length_m": 130.0,
+          "length_m_beyond_proximity": 109.4
+        },
+        {
+          "name": "Pauline Drive",
+          "name_key": "PAULINE DRIVE",
+          "length_m": 123.7,
+          "length_m_beyond_proximity": 104.3
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 144.3,
+          "length_m_beyond_proximity": 103.5
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 90.4,
+          "length_m_beyond_proximity": 90.4
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 137.9,
+          "length_m_beyond_proximity": 84.5
+        },
+        {
+          "name": "Province Line Road",
+          "name_key": "PROVINCE LINE ROAD",
+          "length_m": 60.4,
+          "length_m_beyond_proximity": 42.4
+        },
+        {
+          "name": "Berrien Court",
+          "name_key": "BERRIEN COURT",
+          "length_m": 55.8,
+          "length_m_beyond_proximity": 38.9
+        }
+      ],
+      "unnamed_length_m": 1069.8,
+      "length_m_saved": 232984.8
+    },
+    "njogis": {
+      "n_centerlines": 1612,
+      "length_m": 262462.2,
+      "length_m_within_proximity": 234990.1,
+      "length_m_beyond_proximity": 27472.0,
+      "length_m_near_named": 234658.0,
+      "length_m_name_agrees": 218096.5,
+      "n_mostly_one_source": 148,
+      "mostly_one_source": [
+        {
+          "name": "Windrow Drive",
+          "name_key": "WINDROW DRIVE",
+          "length_m": 961.1,
+          "length_m_beyond_proximity": 938.0
+        },
+        {
+          "name": "Municipal Row",
+          "name_key": "MUNICIPAL ROW",
+          "length_m": 796.6,
+          "length_m_beyond_proximity": 754.6
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 773.7,
+          "length_m_beyond_proximity": 753.2
+        },
+        {
+          "name": "Red Hill Road",
+          "name_key": "RED HILL ROAD",
+          "length_m": 625.1,
+          "length_m_beyond_proximity": 585.0
+        },
+        {
+          "name": "Woodlands Way",
+          "name_key": "WOODLANDS WAY",
+          "length_m": 567.6,
+          "length_m_beyond_proximity": 567.6
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 540.2,
+          "length_m_beyond_proximity": 521.4
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 486.7,
+          "length_m_beyond_proximity": 486.7
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 504.7,
+          "length_m_beyond_proximity": 485.5
+        },
+        {
+          "name": "Herrontown Road",
+          "name_key": "HERRONTOWN ROAD",
+          "length_m": 513.6,
+          "length_m_beyond_proximity": 471.1
+        },
+        {
+          "name": "Springdale Road",
+          "name_key": "SPRINGDALE ROAD",
+          "length_m": 451.2,
+          "length_m_beyond_proximity": 411.0
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 436.4,
+          "length_m_beyond_proximity": 408.6
+        },
+        {
+          "name": "Cherry Valley Road",
+          "name_key": "CHERRY VALLEY ROAD",
+          "length_m": 497.7,
+          "length_m_beyond_proximity": 395.8
+        },
+        {
+          "name": "Cherry Valley Road",
+          "name_key": "CHERRY VALLEY ROAD",
+          "length_m": 383.2,
+          "length_m_beyond_proximity": 383.2
+        },
+        {
+          "name": "Rosedale Lane",
+          "name_key": "ROSEDALE LANE",
+          "length_m": 403.4,
+          "length_m_beyond_proximity": 382.9
+        },
+        {
+          "name": "Unnamed Segment",
+          "name_key": null,
+          "length_m": 374.2,
+          "length_m_beyond_proximity": 374.2
+        }
+      ],
+      "unnamed_length_m": 11716.2
+    },
+    "names_only_in_osm": {
+      "n_names": 36,
+      "length_m": 16821.9,
+      "names_at_least_50_m": [
+        {
+          "name": "MERCER ROAD",
+          "length_m": 3231.3
+        },
+        {
+          "name": "SHADYBROOK LANE",
+          "length_m": 1264.8
+        },
+        {
+          "name": "LAMBERT DRIVE EAST",
+          "length_m": 1186.2
+        },
+        {
+          "name": "LAMBERT DRIVE WEST",
+          "length_m": 944.8
+        },
+        {
+          "name": "HARRISON STREET",
+          "length_m": 901.9
+        },
+        {
+          "name": "PROSPECT AVENUE EXTENSION",
+          "length_m": 829.3
+        },
+        {
+          "name": "STONECLIFF ROAD",
+          "length_m": 796.7
+        },
+        {
+          "name": "RIVERSIDE DRIVE EAST",
+          "length_m": 761.1
+        },
+        {
+          "name": "PHILLIP DRIVE",
+          "length_m": 684.3
+        },
+        {
+          "name": "THEATER DRIVE",
+          "length_m": 630.1
+        },
+        {
+          "name": "GARAGE DRIVE",
+          "length_m": 620.4
+        },
+        {
+          "name": "HILL TOP DRIVE",
+          "length_m": 501.9
+        },
+        {
+          "name": "ROPER LANE",
+          "length_m": 407.7
+        },
+        {
+          "name": "G\u00d6DEL LANE",
+          "length_m": 364.8
+        },
+        {
+          "name": "RIDGEVIEW DRIVE",
+          "length_m": 349.7
+        },
+        {
+          "name": "RIVERSIDE DRIVE WEST",
+          "length_m": 285.2
+        },
+        {
+          "name": "BATTLE ROAD WEST",
+          "length_m": 255.1
+        },
+        {
+          "name": "SOUTH OLDEN LANE",
+          "length_m": 255.1
+        },
+        {
+          "name": "FREDERICK COURT",
+          "length_m": 245.9
+        },
+        {
+          "name": "ETTL DRIVE",
+          "length_m": 240.7
+        },
+        {
+          "name": "BRECKRIDGE ROAD",
+          "length_m": 227.6
+        },
+        {
+          "name": "PRINCETON PIKE",
+          "length_m": 211.8
+        },
+        {
+          "name": "PAULINE DRIVE",
+          "length_m": 196.8
+        },
+        {
+          "name": "ALEXANDER ROAD",
+          "length_m": 196.0
+        },
+        {
+          "name": "MARSHALL AVENUE",
+          "length_m": 188.3
+        },
+        {
+          "name": "EAST STUART ROAD",
+          "length_m": 167.1
+        },
+        {
+          "name": "SWEETGUM DRIVE",
+          "length_m": 163.2
+        },
+        {
+          "name": "THANET WAY",
+          "length_m": 162.2
+        },
+        {
+          "name": "LINCOLN HIGHWAY",
+          "length_m": 92.9
+        },
+        {
+          "name": "MAIN STREET",
+          "length_m": 92.9
+        },
+        {
+          "name": "DUFFY PLACE",
+          "length_m": 92.6
+        },
+        {
+          "name": "STONE CLIFF COURT",
+          "length_m": 84.5
+        },
+        {
+          "name": "MERCER STREET LINK",
+          "length_m": 67.9
+        },
+        {
+          "name": "OLD LINCOLN HIGHWAY",
+          "length_m": 62.9
+        },
+        {
+          "name": "BERRIEN COURT",
+          "length_m": 55.8
+        }
+      ]
+    },
+    "names_only_in_njogis": {
+      "n_names": 61,
+      "length_m": 14557.7,
+      "names_at_least_50_m": [
+        {
+          "name": "SHADY BROOK LANE",
+          "length_m": 1268.8
+        },
+        {
+          "name": "WINDROW DRIVE",
+          "length_m": 1041.1
+        },
+        {
+          "name": "PHILIP DRIVE",
+          "length_m": 929.0
+        },
+        {
+          "name": "MUNICIPAL ROW",
+          "length_m": 796.6
+        },
+        {
+          "name": "HERRONTOWN LANE",
+          "length_m": 715.0
+        },
+        {
+          "name": "WOODLANDS WAY",
+          "length_m": 712.4
+        },
+        {
+          "name": "GRIGGS DRIVE",
+          "length_m": 663.7
+        },
+        {
+          "name": "STADIUM DRIVE",
+          "length_m": 624.8
+        },
+        {
+          "name": "HIBBEN MAGIE ROAD",
+          "length_m": 457.5
+        },
+        {
+          "name": "ROSEDALE LANE",
+          "length_m": 403.4
+        },
+        {
+          "name": "GREENHOLM STREET",
+          "length_m": 398.9
+        },
+        {
+          "name": "GODEL LANE",
+          "length_m": 364.9
+        },
+        {
+          "name": "KARL LIGHT BOULEVARD",
+          "length_m": 349.9
+        },
+        {
+          "name": "LAFAYETTE ROAD WEST",
+          "length_m": 319.8
+        },
+        {
+          "name": "WILLIAM LIVINGSTON COURT",
+          "length_m": 298.9
+        },
+        {
+          "name": "FREDRICK COURT",
+          "length_m": 251.5
+        },
+        {
+          "name": "JONATHAN DAYTON COURT",
+          "length_m": 245.5
+        },
+        {
+          "name": "STUART ROAD EAST",
+          "length_m": 236.8
+        },
+        {
+          "name": "BRECKINRIDGE ROAD",
+          "length_m": 235.9
+        },
+        {
+          "name": "DAVID BREARLY COURT",
+          "length_m": 233.8
+        },
+        {
+          "name": "LAKESIDE ROAD",
+          "length_m": 225.3
+        },
+        {
+          "name": "WILLIAM PATERSON COURT",
+          "length_m": 220.6
+        },
+        {
+          "name": "CHANCELLOR WAY",
+          "length_m": 199.6
+        },
+        {
+          "name": "TAYLOR COURT",
+          "length_m": 196.7
+        },
+        {
+          "name": "MARSHALL STREET",
+          "length_m": 188.1
+        },
+        {
+          "name": "FRIST LANE",
+          "length_m": 186.9
+        },
+        {
+          "name": "BAKER LANE",
+          "length_m": 182.1
+        },
+        {
+          "name": "CHAPEL DRIVE",
+          "length_m": 181.3
+        },
+        {
+          "name": "BILLIE ELLIS LANE",
+          "length_m": 180.5
+        },
+        {
+          "name": "SNOWDEN FARMS LANE",
+          "length_m": 177.2
+        },
+        {
+          "name": "SASSAFRAS ROW",
+          "length_m": 161.1
+        },
+        {
+          "name": "EAST MERWICK COURT",
+          "length_m": 145.3
+        },
+        {
+          "name": "PRESERVATION PLACE",
+          "length_m": 139.6
+        },
+        {
+          "name": "FR US 206 NB TO MOUNTAIN AVENUE",
+          "length_m": 128.9
+        },
+        {
+          "name": "BARSKY COURT",
+          "length_m": 123.4
+        },
+        {
+          "name": "HILLTOP DRIVE",
+          "length_m": 114.7
+        },
+        {
+          "name": "DILLION COURT WALK",
+          "length_m": 108.9
+        },
+        {
+          "name": "JUNIPER ROW",
+          "length_m": 83.5
+        },
+        {
+          "name": "MONUMENT DRIVE",
+          "length_m": 79.2
+        },
+        {
+          "name": "AVERY LANE",
+          "length_m": 79.2
+        },
+        {
+          "name": "GREENBRIAR ROW",
+          "length_m": 78.2
+        },
+        {
+          "name": "MICHELLE MEWS",
+          "length_m": 77.4
+        },
+        {
+          "name": "IRIS LANE",
+          "length_m": 76.8
+        },
+        {
+          "name": "VICTORIA MEWS",
+          "length_m": 75.2
+        },
+        {
+          "name": "RED OAK ROW",
+          "length_m": 74.9
+        },
+        {
+          "name": "LEMONICK COURT",
+          "length_m": 70.2
+        },
+        {
+          "name": "FR CO 604 EB TO CO 604 EB",
+          "length_m": 63.8
+        },
+        {
+          "name": "MULBERRY ROW",
+          "length_m": 62.0
+        },
+        {
+          "name": "TORREY LANE",
+          "length_m": 52.8
+        }
+      ]
+    }
+  },
+  "unchanged_files_sha256": {
+    "data/processed/princeton_drive_network.gpkg": "c4b420765b4eeea3b1deeb4791fbb71bbcf6ddd8083d8beb8e6d32959c308e65",
+    "data/processed/princeton_drive_network.graphml": "0364fbfe7f154304edc7d60fcdfd4f998fee210cd937b8b29fdd1cff0079f5c7",
+    "data/processed/princeton_drive_centerlines.geojson": "206a06ccdccd535f838e2596392341b4f4ed0a68eee80da732f4ab6eb78c82d2",
+    "data/processed/princeton_drive_nodes.geojson": "df12bf7bffbb20926368b0140cfe2c4eaf26eb67d38ff9ed52dce13a24d12312",
+    "data/processed/princeton_drive_edges.geojson": "9f4c5ea2bdbf5a823ecb5eddf4f3df85db2cdcb8137283b9a7fe44268810a030",
+    "data/processed/baseline_stats.json": "7491f7c2da30ce7557ba92078deba0fbebe69d0fef44d7d8e23ee3a0d7743c9e",
+    "data/processed/princeton_centerline_exposure.gpkg": "027225d69ca86f334a7515b4c3e4b75c00068688fb485b7552e67efa0edef9f4",
+    "data/processed/princeton_centerline_exposure.geojson": "4c9e27b75dcbe02d394bb2b4ef54cedc6d511da3c8a3c4931a997417c3f8455d",
+    "data/processed/flood_exposure_stats.json": "081dcff5707b7c764b8949a949100d195cdd4a4b5a4d30ba7b06bfbfef3c247d",
+    "data/processed/princeton_accessibility.gpkg": "359f003316baffe5550d986c78d78d4ec709a3bac8ab14cc8d96e0cc65a43e26",
+    "data/processed/princeton_accessibility.geojson": "9f85ddbb4ccbdf3bc0db9b1bd9f77606e0a5320cf6af2ccc114bf7a66ff9f421",
+    "data/processed/accessibility_stats.json": "1b6275de0a517f0fae1cfac37a9edf6ecaa26e8f733770c192e14699d25313b5",
+    "data/processed/bridge_deck_join.json": "2ff8730cf3e01b24b20535e33cf9e8be2b763b392298a299fe34600210dbb7b8",
+    "data/processed/fema_flood_zones.gpkg": "47b131af91509f111e342834808aaef950a786b9bc50b56e4d482faac33f93b8",
+    "data/processed/fema_flood_zones.geojson": "9f796193ab032df9b09a1ef6c5f178e960a6bcee9cb566c05098163b64f2c226",
+    "data/processed/fema_zone_intersection.json": "6b891dc77d869be4f2b5f3237840157f8af080e9babb1337cebe9e869da463e3",
+    "data/raw/fema_nfhl_princeton.provenance.json": "dcacba6ea687c257c68ce99b29ce0423625459714d41ded761e9edd86b90cc79"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "source_url": "https://www.sciencebase.gov/catalog/file/get/616872bbd34e65377001107e?f=__disk__bb%2Faa%2Fa1%2Fbbaaa1df4a5b988e457eb1a1d48289fe30b91a5d",
+  "doi": "https://doi.org/10.5066/P9IWCH6T",
+  "sciencebase_item": "https://www.sciencebase.gov/catalog/item/616872bbd34e65377001107e",
+  "publisher": "USGS",
+  "bytes": 74398,
+  "sha256": "c087d7dbb9d8ebf79d23e02e5a2c8ff87cf7317b60df79a244568ccf478dc1df",
+  "edited": false,
+  "line_endings": "CRLF, as downloaded",
+  "note": "Point observations of high-water-mark elevation after Hurricane Ida. Not a flood-depth raster and not joined to the road network. Git stores this CSV without newline conversion so the sha256 matches the USGS download."
+}
