@@ -54,6 +54,11 @@ let routeMarks = [];
 let lastRouteKey = null;
 let avoidNames = [];
 let openNames = [];
+let routing = null;
+let routeLayer = null;
+let routeActive = false;
+let located = null;
+let suggestTarget = null;
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -67,6 +72,20 @@ document.getElementById("fema-toggle").addEventListener("change", (event) => {
 });
 document.getElementById("avoid-query").addEventListener("input", () => applyNameFilter("avoid"));
 document.getElementById("open-query").addEventListener("input", () => applyNameFilter("open"));
+document.getElementById("directions").addEventListener("submit", (event) => {
+  event.preventDefault();
+  routeActive = true;
+  drawRoute(true);
+});
+document.getElementById("route-locate").addEventListener("click", useMyLocation);
+["route-start", "route-end"].forEach((id) => {
+  const box = document.getElementById(id);
+  box.addEventListener("input", () => {
+    if (id === "route-start") located = null;
+    showRouteSuggestions(box);
+  });
+  box.addEventListener("focus", () => showRouteSuggestions(box));
+});
 
 Promise.all([
   fetch("data/summary.json").then((response) => response.json()),
@@ -74,11 +93,13 @@ Promise.all([
   fetch("data/boundary.geojson").then((response) => response.json()),
   fetch("data/fema.json").then((response) => response.json()),
   fetch("data/fema-zones.geojson").then((response) => response.json()),
-]).then(([summaryPayload, roadPayload, boundaryPayload, femaPayload, zonePayload]) => {
+  fetch("data/routing.json").then((response) => response.json()),
+]).then(([summaryPayload, roadPayload, boundaryPayload, femaPayload, zonePayload, routingPayload]) => {
   summary = summaryPayload;
   roads = roadPayload;
   fema = femaPayload;
   femaZones = zonePayload;
+  prepareRouting(routingPayload);
   document.getElementById("banner").textContent = "Each mark is a chosen rise already computed, not Hurricane Ida and not a forecast.";
   drawLegend();
   drawMap(boundaryPayload);
@@ -362,6 +383,7 @@ function setStage(next) {
     const route = (row.facility_routes || []).find((item) => item.origin + "→" + item.destination === lastRouteKey);
     if (route) showRouteBlurb(route);
   }
+  if (routeActive) drawRoute(false);
 }
 
 function clearRoadHighlight() {
@@ -558,4 +580,258 @@ function setFemaVisible(visible) {
 
 function stageKey(id) {
   return id.replace(".", "_");
+}
+
+function prepareRouting(payload) {
+  routing = {
+    stages: payload.stages,
+    edges: payload.edges,
+    adj: new Map(),
+    nodes: new Map(),
+    names: [],
+    bounds: [180, 90, -180, -90],
+  };
+  const names = new Set();
+  payload.nodes.forEach(([id, lon, lat]) => {
+    routing.nodes.set(id, [lon, lat]);
+    routing.bounds[0] = Math.min(routing.bounds[0], lon);
+    routing.bounds[1] = Math.min(routing.bounds[1], lat);
+    routing.bounds[2] = Math.max(routing.bounds[2], lon);
+    routing.bounds[3] = Math.max(routing.bounds[3], lat);
+  });
+  payload.edges.forEach((edge) => {
+    if (!routing.adj.has(edge.u)) routing.adj.set(edge.u, []);
+    routing.adj.get(edge.u).push(edge);
+    if (edge.name) names.add(edge.name);
+  });
+  routing.names = [...names].sort((left, right) => left.localeCompare(right));
+}
+
+function useMyLocation() {
+  const note = document.getElementById("route-note");
+  if (!navigator.geolocation) {
+    note.textContent = "This browser cannot share a location.";
+    return;
+  }
+  note.textContent = "Asking the browser for this location.";
+  navigator.geolocation.getCurrentPosition((position) => {
+    located = { lon: position.coords.longitude, lat: position.coords.latitude };
+    document.getElementById("route-start").value = "Your location";
+    note.textContent = "Using this browser's location as the start.";
+  }, () => {
+    note.textContent = "The browser did not share a location.";
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+function showRouteSuggestions(box) {
+  suggestTarget = box;
+  const list = document.getElementById("route-suggest");
+  const needle = box.value.trim().toLowerCase();
+  list.replaceChildren();
+  if (!routing || needle.length < 2 || needle === "your location") {
+    list.hidden = true;
+    return;
+  }
+  const matches = routing.names.filter((name) => name.toLowerCase().includes(needle)).slice(0, 8);
+  if (!matches.length) {
+    list.hidden = true;
+    return;
+  }
+  matches.forEach((name) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "road-link";
+    button.textContent = name;
+    button.addEventListener("click", () => {
+      box.value = name;
+      if (box.id === "route-start") located = null;
+      list.hidden = true;
+    });
+    item.append(button);
+    list.append(item);
+  });
+  list.hidden = false;
+}
+
+function matchRoadName(query) {
+  const needle = query.trim().toLowerCase();
+  const exact = routing.names.find((name) => name.toLowerCase() === needle);
+  if (exact) return { name: exact };
+  const contains = routing.names.filter((name) => name.toLowerCase().includes(needle));
+  if (contains.length === 1) return { name: contains[0] };
+  if (contains.length > 1) return { choices: contains.slice(0, 8) };
+  return null;
+}
+
+function edgeIsClosed(edge, stageIndex) {
+  return ((edge.c || 0) & (1 << stageIndex)) !== 0;
+}
+
+function openEdgesNamed(name, stageIndex) {
+  const wanted = name.toLowerCase();
+  return routing.edges.filter((edge) => (edge.name || "").toLowerCase() === wanted && !edgeIsClosed(edge, stageIndex));
+}
+
+function nodeOnRoad(name, stageIndex) {
+  const open = openEdgesNamed(name, stageIndex);
+  if (!open.length) {
+    const known = routing.edges.some((edge) => (edge.name || "").toLowerCase() === name.toLowerCase());
+    if (known) return { error: name + " is affected at this rise. It is not used for directions." };
+    return null;
+  }
+  const best = open.reduce((left, right) => (right.m > left.m ? right : left));
+  const mid = best.g[Math.floor((best.g.length - 1) / 2)];
+  const nearer = distanceMeters(mid, routing.nodes.get(best.u)) <= distanceMeters(mid, routing.nodes.get(best.v)) ? best.u : best.v;
+  return { node: nearer };
+}
+
+function nearestOpenNode(lon, lat, stageIndex, role) {
+  let best = null;
+  let bestDistance = Infinity;
+  routing.nodes.forEach((coord, id) => {
+    const outgoing = (routing.adj.get(id) || []).some((edge) => !edgeIsClosed(edge, stageIndex));
+    const incoming = routing.edges.some((edge) => edge.v === id && !edgeIsClosed(edge, stageIndex));
+    if (role === "start" && !outgoing) return;
+    if (role === "end" && !outgoing && !incoming) return;
+    const gap = distanceMeters([lon, lat], coord);
+    if (gap < bestDistance) {
+      bestDistance = gap;
+      best = id;
+    }
+  });
+  if (best === null || bestDistance > 200) return { error: "That place is not on an open Princeton road." };
+  return { node: best };
+}
+
+function distanceMeters(left, right) {
+  const radius = 6371000;
+  const lat1 = left[1] * Math.PI / 180;
+  const lat2 = right[1] * Math.PI / 180;
+  const dLat = lat2 - lat1;
+  const dLon = (right[0] - left[0]) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * radius * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+async function geocode(query) {
+  const box = routing.bounds;
+  const viewbox = [box[0], box[3], box[2], box[1]].join(",");
+  const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&bounded=1&viewbox="
+    + viewbox + "&q=" + encodeURIComponent(query);
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const rows = await response.json();
+  if (!rows.length) return null;
+  return { lon: Number(rows[0].lon), lat: Number(rows[0].lat) };
+}
+
+async function resolveStop(text, location, stageIndex, role) {
+  if (location && text.toLowerCase() === "your location") return nearestOpenNode(location.lon, location.lat, stageIndex, role);
+  const matched = matchRoadName(text);
+  if (matched && matched.name) {
+    const node = nodeOnRoad(matched.name, stageIndex);
+    return node || { error: "No saved Princeton road has that name." };
+  }
+  if (matched && matched.choices) return { error: "Several roads match. Choose one from the list." };
+  try {
+    const point = await geocode(text);
+    if (!point) return { error: "No saved road or Princeton address matches that place." };
+    return nearestOpenNode(point.lon, point.lat, stageIndex, role);
+  } catch (error) {
+    return { error: "The address lookup did not answer." };
+  }
+}
+
+function shortestOpenPath(start, end, stageIndex) {
+  const dist = new Map([[start, 0]]);
+  const prev = new Map();
+  const seen = new Set();
+  let current = null;
+  while (true) {
+    current = null;
+    let best = Infinity;
+    dist.forEach((value, node) => {
+      if (!seen.has(node) && value < best) {
+        best = value;
+        current = node;
+      }
+    });
+    if (current === null) return null;
+    if (current === end) break;
+    seen.add(current);
+    (routing.adj.get(current) || []).forEach((edge) => {
+      if (edgeIsClosed(edge, stageIndex)) return;
+      const next = best + edge.m;
+      if (next < (dist.has(edge.v) ? dist.get(edge.v) : Infinity)) {
+        dist.set(edge.v, next);
+        prev.set(edge.v, edge);
+      }
+    });
+  }
+  const edges = [];
+  let cursor = end;
+  let metres = 0;
+  while (cursor !== start) {
+    const edge = prev.get(cursor);
+    if (!edge) return null;
+    if (edgeIsClosed(edge, stageIndex)) return null;
+    edges.push(edge);
+    metres += edge.m;
+    cursor = edge.u;
+  }
+  const line = [];
+  edges.reverse().forEach((edge) => {
+    edge.g.forEach((point) => line.push([point[1], point[0]]));
+  });
+  return { line, metres };
+}
+
+function clearRouteLine() {
+  if (routeLayer && map) map.removeLayer(routeLayer);
+  routeLayer = null;
+}
+
+function paintRoute(latlngs) {
+  clearRouteLine();
+  routeLayer = L.polyline(latlngs, { color: "#1a56c4", weight: 7, opacity: 0.95 }).addTo(map);
+  routeLayer.bringToFront();
+}
+
+async function drawRoute(fit) {
+  const note = document.getElementById("route-note");
+  if (!routing || !map) return;
+  const stageIndex = routing.stages.indexOf(stage);
+  const startText = document.getElementById("route-start").value.trim();
+  const endText = document.getElementById("route-end").value.trim();
+  if (stageIndex < 0) {
+    note.textContent = "This rise is not in the saved network.";
+    clearRouteLine();
+    return;
+  }
+  if (!startText || !endText) {
+    note.textContent = "Enter a start and a destination.";
+    return;
+  }
+  const start = await resolveStop(startText, located, stageIndex, "start");
+  const end = await resolveStop(endText, null, stageIndex, "end");
+  if (start.error || end.error) {
+    note.textContent = start.error || end.error;
+    clearRouteLine();
+    return;
+  }
+  if (start.node === end.node) {
+    note.textContent = "Those are the same place on the open network.";
+    clearRouteLine();
+    return;
+  }
+  const path = shortestOpenPath(start.node, end.node, stageIndex);
+  if (!path) {
+    note.textContent = "No open path between those points at this rise.";
+    clearRouteLine();
+    return;
+  }
+  paintRoute(path.line);
+  note.textContent = groupedMetres(path.metres) + " m on open roads. Affected roads were left out.";
+  if (fit && routeLayer) map.fitBounds(routeLayer.getBounds(), { padding: [36, 36] });
 }

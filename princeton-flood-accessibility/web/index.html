@@ -39,6 +39,23 @@
       </div>
     </section>
 
+    <section class="answer directions" aria-label="Directions">
+      <h2>Directions</h2>
+      <p class="hint">Shortest path on roads that are still open at this rise. Affected roads are left out.</p>
+      <form id="directions">
+        <label for="route-start">Start</label>
+        <input id="route-start" type="text" placeholder="Address or road in Princeton" autocomplete="off">
+        <label for="route-end">Destination</label>
+        <input id="route-end" type="text" placeholder="Address or road in Princeton" autocomplete="off">
+        <div class="route-actions">
+          <button type="button" id="route-locate">Use my location</button>
+          <button type="submit">Get directions</button>
+        </div>
+      </form>
+      <ul id="route-suggest" class="name-list" hidden></ul>
+      <p id="route-note" class="hint"></p>
+    </section>
+
     <section class="answer" aria-label="Which roads are affected">
       <h2>Which roads are affected</h2>
       <div id="scenario-summary" aria-live="polite">

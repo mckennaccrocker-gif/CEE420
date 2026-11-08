@@ -15,7 +15,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from dashboard.routing import build_routing_network  # noqa: E402
 from network.roads import load_settings  # noqa: E402
+from network.roads import resolve  # noqa: E402
 
 
 def _server():
@@ -56,7 +58,15 @@ def export_site(context: dict, web: Path = WEB) -> Path:
 
 
 def main() -> None:
-    out = export_site(_server().build_context(load_settings()))
+    settings = load_settings()
+    out = export_site(_server().build_context(settings))
+    routing = build_routing_network(resolve(settings, "graphml"), resolve(settings, "accessibility_geojson"))
+    if routing.get("hurricane_ida_depth") is not False:
+        raise ValueError("Refusing to publish a route network marked as Hurricane Ida.")
+    (out / "routing.json").write_text(
+        json.dumps(routing, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
     print(f"Wrote static dashboard data to {out}")
 
 

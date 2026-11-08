@@ -246,6 +246,9 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert html.index("</header>") < html.index('id="limits"') < html.index('id="stage-slider"')
         assert "This page does not include soil porosity, buildings, or storm drains, because no published Princeton dataset gives a road depth from those. Depths compare the chosen rise with USGS 3DEP bare-earth elevation only." in html
         assert "How high the water is set" in html
+        assert 'id="directions"' in html
+        assert "Affected roads are left out." in html
+        assert html.index('id="directions"') < html.index('id="map-wrap"')
         assert "Where not to go" in html
         assert "Which roads stay open" in html
         static = json.loads((project_root / "web" / "data" / "summary.json").read_text(encoding="utf-8"))
@@ -298,6 +301,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function wetCaption" in script
         assert "function focusNamedRoad" in script
         assert "function focusFacilityRoute" in script
+        assert "function shortestOpenPath" in script
+        assert "No open path between those points at this rise." in script
         assert "A passenger car can still pass." in script
         assert "Do not drive a passenger car. Half the centerline is at or above 0.30 m." in script
         assert "normal car" not in script
