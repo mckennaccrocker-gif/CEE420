@@ -62,6 +62,7 @@ let suggestTarget = null;
 let picked = { start: null, end: null };
 let lastPlaceAt = 0;
 let routePickOn = false;
+let focusedRouteBox = null;
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -201,23 +202,33 @@ function drawMap(boundary) {
     style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
       layer.on("click", (event) => {
-        if (!routePickOn) {
+        const role = focusedRouteBox;
+        if (!role && !routePickOn) {
           selectLayer(layer);
           return;
         }
         if (event.originalEvent) event.originalEvent._stopped = true;
+        focusedRouteBox = null;
         const props = feature.properties || {};
         if (props["status_" + stageKey(stage)] === "assumed_closed") {
           document.getElementById("route-note").textContent = "That road is affected at this rise. Click an open road.";
           return;
         }
-        placeClickedRoad(event.latlng.lng, event.latlng.lat, props.name || "");
+        placeClickedRoad(event.latlng.lng, event.latlng.lat, props.name || "", role);
       });
     },
   }).addTo(map);
+  map.getContainer().addEventListener("mousedown", () => {
+    const active = document.activeElement;
+    if (active && active.id === "route-start") focusedRouteBox = "start";
+    else if (active && active.id === "route-end") focusedRouteBox = "end";
+    else focusedRouteBox = null;
+  }, true);
   map.on("click", (event) => {
-    if (!routePickOn) return;
-    placeClickedRoad(event.latlng.lng, event.latlng.lat);
+    const role = focusedRouteBox;
+    focusedRouteBox = null;
+    if (!role && !routePickOn) return;
+    placeClickedRoad(event.latlng.lng, event.latlng.lat, "", role);
   });
   map.fitBounds(roadLayer.getBounds(), { padding: [28, 28] });
   requestAnimationFrame(() => map.invalidateSize());
@@ -824,8 +835,9 @@ function setRoutePick(on) {
   else map.dragging.enable();
 }
 
-function placeClickedRoad(lon, lat, roadName) {
-  if (!routePickOn) return;
+function placeClickedRoad(lon, lat, roadName, role) {
+  const directed = role === "start" || role === "end";
+  if (!routePickOn && !directed) return;
   const now = Date.now();
   if (now - lastPlaceAt < 40) return;
   lastPlaceAt = now;
@@ -841,10 +853,25 @@ function placeClickedRoad(lon, lat, roadName) {
   }
   const startBox = document.getElementById("route-start");
   const endBox = document.getElementById("route-end");
-  const choosingStart = !startBox.value.trim() || endBox.value.trim();
+  const choosingStart = directed ? role === "start" : (!startBox.value.trim() || endBox.value.trim());
   const hit = nearestOpenRoad(lon, lat, stageIndex, choosingStart ? "start" : "end", roadName);
   if (hit.error) {
     note.textContent = hit.error;
+    return;
+  }
+  if (directed) {
+    if (role === "start") {
+      picked.start = hit;
+      located = null;
+      startBox.value = hit.label;
+      note.textContent = "Start is " + hit.label + ".";
+    } else {
+      picked.end = hit;
+      endBox.value = hit.label;
+      note.textContent = "Destination is " + hit.label + ".";
+    }
+    clearRouteLine();
+    routeActive = false;
     return;
   }
   if (choosingStart) {

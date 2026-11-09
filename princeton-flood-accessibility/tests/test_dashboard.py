@@ -249,7 +249,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="directions"' in html
         assert 'id="route-go"' in html
         assert "Affected roads are left out." in html
-        assert "Turn on Choose a route on the map, then click a start and a destination. Or type a road." in html
+        assert "Click in Start or Destination, then click an open road." in html
         assert 'id="route-pick"' in html
         assert 'aria-pressed="false"' in html
         assert "Choose a route on the map" in html
@@ -313,6 +313,7 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="route-turns"' in html
         assert "function setRoutePick" in script
         assert "map.dragging.disable()" in script
+        assert 'active.id === "route-start"' in script
         assert "routePickOn" in script
         assert "Click the map again for a destination." in script
         assert "zoomAnimation: false" in script
