@@ -72,11 +72,13 @@ document.getElementById("fema-toggle").addEventListener("change", (event) => {
 });
 document.getElementById("avoid-query").addEventListener("input", () => applyNameFilter("avoid"));
 document.getElementById("open-query").addEventListener("input", () => applyNameFilter("open"));
-document.getElementById("directions").addEventListener("submit", (event) => {
-  event.preventDefault();
+function requestRoute(event) {
+  if (event) event.preventDefault();
   routeActive = true;
   drawRoute(true);
-});
+}
+document.getElementById("directions").addEventListener("submit", requestRoute);
+document.getElementById("route-go").addEventListener("click", requestRoute);
 document.getElementById("route-locate").addEventListener("click", useMyLocation);
 ["route-start", "route-end"].forEach((id) => {
   const box = document.getElementById(id);
@@ -133,7 +135,12 @@ function drawLegend() {
 }
 
 function drawMap(boundary) {
-  map = L.map("map", { zoomControl: true }).setView([40.3562, -74.6693], 13);
+  map = L.map("map", {
+    zoomControl: true,
+    zoomAnimation: false,
+    fadeAnimation: false,
+    markerZoomAnimation: false,
+  }).setView([40.3562, -74.6693], 13);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Boundary: NJGIN Municipal Boundaries of NJ',
@@ -792,46 +799,75 @@ function clearRouteLine() {
   routeLayer = null;
 }
 
+function settleMap() {
+  if (map && map._animatingZoom && typeof map._onZoomTransitionEnd === "function") {
+    map._onZoomTransitionEnd();
+  }
+}
+
 function paintRoute(latlngs) {
   clearRouteLine();
-  routeLayer = L.polyline(latlngs, { color: "#1a56c4", weight: 7, opacity: 0.95 }).addTo(map);
-  routeLayer.bringToFront();
+  settleMap();
+  if (!map.getPane("route")) {
+    map.createPane("route");
+    const pane = map.getPane("route");
+    pane.style.zIndex = 650;
+    pane.style.pointerEvents = "none";
+  }
+  routeLayer = L.polyline(latlngs, {
+    pane: "route",
+    color: "#1a56c4",
+    weight: 7,
+    opacity: 0.95,
+  }).addTo(map);
 }
 
 async function drawRoute(fit) {
   const note = document.getElementById("route-note");
-  if (!routing || !map) return;
-  const stageIndex = routing.stages.indexOf(stage);
-  const startText = document.getElementById("route-start").value.trim();
-  const endText = document.getElementById("route-end").value.trim();
-  if (stageIndex < 0) {
-    note.textContent = "This rise is not in the saved network.";
+  try {
+    if (!routing || !map) {
+      note.textContent = "The road network is still loading.";
+      return;
+    }
+    const stageIndex = routing.stages.indexOf(stage);
+    const startText = document.getElementById("route-start").value.trim();
+    const endText = document.getElementById("route-end").value.trim();
+    if (stageIndex < 0) {
+      note.textContent = "This rise is not in the saved network.";
+      clearRouteLine();
+      return;
+    }
+    if (!startText || !endText) {
+      note.textContent = "Enter a start and a destination.";
+      return;
+    }
+    note.textContent = "Finding an open path.";
+    const start = await resolveStop(startText, located, stageIndex, "start");
+    const end = await resolveStop(endText, null, stageIndex, "end");
+    if (start.error || end.error) {
+      note.textContent = start.error || end.error;
+      clearRouteLine();
+      return;
+    }
+    if (start.node === end.node) {
+      note.textContent = "Those are the same place on the open network.";
+      clearRouteLine();
+      return;
+    }
+    const path = shortestOpenPath(start.node, end.node, stageIndex);
+    if (!path) {
+      note.textContent = "No open path between those points at this rise.";
+      clearRouteLine();
+      return;
+    }
+    paintRoute(path.line);
+    note.textContent = groupedMetres(path.metres) + " m on open roads. Affected roads were left out.";
+    if (fit && routeLayer) {
+      settleMap();
+      map.fitBounds(routeLayer.getBounds(), { padding: [36, 36], animate: false });
+    }
+  } catch (error) {
+    note.textContent = "Directions could not be drawn.";
     clearRouteLine();
-    return;
   }
-  if (!startText || !endText) {
-    note.textContent = "Enter a start and a destination.";
-    return;
-  }
-  const start = await resolveStop(startText, located, stageIndex, "start");
-  const end = await resolveStop(endText, null, stageIndex, "end");
-  if (start.error || end.error) {
-    note.textContent = start.error || end.error;
-    clearRouteLine();
-    return;
-  }
-  if (start.node === end.node) {
-    note.textContent = "Those are the same place on the open network.";
-    clearRouteLine();
-    return;
-  }
-  const path = shortestOpenPath(start.node, end.node, stageIndex);
-  if (!path) {
-    note.textContent = "No open path between those points at this rise.";
-    clearRouteLine();
-    return;
-  }
-  paintRoute(path.line);
-  note.textContent = groupedMetres(path.metres) + " m on open roads. Affected roads were left out.";
-  if (fit && routeLayer) map.fitBounds(routeLayer.getBounds(), { padding: [36, 36] });
 }

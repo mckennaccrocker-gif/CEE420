@@ -361,6 +361,11 @@ button.road-link[aria-pressed="true"] { background: #f3efe4; }
 
 #route-suggest { margin-top: 0.4rem; }
 
+#route-note:not(:empty) {
+  color: var(--navy);
+  font-weight: 650;
+}
+
 .list-search {
   display: flex;
   flex-direction: column;
