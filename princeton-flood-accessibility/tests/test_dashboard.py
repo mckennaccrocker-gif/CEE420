@@ -308,6 +308,9 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function focusFacilityRoute" in script
         assert "function shortestOpenPath" in script
         assert "function placeClickedRoad" in script
+        assert "function turnSentence" in script
+        assert "then turn onto " in script
+        assert 'id="route-turns"' in html
         assert "function setRoutePick" in script
         assert "routePickOn" in script
         assert "Click the map again for a destination." in script

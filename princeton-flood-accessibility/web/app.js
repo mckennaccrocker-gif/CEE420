@@ -861,7 +861,9 @@ function placeClickedRoad(lon, lat) {
   picked.end = hit;
   endBox.value = hit.label;
   routeActive = true;
-  drawRoute(true);
+  drawRoute(true).then(() => {
+    if (routeLayer) setRoutePick(false);
+  });
 }
 
 async function resolveStop(text, location, stageIndex, role) {
@@ -920,16 +922,48 @@ function shortestOpenPath(start, end, stageIndex) {
     metres += edge.m;
     cursor = edge.u;
   }
+  edges.reverse();
   const line = [];
-  edges.reverse().forEach((edge) => {
+  edges.forEach((edge) => {
     edge.g.forEach((point) => line.push([point[1], point[0]]));
   });
-  return { line, metres };
+  return { line, metres, edges };
+}
+
+function roadsOnPath(edges) {
+  const names = [];
+  (edges || []).forEach((edge) => {
+    const name = edge.name && String(edge.name).trim();
+    if (!name || names[names.length - 1] === name) return;
+    names.push(name);
+  });
+  return names;
+}
+
+function turnSentence(names) {
+  if (!names.length) return "";
+  if (names.length === 1) return "Take " + names[0] + ".";
+  return "Take " + names[0] + names.slice(1).map((name) => ", then turn onto " + name).join("") + ".";
+}
+
+function showTurns(edges) {
+  const list = document.getElementById("route-turns");
+  const sentence = turnSentence(roadsOnPath(edges));
+  list.hidden = !sentence;
+  list.textContent = sentence;
+}
+
+function clearTurns() {
+  const list = document.getElementById("route-turns");
+  if (!list) return;
+  list.hidden = true;
+  list.textContent = "";
 }
 
 function clearRouteLine() {
   if (routeLayer && map) map.removeLayer(routeLayer);
   routeLayer = null;
+  clearTurns();
 }
 
 function settleMap() {
@@ -994,6 +1028,7 @@ async function drawRoute(fit) {
       return;
     }
     paintRoute(path.line);
+    showTurns(path.edges);
     note.textContent = groupedMetres(path.metres) + " m on open roads. Affected roads were left out.";
     if (fit && routeLayer) {
       settleMap();
