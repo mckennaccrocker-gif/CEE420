@@ -1,0 +1,16 @@
+{
+  "source_flowline": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/6/query",
+  "source_waterbody": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/12/query",
+  "retrieved_at_utc": "2026-11-02T22:32:30Z",
+  "bbox_epsg4326": [
+    -74.72920367773322,
+    40.29947686921709,
+    -74.61042007400923,
+    40.396458766885225
+  ],
+  "flowline_where": "ftype IN (460, 558) OR (ftype = 336 AND (gnis_name = 'Delaware and Raritan Canal'))",
+  "waterbody_where": "GNIS_NAME = 'Carnegie Lake'",
+  "n_features": 1005,
+  "sha256": "39b58c94623d4f380401eb96b4ef63f2d287832c6ee05701120289550c77880f",
+  "note": "National Hydrography Dataset flowlines (StreamRiver 460 and Artificial Path 558) plus named CanalDitch features and named waterbodies from config. Connectors, pipelines, and unnamed ditches are not included. This file is the channel reference for the scenario. It is not a flood extent."
+}

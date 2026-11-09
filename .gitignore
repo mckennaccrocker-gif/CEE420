@@ -12,6 +12,8 @@ work/
 
 # exports and OS noise
 *.html
+# The Princeton dashboard page is application source, not an exported notebook.
+!princeton-flood-accessibility/web/index.html
 .DS_Store
 Thumbs.db
 

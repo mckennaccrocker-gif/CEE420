@@ -1,0 +1,11 @@
+{
+  "file": "data/raw/princeton_boundary.geojson",
+  "sha256": "57be216fbf18ca26c2ad7f824b73465700aa3d4b7dc4a968ea95fff1a83a0446",
+  "feature_name": "Princeton, New Jersey",
+  "source": "NJGIN Open Data, Municipal Boundaries of NJ",
+  "source_note": "Pinned public-record snapshot shipped with the CEE420 course as P01/data/princeton_boundary.geojson. The course data note says it was retrieved 2026-09-07. This copy is unchanged.",
+  "course_file": "P01/data/princeton_boundary.geojson",
+  "license": "Public record",
+  "crs": "EPSG:4326",
+  "copied_on": "2026-11-02"
+}

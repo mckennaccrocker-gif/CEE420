@@ -1,0 +1,18 @@
+{
+  "source": "OpenStreetMap via OSMnx features_from_polygon",
+  "tags": {
+    "amenity": [
+      "hospital",
+      "school",
+      "fire_station",
+      "police",
+      "townhall",
+      "ambulance_station"
+    ]
+  },
+  "retrieved_at_utc": "2026-11-02T22:50:51Z",
+  "n_features": 27,
+  "n_inside": 27,
+  "sha256": "d5d34a243b75832dee23645e7fe13fc54f68d9ea9cc93917c3f640d21eb5f544",
+  "note": "Amenities that intersect the municipal polygon. The inside flag uses the representative point. This is not a flood layer. Do not overwrite the file."
+}

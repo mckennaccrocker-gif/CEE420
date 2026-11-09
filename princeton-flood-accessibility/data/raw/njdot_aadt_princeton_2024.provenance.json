@@ -1,0 +1,13 @@
+{
+  "source_url": "https://www.nj.gov/transportation/refdata/roadway/mdb/TrafficCount2024DataSetwithAADTs.csv",
+  "publisher": "NJDOT",
+  "filter": "County casefold equals 'mercer' AND Community contains 'princeton'",
+  "rows_in_source": 8857,
+  "rows_written": 39,
+  "aadt_year_values": [
+    2024
+  ],
+  "sha256": "9c2e07d07e900178b924bd06bb778070643e02770fd6961663166633d6dc8563",
+  "joined_to_road_edges": false,
+  "note": "Station records as published. Community still uses NJDOT's 'Princeton' and 'Princeton Twp' labels. Values were not summed and were not copied onto road edges."
+}

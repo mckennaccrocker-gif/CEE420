@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Princeton road accessibility</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="banner" role="note">Each mark is a chosen rise already computed, not Hurricane Ida and not a forecast.</div>
+  <header>
+    <div class="mast">
+      <p class="kicker">Municipality of Princeton, New Jersey</p>
+      <h1>Early warning</h1>
+      <p id="product-line" class="product">Shows which roads would close, so the town can act before they are already closed.</p>
+    </div>
+  </header>
+  <p id="limits" class="limits" role="note">This page does not include soil porosity, buildings, or storm drains, because no published Princeton dataset gives a road depth from those. Depths compare the chosen rise with USGS 3DEP bare-earth elevation only.</p>
+  <div class="page">
+    <div class="warning-split">
+    <div class="warning-lists">
+    <section class="rise-panel answer" aria-label="How high the water is set">
+      <h2>How high the water is set</h2>
+      <div class="rise">
+        <label for="stage-slider">Chosen rise</label>
+        <input id="stage-slider" type="range" min="0" max="2" step="0.25" value="0.25" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0.25" aria-valuetext="+0.25 m. 3,111 m at or above 0.30 m">
+        <div class="rise-scale" aria-hidden="true">
+          <span>0</span>
+          <span>0.5</span>
+          <span>1.0</span>
+          <span>1.5</span>
+          <span>2.0 m</span>
+        </div>
+      </div>
+      <div class="result">
+        <p id="stage-readout" class="rise-value">+0.25 m</p>
+        <p id="stage-caption" class="rise-caption">3,111 m at or above 0.30 m</p>
+      </div>
+    </section>
+
+    <section class="answer directions" aria-label="Directions">
+      <h2>Directions</h2>
+      <p class="hint">Click in Start or Destination, then click an open road. Or turn on Choose a route on the map. Affected roads are left out.</p>
+      <form id="directions">
+        <label for="route-start">Start</label>
+        <input id="route-start" type="text" placeholder="Address or road in Princeton" autocomplete="off">
+        <label for="route-end">Destination</label>
+        <input id="route-end" type="text" placeholder="Address or road in Princeton" autocomplete="off">
+        <div class="route-actions">
+          <button type="button" id="route-locate">Use my location</button>
+          <button type="button" id="route-go">Get directions</button>
+        </div>
+      </form>
+      <ul id="route-suggest" class="name-list" hidden></ul>
+      <p id="route-note" class="hint"></p>
+      <p id="route-turns" class="hint" hidden></p>
+    </section>
+
+    <section class="answer" aria-label="Which roads are affected">
+      <h2>Which roads are affected</h2>
+      <div id="scenario-summary" aria-live="polite">
+        <p id="affected-lead" class="answer-lead alert">15 centerlines are affected. Do not use them.</p>
+      </div>
+    </section>
+
+    <section class="answer" aria-label="Where not to go">
+      <h2>Where not to go</h2>
+      <label class="list-search" for="avoid-query">Search these roads
+        <input id="avoid-query" type="search" placeholder="Road name" autocomplete="off">
+      </label>
+      <details id="avoid-fold" class="name-fold">
+        <summary>Road names</summary>
+        <ul id="avoid-list" class="name-list"></ul>
+      </details>
+    </section>
+
+    <section class="answer" id="stay-open" aria-label="Which roads stay open">
+      <h2>Which roads stay open</h2>
+      <p id="open-lead" class="answer-lead open">946 centerlines are still open. Send traffic there.</p>
+      <label class="list-search" for="open-query">Search these roads
+        <input id="open-query" type="search" placeholder="Road name" autocomplete="off">
+      </label>
+      <details id="open-fold" class="name-fold">
+        <summary>Road names</summary>
+        <ul id="open-list" class="name-list"></ul>
+      </details>
+      <h3>Hospital, fire, and police</h3>
+      <p id="facility-note" class="hint">Hospital, fire, and police routes are already saved for every mark from 0 m to 2.0 m by 0.25 m. No route was added.</p>
+      <ul id="facility-routes" class="summary-roads"></ul>
+    </section>
+
+    </div>
+    <div class="warning-map">
+      <section id="map-wrap" aria-label="Centerline map">
+        <div id="map"></div>
+        <button type="button" id="route-pick" aria-pressed="false">Choose a route on the map</button>
+        <form id="search">
+          <label for="road-query">Find a road</label>
+          <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
+        </form>
+        <aside id="map-blurb" class="map-blurb" hidden>
+          <p id="blurb-name" class="blurb-name"></p>
+          <p id="blurb-status"></p>
+          <p id="blurb-detail" class="hint"></p>
+        </aside>
+      </section>
+      <div class="zone-control">
+        <label for="fema-toggle">
+          <input id="fema-toggle" type="checkbox">
+          Regulatory flood zones
+        </label>
+        <p>FEMA NFHL. A zone does not change the road depth.</p>
+      </div>
+      <div id="legend" class="legend-strip"></div>
+    </div>
+    </div>
+
+    <section class="rise-summary" aria-live="polite">
+      <h2>This rise</h2>
+      <p id="share-line"></p>
+      <p id="cost-line">Damage cost is not estimated.</p>
+    </section>
+
+    <section class="sources" aria-label="Sources">
+      <h2>Sources</h2>
+      <p>Mckenna Crocker and Annie Huettel.</p>
+      <p>OpenStreetMap. USGS 3DEP. NJGIN municipal boundary. FEMA NFHL.</p>
+    </section>
+  </div>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

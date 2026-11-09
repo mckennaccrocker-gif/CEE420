@@ -1,0 +1,21 @@
+{
+  "url": "https://www.fhwa.dot.gov/bridge/nbi/2025/delimited/NJ25.txt",
+  "publisher": "Federal Highway Administration",
+  "title": "2025 National Bridge Inventory, New Jersey highway bridges, comma-delimited",
+  "retrieved_at_utc": "2026-11-03T20:03:06Z",
+  "http_last_modified": "Thu, 12 Jun 2025 14:05:40 GMT",
+  "sha256": "88d40b94c4ada27ffe159601fb206170014f01bfd7e59098b3f0e1aba2d5e6ee",
+  "bytes": 2901317,
+  "n_records": 6825,
+  "horizontal_datum": "NAD83",
+  "horizontal_datum_note": "Items 16 and 17 are latitude and longitude packed as degrees, minutes, seconds, and hundredths of a second. The SNBI commentary for B.L.05 and B.L.06 says those coordinates are consistent with a linear referencing system on the North American Datum of 1983. Longitude is stored without a west sign.",
+  "vertical_datum": null,
+  "vertical_datum_note": "The 123-column file has no deck-elevation column and no vertical datum. Structure length, maximum span, deck width, and clearances are metres. Item 58 deck condition is a rating code, not an elevation.",
+  "units": {
+    "structure_length": "metres",
+    "max_span": "metres",
+    "deck_width": "metres",
+    "clearances": "metres",
+    "deck_condition_item_58": "rating code 0-9 or N, not an elevation"
+  }
+}
