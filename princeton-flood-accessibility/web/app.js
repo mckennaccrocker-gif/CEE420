@@ -61,6 +61,8 @@ let located = null;
 let suggestTarget = null;
 let picked = { start: null, end: null };
 let lastPlaceAt = 0;
+let routePickOn = false;
+let pressPoint = null;
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -82,6 +84,7 @@ function requestRoute(event) {
 document.getElementById("directions").addEventListener("submit", requestRoute);
 document.getElementById("route-go").addEventListener("click", requestRoute);
 document.getElementById("route-locate").addEventListener("click", useMyLocation);
+document.getElementById("route-pick").addEventListener("click", () => setRoutePick(!routePickOn));
 ["route-start", "route-end"].forEach((id) => {
   const box = document.getElementById(id);
   box.addEventListener("input", () => {
@@ -198,14 +201,32 @@ function drawMap(boundary) {
   roadLayer = L.geoJSON(roads, {
     style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
-      layer.on("click", (event) => {
-        selectLayer(layer);
-        placeClickedRoad(event.latlng.lng, event.latlng.lat);
-      });
+      layer.on("click", () => selectLayer(layer));
     },
   }).addTo(map);
-  map.on("click", (event) => placeClickedRoad(event.latlng.lng, event.latlng.lat));
-  map.getContainer().style.cursor = "crosshair";
+  map.on("mousedown", (event) => {
+    const point = event.originalEvent;
+    if (!point) {
+      pressPoint = null;
+      return;
+    }
+    pressPoint = { x: point.clientX, y: point.clientY, moved: false };
+    const move = (native) => {
+      const dx = native.clientX - pressPoint.x;
+      const dy = native.clientY - pressPoint.y;
+      if (dx * dx + dy * dy > 25) pressPoint.moved = true;
+    };
+    const up = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  });
+  map.on("click", (event) => {
+    if (!routePickOn || (pressPoint && pressPoint.moved)) return;
+    placeClickedRoad(event.latlng.lng, event.latlng.lat);
+  });
   map.fitBounds(roadLayer.getBounds(), { padding: [28, 28] });
   requestAnimationFrame(() => map.invalidateSize());
   window.addEventListener("resize", () => map.invalidateSize());
@@ -795,7 +816,16 @@ function nearestOpenRoad(lon, lat, stageIndex, role) {
   };
 }
 
+function setRoutePick(on) {
+  routePickOn = on;
+  const button = document.getElementById("route-pick");
+  button.setAttribute("aria-pressed", on ? "true" : "false");
+  button.textContent = on ? "Choosing a route on the map" : "Choose a route on the map";
+  if (map) map.getContainer().style.cursor = on ? "crosshair" : "";
+}
+
 function placeClickedRoad(lon, lat) {
+  if (!routePickOn) return;
   const now = Date.now();
   if (now - lastPlaceAt < 40) return;
   lastPlaceAt = now;

@@ -433,6 +433,28 @@ button.road-link[aria-pressed="true"] { background: #f3efe4; }
 
 .sources p + p { margin-top: 0.25rem; }
 
+#route-pick {
+  position: absolute;
+  z-index: 500;
+  left: 14px;
+  bottom: 28px;
+  max-width: calc(100% - 28px);
+  border: 1px solid var(--navy);
+  background: #fff;
+  color: var(--navy);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(14, 42, 67, 0.18);
+}
+
+#route-pick[aria-pressed="true"] {
+  background: var(--navy);
+  color: #fff;
+}
+
 #search {
   position: absolute;
   z-index: 500;

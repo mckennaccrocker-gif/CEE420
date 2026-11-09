@@ -249,7 +249,10 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert 'id="directions"' in html
         assert 'id="route-go"' in html
         assert "Affected roads are left out." in html
-        assert "Click the map for a start, then a destination, or type a road." in html
+        assert "Turn on Choose a route on the map, then click a start and a destination. Or type a road." in html
+        assert 'id="route-pick"' in html
+        assert 'aria-pressed="false"' in html
+        assert "Choose a route on the map" in html
         assert html.index('id="directions"') < html.index('id="map-wrap"')
         assert "Where not to go" in html
         assert "Which roads stay open" in html
@@ -305,6 +308,8 @@ def test_server_serves_the_scenario_summary(settings: dict, project_root: Path) 
         assert "function focusFacilityRoute" in script
         assert "function shortestOpenPath" in script
         assert "function placeClickedRoad" in script
+        assert "function setRoutePick" in script
+        assert "routePickOn" in script
         assert "Click the map again for a destination." in script
         assert "zoomAnimation: false" in script
         assert "animate: false" in script

@@ -41,7 +41,7 @@
 
     <section class="answer directions" aria-label="Directions">
       <h2>Directions</h2>
-      <p class="hint">Click the map for a start, then a destination, or type a road. Affected roads are left out.</p>
+      <p class="hint">Turn on Choose a route on the map, then click a start and a destination. Or type a road. Affected roads are left out.</p>
       <form id="directions">
         <label for="route-start">Start</label>
         <input id="route-start" type="text" placeholder="Address or road in Princeton" autocomplete="off">
@@ -93,6 +93,7 @@
     <div class="warning-map">
       <section id="map-wrap" aria-label="Centerline map">
         <div id="map"></div>
+        <button type="button" id="route-pick" aria-pressed="false">Choose a route on the map</button>
         <form id="search">
           <label for="road-query">Find a road</label>
           <input id="road-query" type="search" placeholder="Quaker Road" autocomplete="off">
