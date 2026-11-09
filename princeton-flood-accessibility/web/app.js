@@ -62,7 +62,6 @@ let suggestTarget = null;
 let picked = { start: null, end: null };
 let lastPlaceAt = 0;
 let routePickOn = false;
-let pressPoint = null;
 
 document.getElementById("stage-slider").addEventListener("input", (event) => {
   setStage(nearestStageId(event.target.value));
@@ -201,30 +200,23 @@ function drawMap(boundary) {
   roadLayer = L.geoJSON(roads, {
     style: (feature) => styleFor(feature.properties["status_" + stageKey(stage)], feature.properties.deck_status),
     onEachFeature: (feature, layer) => {
-      layer.on("click", () => selectLayer(layer));
+      layer.on("click", (event) => {
+        if (!routePickOn) {
+          selectLayer(layer);
+          return;
+        }
+        if (event.originalEvent) event.originalEvent._stopped = true;
+        const props = feature.properties || {};
+        if (props["status_" + stageKey(stage)] === "assumed_closed") {
+          document.getElementById("route-note").textContent = "That road is affected at this rise. Click an open road.";
+          return;
+        }
+        placeClickedRoad(event.latlng.lng, event.latlng.lat, props.name || "");
+      });
     },
   }).addTo(map);
-  map.on("mousedown", (event) => {
-    const point = event.originalEvent;
-    if (!point) {
-      pressPoint = null;
-      return;
-    }
-    pressPoint = { x: point.clientX, y: point.clientY, moved: false };
-    const move = (native) => {
-      const dx = native.clientX - pressPoint.x;
-      const dy = native.clientY - pressPoint.y;
-      if (dx * dx + dy * dy > 25) pressPoint.moved = true;
-    };
-    const up = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-    };
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  });
   map.on("click", (event) => {
-    if (!routePickOn || (pressPoint && pressPoint.moved)) return;
+    if (!routePickOn) return;
     placeClickedRoad(event.latlng.lng, event.latlng.lat);
   });
   map.fitBounds(roadLayer.getBounds(), { padding: [28, 28] });
@@ -788,19 +780,24 @@ function distanceToLine(point, line) {
   return line.length === 1 ? distanceMeters(point, line[0]) : best;
 }
 
-function nearestOpenRoad(lon, lat, stageIndex, role) {
+function nearestOpenRoad(lon, lat, stageIndex, role, roadName) {
+  const wanted = roadName && String(roadName).trim();
   const point = [lon, lat];
   let best = null;
   let bestDistance = Infinity;
   routing.edges.forEach((edge) => {
     if (edgeIsClosed(edge, stageIndex)) return;
+    if (wanted && edge.name !== wanted) return;
     const gap = distanceToLine(point, edge.g);
     if (gap < bestDistance) {
       bestDistance = gap;
       best = edge;
     }
   });
-  if (!best || bestDistance > 200) return { error: "That place is not on an open Princeton road." };
+  if (!best || bestDistance > (wanted ? 120 : 200)) {
+    if (wanted) return nearestOpenRoad(lon, lat, stageIndex, role);
+    return { error: "That place is not on an open Princeton road." };
+  }
   const closer = [best.u, best.v].sort((left, right) => {
     return distanceMeters(point, routing.nodes.get(left)) - distanceMeters(point, routing.nodes.get(right));
   });
@@ -812,7 +809,7 @@ function nearestOpenRoad(lon, lat, stageIndex, role) {
   });
   return {
     node: usable === undefined ? best.u : usable,
-    label: best.name || "Unnamed road",
+    label: best.name || wanted || "Unnamed road",
   };
 }
 
@@ -821,10 +818,13 @@ function setRoutePick(on) {
   const button = document.getElementById("route-pick");
   button.setAttribute("aria-pressed", on ? "true" : "false");
   button.textContent = on ? "Choosing a route on the map" : "Choose a route on the map";
-  if (map) map.getContainer().style.cursor = on ? "crosshair" : "";
+  if (!map) return;
+  map.getContainer().style.cursor = on ? "crosshair" : "";
+  if (on) map.dragging.disable();
+  else map.dragging.enable();
 }
 
-function placeClickedRoad(lon, lat) {
+function placeClickedRoad(lon, lat, roadName) {
   if (!routePickOn) return;
   const now = Date.now();
   if (now - lastPlaceAt < 40) return;
@@ -842,7 +842,7 @@ function placeClickedRoad(lon, lat) {
   const startBox = document.getElementById("route-start");
   const endBox = document.getElementById("route-end");
   const choosingStart = !startBox.value.trim() || endBox.value.trim();
-  const hit = nearestOpenRoad(lon, lat, stageIndex, choosingStart ? "start" : "end");
+  const hit = nearestOpenRoad(lon, lat, stageIndex, choosingStart ? "start" : "end", roadName);
   if (hit.error) {
     note.textContent = hit.error;
     return;
